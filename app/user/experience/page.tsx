@@ -122,7 +122,17 @@ export default function WorkExperiencePage() {
 
   const buttonOne: IButton = {
     name: "Add Experience",
-    onClick: () => setIsFormOpen(true)
+    onClick: () => {
+      setFormValues({
+        company: "",
+        job_title: "",
+        job_description: null,
+        date_start: null,
+        date_end: null,
+      });
+      setExperienceToEdit(null);
+      setIsFormOpen(true);
+    },
   }
 
   const inputRows: IInputFormRow[] = [

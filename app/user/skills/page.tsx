@@ -127,7 +127,15 @@ export default function SkillsPage() {
 
   const buttonOne: IButton = {
     name: "Add Skill",
-    onClick: () => setIsFormOpen(true)
+    onClick: () => {
+      setFormValues({
+        name: "",
+        proficiency: null,
+        years_of_experience: null
+      });
+      setSkillToEdit(null);
+      setIsFormOpen(true);
+    }
   }
 
   const rows = state.skills.map((skill) => ({
