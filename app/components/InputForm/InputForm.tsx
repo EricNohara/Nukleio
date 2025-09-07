@@ -11,8 +11,9 @@ export interface IInputFormInput {
     value: string;
     type: string;
     placeholder: string;
-    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     required?: boolean;
+    textAreaRows?: number;
 }
 
 export interface IInputFormRow {
@@ -54,6 +55,7 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                                 onChange={row.inputOne.onChange}
                                 required={row.inputOne.required}
                                 isInInputForm={true}
+                                textAreaRows={row.inputOne.textAreaRows}
                             />
                             {
                                 row.inputTwo &&
@@ -66,6 +68,7 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                                     onChange={row.inputTwo.onChange}
                                     required={row.inputTwo.required}
                                     isInInputForm={true}
+                                    textAreaRows={row.inputTwo.textAreaRows}
                                 />
                             }
                         </div>

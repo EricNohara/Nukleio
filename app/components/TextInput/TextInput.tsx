@@ -8,11 +8,12 @@ interface TextInputProps {
     label: string;
     name: string;
     value: string;
-    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     placeholder?: string;
     type?: string;
     required?: boolean;
     isInInputForm?: boolean;
+    textAreaRows?: number;
 }
 
 export default function TextInput({
@@ -23,23 +24,37 @@ export default function TextInput({
     placeholder,
     type = "text",
     required = false,
-    isInInputForm = false
+    isInInputForm = false,
+    textAreaRows = 4
 }: TextInputProps) {
     return (
         <div className={styles.inputDiv}>
             <label className={`${styles.inputLabel} ${isInInputForm && styles.inputFormInputLabel}`} htmlFor={name}>
                 {label}
             </label>
-            <input
-                className={isInInputForm ? styles.inputFormInput : styles.textInput}
-                id={name}
-                name={name}
-                value={value}
-                onChange={onChange}
-                placeholder={placeholder}
-                type={type}
-                required={required}
-            />
+            {type === "textarea" ?
+                <textarea
+                    className={isInInputForm ? styles.inputFormInput : styles.textInput}
+                    id={name}
+                    name={name}
+                    value={value}
+                    onChange={onChange}
+                    placeholder={placeholder}
+                    required={required}
+                    rows={textAreaRows}
+                />
+                :
+                <input
+                    className={isInInputForm ? styles.inputFormInput : styles.textInput}
+                    id={name}
+                    name={name}
+                    value={value}
+                    onChange={onChange}
+                    placeholder={placeholder}
+                    type={type}
+                    required={required}
+                />}
+
         </div>
     );
 }

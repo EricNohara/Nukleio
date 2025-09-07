@@ -47,7 +47,7 @@ export default function WorkExperiencePage() {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormValues(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
@@ -182,11 +182,12 @@ export default function WorkExperiencePage() {
       inputOne: {
         label: "Job Description",
         name: "job_description",
-        type: "text",
+        type: "textarea",
         placeholder: "Enter job description",
         required: false,
         onChange: handleChange,
-        value: formValues.job_description ? formValues.job_description : ""
+        value: formValues.job_description ? formValues.job_description : "",
+        textAreaRows: 8
       }
     },
   ];
