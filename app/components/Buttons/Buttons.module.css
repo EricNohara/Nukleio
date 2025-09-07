@@ -61,6 +61,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: white;
+  transition: 0.2s ease;
 }
 
 .edit:hover,
@@ -70,14 +72,19 @@
 }
 
 .edit {
-  background-color: var(--page-btn-1);
+  background-color: var(--btn-1);
 }
 
-.delete {
-  background-color: var(--page-btn-2);
+.edit:hover {
+  background-color: var(--btn-1-hover);
 }
 
+.delete,
 .exit {
   background-color: var(--exit-btn);
-  color: white;
+}
+
+.delete:hover,
+.exit:hover {
+  background-color: var(--exit-btn-hover);
 }

@@ -57,6 +57,8 @@ export default function WorkExperiencePage() {
     const company = formValues.company.trim();
     const job_title = formValues.job_title.trim();
     const job_description = formValues.job_description?.trim();
+    const date_start = formValues.date_start ? new Date(formValues.date_start) : null;
+    const date_end = formValues.date_end ? new Date(formValues.date_end) : null;
 
     // validate input
     if (!company || !job_title) {
@@ -64,12 +66,23 @@ export default function WorkExperiencePage() {
       return;
     }
 
+    // Validate dates
+    if (date_end && !date_start) {
+      alert("Start date must be provided if end date exists.");
+      return;
+    }
+
+    if (date_start && date_end && date_end < date_start) {
+      alert("End date cannot be before start date.");
+      return;
+    }
+
     const newExperience: IExperience = {
       company: company,
       job_title: job_title,
       job_description: job_description ? job_description : null,
-      date_start: null,
-      date_end: null
+      date_start: date_start ? date_start.toISOString().split("T")[0] : null,
+      date_end: date_end ? date_end.toISOString().split("T")[0] : null
     }
 
     try {
@@ -92,7 +105,7 @@ export default function WorkExperiencePage() {
         dispatch({ type: "UPDATE_EXPERIENCE", payload: { old: experienceToEdit, new: newExperience } });
       } else {
         // Add the skill
-        const res = await fetch("/api/internal/user/experiences", {
+        const res = await fetch("/api/internal/user/experience", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newExperience),
