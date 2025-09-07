@@ -68,3 +68,39 @@
   -webkit-text-fill-color: var(--input-form-input-txt) !important;
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
+
+/* DATE PICKER */
+.inputFormInput[type="date"] {
+  background-color: var(--input-form-input);
+  border: 1.5px solid var(--input-form-input-placeholder-txt);
+  color: var(--input-form-input-txt);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--global-border-radius);
+  font-size: 1rem;
+  width: 100%;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.inputFormInput[type="date"]:focus {
+  outline: none;
+  border-color: var(--input-form-input-focus);
+}
+
+.inputFormInput[type="date"]:focus-within {
+  border-color: var(--input-form-input-focus);
+}
+
+/* Style the text inside (placeholder-like text) */
+.inputFormInput[type="date"]::-webkit-datetime-edit {
+  color: var(--input-form-input-placeholder-txt);
+}
+
+/* Style the calendar icon */
+.inputFormInput[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+/* Firefox tweaks */
+.inputFormInput[type="date"]::-moz-focus-inner {
+  border: 0;
+}
