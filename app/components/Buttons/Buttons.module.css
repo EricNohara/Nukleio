@@ -54,9 +54,10 @@
 
 .edit,
 .delete,
-.exit {
+.exit,
+.external {
   border: none;
-  border-radius: 50%;
+  border-radius: var(--global-border-radius);
   padding: 0.5rem;
   display: flex;
   align-items: center;
@@ -67,7 +68,8 @@
 
 .edit:hover,
 .delete:hover,
-.exit:hover {
+.exit:hover,
+.external:hover {
   cursor: pointer;
 }
 
@@ -87,4 +89,12 @@
 .delete:hover,
 .exit:hover {
   background-color: var(--exit-btn-hover);
+}
+
+.external {
+  background-color: var(--btn-2);
+}
+
+.external:hover {
+  background-color: var(--btn-2-hover);
 }

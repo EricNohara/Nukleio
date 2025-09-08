@@ -61,7 +61,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
           .eq("education_id", education.id);
       if (educationCoursesError) throw educationCoursesError;
 
-      const { _id, _user_id, ...cleanedEducation } = education;
+      const { _user_id, ...cleanedEducation } = education;
       const educationWithCourses = {
         ...cleanedEducation,
         courses: educationCourses,

@@ -55,12 +55,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       user_id: user.id,
     };
 
-    const { error } = await supabase.from("education").insert(educationData);
+    const { data, error } = await supabase
+      .from("education")
+      .insert(educationData)
+      .select("id")
+      .single();
 
     if (error) throw error;
 
     return NextResponse.json(
-      { message: "Successfully added education" },
+      { message: "Successfully added education", id: data.id },
       { status: 201 }
     );
   } catch (err) {

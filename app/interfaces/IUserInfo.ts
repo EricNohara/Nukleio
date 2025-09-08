@@ -12,6 +12,7 @@ export interface IUserInfo extends IUser {
 }
 
 export interface IUserEducation {
+  id: number;
   degree: string;
   majors: string[];
   minors: string[];

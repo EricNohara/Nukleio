@@ -4,6 +4,7 @@ import styles from "./Buttons.module.css"
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     children: ReactNode;
+    href?: string;
 }
 
 export function ButtonOne({ children, className, ...props }: ButtonProps) {
@@ -32,4 +33,8 @@ export function DeleteButton({ children, className, ...props }: ButtonProps) {
 
 export function ExitButton({ children, className, ...props }: ButtonProps) {
     return <button className={`${styles.exit} ${className || ""}`} {...props}>{children}</button>
+}
+
+export function ExternalLinkButton({ children, className, ...props }: ButtonProps) {
+    return <button className={`${styles.external} ${className || ""}`} {...props}>{children}</button>
 }
