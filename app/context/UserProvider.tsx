@@ -27,9 +27,9 @@ type Action =
     | { type: "ADD_EDUCATION"; payload: IUserEducationInternal }
     | { type: "UPDATE_EDUCATION"; payload: { old: IUserEducationInternal, new: IUserEducationInternal } }
     | { type: "DELETE_EDUCATION"; payload: IUserEducationInternal }
-    | { type: "ADD_COURSE"; payload: { educationIndex: number; course: ICourseInput } }
-    | { type: "UPDATE_COURSE"; payload: { educationIndex: number; courseIndex: number; newCourse: ICourseInput } }
-    | { type: "DELETE_COURSE"; payload: { educationIndex: number; courseIndex: number } }
+    | { type: "ADD_COURSE"; payload: { educationID: number; course: ICourseInput } }
+    | { type: "UPDATE_COURSE"; payload: { educationID: number; courseName: string; newCourse: ICourseInput } }
+    | { type: "DELETE_COURSE"; payload: { educationID: number; courseIndex: number } }
     | { type: "ADD_API_KEY"; payload: IApiKeyInternal }
     | { type: "UPDATE_API_KEY"; payload: { old: IApiKeyInternal, new: IApiKeyInternal } }
     | { type: "DELETE_API_KEY"; payload: IApiKeyInternal }

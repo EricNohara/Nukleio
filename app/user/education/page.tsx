@@ -52,7 +52,6 @@ export default function EducationPage() {
 
   const handleDelete = async (rowIndex: number) => {
     const education = state.education[rowIndex];
-    console.log(education);
     try {
       const res = await fetch(`/api/internal/user/education?id=${education.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(`Error deleting education: ${education.institution}, ${education.degree}.`);
@@ -113,7 +112,7 @@ export default function EducationPage() {
 
     try {
       if (educationToEdit) {
-        // update the skill
+        // update the education
         const editPayload = {
           id: educationToEdit.id,
           updatedEducation: newEducation
@@ -135,7 +134,7 @@ export default function EducationPage() {
         // update cached state
         dispatch({ type: "UPDATE_EDUCATION", payload: { old: educationToEdit, new: newUserEducation } });
       } else {
-        // Add the skill
+        // Add the education
         const res = await fetch("/api/internal/user/education", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
