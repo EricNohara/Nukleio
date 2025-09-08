@@ -9,7 +9,7 @@ import { IProjectInput } from "../interfaces/IProject";
 import { IPublicApiLogInternal } from "../interfaces/IPublicApiLog";
 import { ISkillsInput } from "../interfaces/ISkills";
 import IUser from "../interfaces/IUser";
-import { IUserEducation } from "../interfaces/IUserInfo";
+import { IUserEducationInternal } from "../interfaces/IUserInfoInternal";
 import { IUserInfoInternal } from "../interfaces/IUserInfoInternal";
 
 type Action =
@@ -24,9 +24,9 @@ type Action =
     | { type: "ADD_PROJECT"; payload: IProjectInput }
     | { type: "UPDATE_PROJECT"; payload: { old: IProjectInput, new: IProjectInput } }
     | { type: "DELETE_PROJECT"; payload: IProjectInput }
-    | { type: "ADD_EDUCATION"; payload: IUserEducation }
-    | { type: "UPDATE_EDUCATION"; payload: { old: IUserEducation, new: IUserEducation } }
-    | { type: "DELETE_EDUCATION"; payload: IUserEducation }
+    | { type: "ADD_EDUCATION"; payload: IUserEducationInternal }
+    | { type: "UPDATE_EDUCATION"; payload: { old: IUserEducationInternal, new: IUserEducationInternal } }
+    | { type: "DELETE_EDUCATION"; payload: IUserEducationInternal }
     | { type: "ADD_COURSE"; payload: { educationIndex: number; course: ICourseInput } }
     | { type: "UPDATE_COURSE"; payload: { educationIndex: number; courseIndex: number; newCourse: ICourseInput } }
     | { type: "DELETE_COURSE"; payload: { educationIndex: number; courseIndex: number } }
