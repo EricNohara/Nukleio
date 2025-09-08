@@ -38,7 +38,16 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
 
     return (
         <div className={styles.overlay} onClick={handleOverlayClick}>
-            <form onSubmit={onSubmit} className={styles.form}>
+            <form
+                onSubmit={onSubmit}
+                className={styles.form}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e: React.KeyboardEvent<HTMLFormElement>) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        e.currentTarget.requestSubmit();
+                    }
+                }}>
                 <header className={styles.header}>
                     <h1 className={styles.title}>{title}</h1>
                     <ExitButton onClick={onClose}><X size={15} /></ExitButton>
