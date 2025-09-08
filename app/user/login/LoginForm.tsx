@@ -15,7 +15,7 @@ export default function LoginForm() {
     password: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setCredentials((prevCredentials) => ({
       ...prevCredentials,

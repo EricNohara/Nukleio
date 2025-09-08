@@ -24,7 +24,7 @@ export default function SignUpForm() {
 
   const minPasswordLen: number = parseInt(process.env.MIN_PASSWORD_LEN || "6");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setUserData((prevData) => ({
       ...prevData,
