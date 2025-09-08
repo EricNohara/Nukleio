@@ -11,7 +11,7 @@ import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentW
 import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
 import { IEducationInput, IEducationUserInput, } from "@/app/interfaces/IEducation";
-import { IUserEducation } from "@/app/interfaces/IUserInfo";
+import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
@@ -33,7 +33,7 @@ export default function EducationPage() {
   const { state, dispatch } = useUser();
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [formValues, setFormValues] = useState<IEducationUserInput>(EMPTY_EDUCATION);
-  const [educationToEdit, setEducationToEdit] = useState<IUserEducation | null>(null);
+  const [educationToEdit, setEducationToEdit] = useState<IUserEducationInternal | null>(null);
   const router = useRouter();
 
   const handleEdit = (rowIndex: number) => {
@@ -126,7 +126,7 @@ export default function EducationPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
 
-        const newUserEducation: IUserEducation = {
+        const newUserEducation: IUserEducationInternal = {
           ...newEducation,
           id: educationToEdit.id,
           courses: educationToEdit.courses
@@ -146,7 +146,7 @@ export default function EducationPage() {
 
         console.log(data);
 
-        const newUserEducation: IUserEducation = {
+        const newUserEducation: IUserEducationInternal = {
           ...newEducation,
           id: data.id, // fix later
           courses: []

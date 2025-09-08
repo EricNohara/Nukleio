@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { IUserEducation } from "@/app/interfaces/IUserInfo";
+import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
 import { IUserInfoInternal } from "@/app/interfaces/IUserInfoInternal";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 
@@ -50,7 +50,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
 
     if (userEducationError) throw userEducationError;
 
-    const userEducationWithCourses: IUserEducation[] = [];
+    const userEducationWithCourses: IUserEducationInternal[] = [];
 
     for (const education of userEducation) {
       const { data: educationCourses, error: educationCoursesError } =
