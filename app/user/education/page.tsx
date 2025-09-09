@@ -277,7 +277,7 @@ export default function EducationPage() {
     "Minors": education.minors.join(", "),
     "Awards": education.awards.join(", "),
     "Courses":
-      <ExternalLinkButton onClick={() => router.push(`/user/education/course?educationID=${education.id}`)}>
+      <ExternalLinkButton onClick={() => router.push(`/user/education/${education.id}/course`)}>
         <ExternalLink size={20} strokeWidth={2} />
       </ExternalLinkButton>
   }));
