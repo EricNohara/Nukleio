@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import InputForm from "@/app/components/InputForm/InputForm";
@@ -29,6 +30,7 @@ export default function CoursePage() {
   const [courseToEdit, setCourseToEdit] = useState<ICourseInput | null>(null);
   const [education, setEducation] = useState<IUserEducationInternal | null>(null);
   const [rows, setRows] = useState<Record<string, React.ReactNode>[]>([]);
+  const router = useRouter();
 
   const searchParams = useSearchParams();
   const educationID = Number(searchParams.get("educationID"));
@@ -155,6 +157,11 @@ export default function CoursePage() {
     },
   }
 
+  const buttonFour: IButton = {
+    name: "Return",
+    onClick: () => { router.push("/user/education") }
+  }
+
   const inputRows: IInputFormRow[] = [
     {
       inputOne: {
@@ -202,7 +209,7 @@ export default function CoursePage() {
 
   return (
     <PageContentWrapper>
-      <PageContentHeader title={`${education?.institution} Courses`} buttonOne={buttonOne} />
+      <PageContentHeader title={`${education?.institution} Courses`} buttonOne={buttonOne} buttonFour={buttonFour} />
       <Table
         columns={columns}
         rows={rows}

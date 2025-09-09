@@ -14,13 +14,14 @@ interface INavItem {
     label: string;
     path: string;
     icon: LucideIcon;
+    altPath?: string;
 }
 
 const navItems: INavItem[] = [
     { label: "Home", path: "/user", icon: House, },
     { label: "Documents", path: "/user/documents", icon: File },
     { label: "Experience", path: "/user/experience", icon: Briefcase },
-    { label: "Education", path: "/user/education", icon: GraduationCap },
+    { label: "Education", path: "/user/education", icon: GraduationCap, altPath: "/user/education/course" },
     { label: "Projects", path: "/user/projects", icon: Rocket },
     { label: "Skills", path: "/user/skills", icon: Brain },
     { label: "Connect", path: "/user/connect", icon: Cable },
@@ -56,7 +57,7 @@ export default function AppNav() {
                 <TitleLogo />
                 {navItems.map((item, i) => {
                     const Icon = item.icon;
-                    const isActive = pathname === item.path;
+                    const isActive = item.altPath ? pathname === item.path || pathname.includes(item.altPath) : pathname === item.path;
                     return (
                         <button
                             key={i}

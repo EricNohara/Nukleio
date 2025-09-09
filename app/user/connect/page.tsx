@@ -19,10 +19,8 @@ const buttonFour: IButton = {
   onClick: () => { }
 }
 
-const columns = ["Description", "Created", "Expires"];
-// const columns = ["Description", "Created", "Expires", "Last Used"];
-const columnWidths = [50, 25, 25];
-// const columnWidths = [40, 20, 20, 20];
+const columns = ["Description", "Created", "Expires", "Last Used"];
+const columnWidths = [40, 20, 20, 20];
 
 export default function ConnectPage() {
   const { state } = useUser();
