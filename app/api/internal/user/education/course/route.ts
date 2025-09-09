@@ -4,6 +4,7 @@ import { ICourseInput } from "@/app/interfaces/ICourse";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 
 const letterGrades = [
+  "A+",
   "A",
   "A-",
   "B+",

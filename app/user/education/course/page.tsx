@@ -1,23 +1,20 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
-import { ExternalLinkButton } from "@/app/components/Buttons/Buttons";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
-import { IEducationInput, IEducationUserInput, } from "@/app/interfaces/IEducation";
-import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
 import { ICourseInput } from "@/app/interfaces/ICourse";
-import { useSearchParams } from "next/navigation";
+import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
 
-import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
+import PageContentHeader, { IButton } from "../../../components/PageContentHeader/PageContentHeader";
 
 const columns = ["Name", "Grade", "Description"];
-const columnWidths = [25, 10, 65];
+const columnWidths = [30, 10, 60];
 
 const EMPTY_COURSE: ICourseInput = {
   name: "",
@@ -31,7 +28,7 @@ export default function CoursePage() {
   const [formValues, setFormValues] = useState<ICourseInput>(EMPTY_COURSE);
   const [courseToEdit, setCourseToEdit] = useState<ICourseInput | null>(null);
   const [education, setEducation] = useState<IUserEducationInternal | null>(null);
-  const router = useRouter();
+  const [rows, setRows] = useState<Record<string, React.ReactNode>[]>([]);
 
   const searchParams = useSearchParams();
   const educationID = Number(searchParams.get("educationID"));
@@ -39,11 +36,22 @@ export default function CoursePage() {
   useEffect(() => {
     const education = state.education.find((edu) => edu.id === educationID);
     setEducation(education ? education : null);
-  }, [educationID])
+  }, [educationID, state])
+
+  useEffect(() => {
+    const rows = education === null ? [] : education.courses.map((course) => ({
+      "Name": course.name,
+      "Grade": course.grade,
+      "Description": course.description
+    }));
+
+    setRows(rows);
+  }, [education])
 
   const handleEdit = (rowIndex: number) => {
     if (!education) return;
     const course: ICourseInput = education.courses[rowIndex];
+    setCourseToEdit(course);
     setFormValues(course);
     setIsFormOpen(true);
   };
@@ -56,7 +64,7 @@ export default function CoursePage() {
       if (!res.ok) throw new Error(`Error deleting course: ${course.name}.`);
 
       // update cached state
-      dispatch({ type: "DELETE_COURSE", payload: { educationID: educationID, courseIndex: rowIndex } });
+      dispatch({ type: "DELETE_COURSE", payload: { educationID: educationID, courseName: course.name } });
     } catch (error) {
       console.error(error);
       alert(error);
@@ -71,19 +79,19 @@ export default function CoursePage() {
     e.preventDefault();
 
     const name = formValues.name.trim();
-    const grade = formValues.grade.trim();
-    const description = formValues.description;
+    const grade = formValues.grade?.trim();
+    const description = formValues.description?.trim();
 
     // validate input
-    if (!name || !grade || !description) {
+    if (!name) {
       alert("Please fill out all required fields.");
       return;
     }
 
     const newCourse: ICourseInput = {
       name: name,
-      grade: grade,
-      description: description
+      grade: grade ? grade : null,
+      description: description ? description : null
     }
 
     try {
@@ -92,7 +100,7 @@ export default function CoursePage() {
         const putPayload = {
           educationID: educationID,
           courseName: courseToEdit.name,
-          updatedCourse: newCourse
+          course: newCourse
         }
         const res = await fetch("/api/internal/user/education/course", {
           method: "PUT",
@@ -108,7 +116,7 @@ export default function CoursePage() {
         // Add the skill
         const postPayload = {
           educationID: educationID,
-          sentCourse: newCourse
+          course: newCourse
         }
         const res = await fetch("/api/internal/user/education/course", {
           method: "POST",
@@ -146,112 +154,47 @@ export default function CoursePage() {
       setIsFormOpen(true);
     },
   }
-  // 
+
   const inputRows: IInputFormRow[] = [
     {
       inputOne: {
-        label: "Institution Name",
-        name: "institution",
+        label: "Course Name",
+        name: "name",
         type: "text",
-        placeholder: "Enter institution name",
+        placeholder: "Enter course name",
         required: true,
         onChange: handleChange,
-        value: formValues.institution
+        value: formValues.name
       }
     },
     {
       inputOne: {
-        label: "Degree",
-        name: "degree",
+        label: "Grade Earned",
+        name: "grade",
         type: "text",
-        placeholder: "Enter degree",
-        required: true,
-        onChange: handleChange,
-        value: formValues.degree
-      },
-      inputTwo: {
-        label: "Grade Point Average",
-        name: "gpa",
-        type: "number",
-        placeholder: "Enter grade point average",
+        placeholder: "Enter grade earned",
         required: false,
         onChange: handleChange,
-        value: formValues.gpa ? `${formValues.gpa}` : ""
+        value: formValues.grade ? formValues.grade : ""
       }
     },
     {
       inputOne: {
-        label: "Year Start",
-        name: "year_start",
-        type: "number",
-        placeholder: "Enter year started",
+        label: "Course Description",
+        name: "description",
+        type: "textarea",
+        placeholder: "Enter course description",
         required: false,
         onChange: handleChange,
-        value: formValues.year_start ? `${formValues.year_start}` : ""
-      },
-      inputTwo: {
-        label: "Year End",
-        name: "year_end",
-        type: "number",
-        placeholder: "Enter year ended",
-        required: false,
-        onChange: handleChange,
-        value: formValues.year_end ? `${formValues.year_end}` : ""
-      }
-    },
-    {
-      inputOne: {
-        label: "Majors (Separated by Comma)",
-        name: "majors",
-        type: "text",
-        placeholder: "Enter list of majors",
-        required: false,
-        onChange: handleChange,
-        value: formValues.majors
-      }
-    },
-    {
-      inputOne: {
-        label: "Minors (Separated by Comma)",
-        name: "minors",
-        type: "text",
-        placeholder: "Enter list of minors",
-        required: false,
-        onChange: handleChange,
-        value: formValues.minors
-      }
-    },
-    {
-      inputOne: {
-        label: "Awards (Separated by Comma)",
-        name: "awards",
-        type: "text",
-        placeholder: "Enter list of awards",
-        required: false,
-        onChange: handleChange,
-        value: formValues.awards
+        value: formValues.description ? formValues.description : "",
+        textAreaRows: 8
       }
     },
   ];
 
-  const rows = state.education.map((education) => ({
-    "Institution": education.institution,
-    "Degree": education.degree,
-    "GPA": education.gpa,
-    "Start": education.year_start,
-    "End": education.year_end,
-    "Majors": education.majors.join(", "),
-    "Minors": education.minors.join(", "),
-    "Awards": education.awards.join(", "),
-    "Courses":
-      <ExternalLinkButton onClick={() => router.push(`/user/education/course?educationID=${education.id}`)}>
-        <ExternalLink size={20} strokeWidth={2} />
-      </ExternalLinkButton>
-  }));
-
   const formProps: IInputFormProps = {
-    title: courseToEdit ? "Edit Education Information" : "Add Education Information",
-    buttonLabel: courseToEdit ? "Save Changes" : "Add Education",
+    title: courseToEdit ? "Edit Course Information" : "Add Course Information",
+    buttonLabel: courseToEdit ? "Save Changes" : "Add Course",
     onSubmit: onSubmit,
     inputRows: inputRows,
     onClose: onClose
@@ -259,7 +202,7 @@ export default function CoursePage() {
 
   return (
     <PageContentWrapper>
-      <PageContentHeader title="Education" buttonOne={buttonOne} />
+      <PageContentHeader title={`${education?.institution} Courses`} buttonOne={buttonOne} />
       <Table
         columns={columns}
         rows={rows}

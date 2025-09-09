@@ -29,7 +29,7 @@ type Action =
     | { type: "DELETE_EDUCATION"; payload: IUserEducationInternal }
     | { type: "ADD_COURSE"; payload: { educationID: number; course: ICourseInput } }
     | { type: "UPDATE_COURSE"; payload: { educationID: number; courseName: string; newCourse: ICourseInput } }
-    | { type: "DELETE_COURSE"; payload: { educationID: number; courseIndex: number } }
+    | { type: "DELETE_COURSE"; payload: { educationID: number; courseName: string } }
     | { type: "ADD_API_KEY"; payload: IApiKeyInternal }
     | { type: "UPDATE_API_KEY"; payload: { old: IApiKeyInternal, new: IApiKeyInternal } }
     | { type: "DELETE_API_KEY"; payload: IApiKeyInternal }
@@ -152,8 +152,8 @@ function reducer(state: IUserInfoInternal, action: Action): IUserInfoInternal {
         case "ADD_COURSE":
             return {
                 ...state,
-                education: state.education.map((edu, idx) =>
-                    idx === action.payload.educationIndex
+                education: state.education.map((edu) =>
+                    edu.id === action.payload.educationID
                         ? { ...edu, courses: [...edu.courses, action.payload.course] }
                         : edu
                 ),
@@ -161,12 +161,12 @@ function reducer(state: IUserInfoInternal, action: Action): IUserInfoInternal {
         case "DELETE_COURSE":
             return {
                 ...state,
-                education: state.education.map((edu, idx) =>
-                    idx === action.payload.educationIndex
+                education: state.education.map((edu) =>
+                    edu.id === action.payload.educationID
                         ? {
                             ...edu,
                             courses: edu.courses.filter(
-                                (_, cIdx) => cIdx !== action.payload.courseIndex
+                                (course) => course.name !== action.payload.courseName
                             ),
                         }
                         : edu
@@ -175,12 +175,12 @@ function reducer(state: IUserInfoInternal, action: Action): IUserInfoInternal {
         case "UPDATE_COURSE":
             return {
                 ...state,
-                education: state.education.map((edu, idx) =>
-                    idx === action.payload.educationIndex
+                education: state.education.map((edu) =>
+                    edu.id === action.payload.educationID
                         ? {
                             ...edu,
-                            courses: edu.courses.map((course, cIdx) =>
-                                cIdx === action.payload.courseIndex ? action.payload.newCourse : course
+                            courses: edu.courses.map((course) =>
+                                course.name === action.payload.courseName ? action.payload.newCourse : course
                             ),
                         }
                         : edu
