@@ -14,6 +14,7 @@ interface TextInputProps {
     required?: boolean;
     isInInputForm?: boolean;
     textAreaRows?: number;
+    disabled?: boolean;
 }
 
 export default function TextInput({
@@ -25,7 +26,8 @@ export default function TextInput({
     type = "text",
     required = false,
     isInInputForm = false,
-    textAreaRows = 4
+    textAreaRows = 4,
+    disabled = false
 }: TextInputProps) {
     return (
         <div className={styles.inputDiv}>
@@ -42,6 +44,7 @@ export default function TextInput({
                     placeholder={placeholder}
                     required={required}
                     rows={textAreaRows}
+                    disabled={disabled}
                 />
                 :
                 <input
@@ -53,6 +56,7 @@ export default function TextInput({
                     placeholder={placeholder}
                     type={type}
                     required={required}
+                    disabled={disabled}
                 />}
 
         </div>

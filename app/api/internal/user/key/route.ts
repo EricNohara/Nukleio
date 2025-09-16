@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { generateAndStoreKey } from "@/utils/auth/generateAndStoreKey";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
+import { IApiKeyInternal } from "@/app/interfaces/IApiKey";
 
 export async function GET(_req: NextRequest): Promise<NextResponse> {
   try {
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const email = data[0].email;
 
     // generate and store new key
-    const { encryptedKey } = await generateAndStoreKey(
+    const { key } = await generateAndStoreKey(
       supabase,
       user.id,
       email,
@@ -58,7 +59,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       expires
     );
 
-    return NextResponse.json({ encrypted_key: encryptedKey }, { status: 201 });
+    const newKey: IApiKeyInternal = {
+      description: key.description,
+      expires: key.expires,
+      created: key.created,
+      last_used: null,
+    };
+
+    return NextResponse.json({ key: newKey }, { status: 201 });
   } catch (err) {
     const error = err as Error;
     console.error(error);
@@ -100,7 +108,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     const email = data[0].email;
 
     // generate and store new key
-    const { encryptedKey } = await generateAndStoreKey(
+    const { key } = await generateAndStoreKey(
       supabase,
       user.id,
       email,
@@ -108,7 +116,14 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
       expires
     );
 
-    return NextResponse.json({ encrypted_key: encryptedKey }, { status: 201 });
+    const updatedKey: IApiKeyInternal = {
+      description: key.description,
+      expires: key.expires,
+      created: key.created,
+      last_used: null,
+    };
+
+    return NextResponse.json({ key: updatedKey }, { status: 201 });
   } catch (err) {
     const error = err as Error;
     console.error(error);

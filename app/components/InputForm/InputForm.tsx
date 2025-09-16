@@ -1,9 +1,12 @@
+"use client";
+
 import { X } from "lucide-react";
 import { ChangeEvent } from "react";
 
 import styles from "./InputForm.module.css";
 import { ButtonOne, ExitButton } from "../Buttons/Buttons";
 import TextInput from "../TextInput/TextInput";
+import { useEffect } from "react";
 
 export interface IInputFormInput {
     label: string;
@@ -14,6 +17,7 @@ export interface IInputFormInput {
     onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     required?: boolean;
     textAreaRows?: number;
+    disabled?: boolean;
 }
 
 export interface IInputFormRow {
@@ -30,6 +34,16 @@ export interface IInputFormProps {
 }
 
 export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onClose }: IInputFormProps) {
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                onClose();
+            }
+        };
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [onClose]);
+
     const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) {
             onClose();
@@ -65,6 +79,7 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                                 required={row.inputOne.required}
                                 isInInputForm={true}
                                 textAreaRows={row.inputOne.textAreaRows}
+                                disabled={row.inputOne.disabled}
                             />
                             {
                                 row.inputTwo &&
@@ -78,6 +93,7 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                                     required={row.inputTwo.required}
                                     isInInputForm={true}
                                     textAreaRows={row.inputTwo.textAreaRows}
+                                    disabled={row.inputOne.disabled}
                                 />
                             }
                         </div>
@@ -87,6 +103,6 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                     <ButtonOne type="submit">{buttonLabel}</ButtonOne>
                 </div>
             </form>
-        </div>
+        </div >
     );
 }

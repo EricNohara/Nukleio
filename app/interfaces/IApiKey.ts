@@ -2,7 +2,7 @@ export interface IApiKeyInternal {
   description: string;
   expires: string | null;
   created: string;
-  last_used: string;
+  last_used: string | null;
 }
 
 export interface IApiKey extends IApiKeyInternal {
@@ -15,4 +15,9 @@ export interface IApiKeyInput {
   user_id: string;
   encrypted_key: string;
   hashed_key: string;
+}
+
+export interface IApiKeyInternalInput {
+  description: string;
+  expires: string | null;
 }
