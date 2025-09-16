@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { IApiKeyInternal } from "@/app/interfaces/IApiKey";
 import { generateAndStoreKey } from "@/utils/auth/generateAndStoreKey";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
-import { IApiKeyInternal } from "@/app/interfaces/IApiKey";
 
 export async function GET(_req: NextRequest): Promise<NextResponse> {
   try {

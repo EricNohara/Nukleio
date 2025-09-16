@@ -1,5 +1,6 @@
 "use client";
 
+import { RefreshCcw } from "lucide-react";
 import { useState } from "react";
 
 import InputForm from "@/app/components/InputForm/InputForm";
@@ -7,10 +8,9 @@ import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/Input
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
+import { IApiKeyInternal, IApiKeyInternalInput } from "@/app/interfaces/IApiKey";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
-import { IApiKeyInternal, IApiKeyInternalInput } from "@/app/interfaces/IApiKey";
-import { RefreshCcw } from "lucide-react";
 
 const buttonFour: IButton = {
   name: "API Docs",
