@@ -145,7 +145,7 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
 
     if (!description) {
       return NextResponse.json(
-        { error: "Missing description" },
+        { error: "Missing required parameter" },
         { status: 400 }
       );
     }

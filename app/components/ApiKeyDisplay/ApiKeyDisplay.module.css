@@ -1,0 +1,19 @@
+.disclaimerContainer {
+  width: 100%;
+  padding: 0 2rem;
+}
+
+.disclaimer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 1rem 2rem;
+  gap: 2rem;
+  background-color: var(--input-form-input);
+  border-radius: var(--global-border-radius);
+}
+
+.disclaimerText {
+  color: var(--input-form-input-txt);
+  font-weight: bold;
+}

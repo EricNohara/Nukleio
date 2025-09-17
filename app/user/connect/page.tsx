@@ -11,6 +11,7 @@ import { useUser } from "@/app/context/UserProvider";
 import { IApiKeyInternal, IApiKeyInternalInput } from "@/app/interfaces/IApiKey";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
+import ApiKeyDisplay from "@/app/components/ApiKeyDisplay/ApiKeyDisplay";
 
 const buttonFour: IButton = {
   name: "API Docs",
@@ -23,6 +24,7 @@ const columnWidths = [40, 20, 20, 20];
 export default function ConnectPage() {
   const { state, dispatch } = useUser();
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+  const [keyToDisplay, setKeyToDisplay] = useState<string | null>(null);
   const [formValues, setFormValues] = useState<IApiKeyInternalInput>({
     description: "",
     expires: null,
@@ -76,6 +78,8 @@ export default function ConnectPage() {
       expires: expires ? expires.toISOString().split("T")[0] : null
     }
 
+    let success = false;
+
     try {
       if (apiKeyToRefresh) {
         // update the skill
@@ -113,20 +117,27 @@ export default function ConnectPage() {
         dispatch({ type: "ADD_API_KEY", payload: data.key });
       }
 
+      success = true;
     } catch (err) {
       console.error(err);
       const error = err as Error;
       alert(error.message);
     }
 
-    // reset form
+    // reset form and show generated key
     setFormValues({ description: "", expires: null });
     setIsFormOpen(false);
     setApiKeyToRefresh(null);
+
+    if (success) setKeyToDisplay(description);
   }
 
   const onClose = () => {
     setIsFormOpen(false);
+  }
+
+  const onApiKeyDisplayClose = () => {
+    setKeyToDisplay(null);
   }
 
   const buttonOne: IButton = {
@@ -202,6 +213,11 @@ export default function ConnectPage() {
           inputRows={formProps.inputRows}
           onClose={formProps.onClose}
         />
+      }
+
+      {
+        keyToDisplay &&
+        <ApiKeyDisplay keyDescription={keyToDisplay} onClose={onApiKeyDisplayClose} />
       }
     </PageContentWrapper>
   );
