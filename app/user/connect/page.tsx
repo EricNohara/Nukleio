@@ -3,6 +3,7 @@
 import { RefreshCcw } from "lucide-react";
 import { useState } from "react";
 
+import ApiKeyDisplay from "@/app/components/ApiKeyDisplay/ApiKeyDisplay";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
@@ -11,7 +12,6 @@ import { useUser } from "@/app/context/UserProvider";
 import { IApiKeyInternal, IApiKeyInternalInput } from "@/app/interfaces/IApiKey";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
-import ApiKeyDisplay from "@/app/components/ApiKeyDisplay/ApiKeyDisplay";
 
 const buttonFour: IButton = {
   name: "API Docs",

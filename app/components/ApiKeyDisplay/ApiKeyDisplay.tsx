@@ -1,9 +1,10 @@
-import styles from "./ApiKeyDisplay.module.css";
-import inputFormStyles from "../InputForm/InputForm.module.css";
-import { ExitButton, ButtonOne } from "../Buttons/Buttons";
-import TextInput from "../TextInput/TextInput";
-import { useState, useEffect } from "react";
 import { TriangleAlert, X } from "lucide-react";
+import { useState, useEffect } from "react";
+
+import styles from "./ApiKeyDisplay.module.css";
+import { ExitButton, ButtonOne } from "../Buttons/Buttons";
+import inputFormStyles from "../InputForm/InputForm.module.css";
+import TextInput from "../TextInput/TextInput";
 
 export interface IApiKeyDisplayProps {
     keyDescription: string;
