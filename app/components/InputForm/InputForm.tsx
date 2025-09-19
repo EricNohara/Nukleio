@@ -61,7 +61,8 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                         e.preventDefault();
                         e.currentTarget.requestSubmit();
                     }
-                }}>
+                }}
+            >
                 <header className={styles.header}>
                     <h1 className={styles.title}>{title}</h1>
                     <ExitButton onClick={onClose}><X size={15} /></ExitButton>

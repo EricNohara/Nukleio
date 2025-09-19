@@ -9,11 +9,46 @@
   width: 100%;
   padding: 1rem 2rem;
   gap: 2rem;
-  background-color: var(--input-form-input);
+  background-color: #e4efff;
   border-radius: var(--global-border-radius);
+  margin-top: 1rem;
 }
 
 .disclaimerText {
-  color: var(--input-form-input-txt);
   font-weight: bold;
+}
+
+.inputContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  padding: 0rem 2rem;
+  gap: 2rem;
+  padding-top: 2rem;
+}
+
+.copyButton {
+  padding: 0.75rem !important;
+}
+
+.keyValueContainer {
+  display: grid;
+  grid-template-columns: 95% 5%;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--input-form-input);
+  overflow: hidden;
+  border-radius: var(--global-border-radius);
+}
+
+.keyValueContainer > p {
+  margin: 0;
+  padding: 1rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.eyeIcon:hover {
+  cursor: pointer;
 }
