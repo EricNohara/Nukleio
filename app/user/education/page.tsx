@@ -143,11 +143,9 @@ export default function EducationPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
 
-        console.log(data);
-
         const newUserEducation: IUserEducationInternal = {
           ...newEducation,
-          id: data.id, // fix later
+          id: data.id,
           courses: []
         }
 

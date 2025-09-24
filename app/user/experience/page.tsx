@@ -87,7 +87,7 @@ export default function WorkExperiencePage() {
 
     try {
       if (experienceToEdit) {
-        // update the skill
+        // update the experience
         const editPayload = {
           prevCompany: experienceToEdit.company,
           prevJob: experienceToEdit.job_title,
@@ -104,7 +104,7 @@ export default function WorkExperiencePage() {
         // update cached state
         dispatch({ type: "UPDATE_EXPERIENCE", payload: { old: experienceToEdit, new: newExperience } });
       } else {
-        // Add the skill
+        // Add the experience
         const res = await fetch("/api/internal/user/experience", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

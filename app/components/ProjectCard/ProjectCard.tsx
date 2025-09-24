@@ -1,11 +1,13 @@
 "use client";
 
-import styles from "./ProjectCard.module.css";
-import { useState } from "react";
-import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
-import Image from "next/image";
 import { EllipsisVertical } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+
+import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
 import formatDate from "@/utils/general/formatDate";
+
+import styles from "./ProjectCard.module.css";
 
 interface IProjectCardProps {
     project: IProjectInternal;

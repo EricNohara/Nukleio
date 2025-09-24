@@ -5,29 +5,29 @@ import { useState } from "react";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
-import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
-import { IExperience } from "@/app/interfaces/IExperience";
+import { IProjectInput } from "@/app/interfaces/IProject";
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
+const EMPTY_PROJECT_INPUT: IProjectInput = {
+  name: "",
+  date_start: "",
+  date_end: "",
+  languages_used: null,
+  frameworks_used: null,
+  technologies_used: null,
+  description: "",
+  github_url: null,
+  demo_url: null,
+  thumbnail_url: null,
+}
+
 export default function ProjectsPage() {
   const { state, dispatch } = useUser();
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
-  const [formValues, setFormValues] = useState<IProjectInternal>({
-    id: -1,
-    name: "",
-    date_start: "",
-    date_end: "",
-    languages_used: null,
-    frameworks_used: null,
-    technologies_used: null,
-    description: "",
-    github_url: null,
-    demo_url: null,
-    thumbnail_url: null,
-  });
+  const [formValues, setFormValues] = useState<IProjectInput>(EMPTY_PROJECT_INPUT);
   const [projectToEdit, setProjectToEdit] = useState<IProjectInternal | null>(null);
 
   const handleEdit = (rowIndex: number) => {
@@ -38,13 +38,13 @@ export default function ProjectsPage() {
   };
 
   const handleDelete = async (rowIndex: number) => {
-    const experience = state.experiences[rowIndex];
+    const project = state.projects[rowIndex];
     try {
-      const res = await fetch(`/api/internal/user/experience?company=${experience.company}&job_title=${experience.job_title}`, { method: "DELETE" });
-      if (!res.ok) throw new Error(`Error deleting experience: ${experience.company}, ${experience.job_title}.`);
+      const res = await fetch(`/api/internal/user/projects?projectID=${project.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`Error deleting project: ${project.name}.`);
 
       // update cached state
-      dispatch({ type: "DELETE_EXPERIENCE", payload: experience });
+      dispatch({ type: "DELETE_PROJECT", payload: project });
     } catch (error) {
       console.error(error);
       alert(error);
@@ -58,46 +58,50 @@ export default function ProjectsPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const company = formValues.company.trim();
-    const job_title = formValues.job_title.trim();
-    const job_description = formValues.job_description?.trim();
-    const date_start = formValues.date_start ? new Date(formValues.date_start) : null;
-    const date_end = formValues.date_end ? new Date(formValues.date_end) : null;
+    const name = formValues.name.trim();
+    const date_start = new Date(formValues.date_start);
+    const date_end = new Date(formValues.date_end);
+    const languages_used = formValues.languages_used;
+    const frameworks_used = formValues.frameworks_used;
+    const technologies_used = formValues.technologies_used;
+    const description = formValues.description.trim();
+    const github_url = formValues.github_url ? formValues.github_url.trim() : null;
+    const demo_url = formValues.demo_url ? formValues.demo_url.trim() : null;
+    const thumbnail_url = formValues.thumbnail_url ? formValues.thumbnail_url.trim() : null;
 
     // validate input
-    if (!company || !job_title) {
+    if (!name || !description || !date_start || !date_end) {
       alert("Please fill out all required fields.");
       return;
     }
 
     // Validate dates
-    if (date_end && !date_start) {
-      alert("Start date must be provided if end date exists.");
-      return;
-    }
-
-    if (date_start && date_end && date_end < date_start) {
+    if (date_end < date_start) {
       alert("End date cannot be before start date.");
       return;
     }
 
-    const newExperience: IExperience = {
-      company: company,
-      job_title: job_title,
-      job_description: job_description ? job_description : null,
-      date_start: date_start ? date_start.toISOString().split("T")[0] : null,
-      date_end: date_end ? date_end.toISOString().split("T")[0] : null
+    const newProject: IProjectInput = {
+      name: name,
+      date_start: date_start.toISOString().split("T")[0],
+      date_end: date_end.toISOString().split("T")[0],
+      languages_used: languages_used,
+      frameworks_used: frameworks_used,
+      technologies_used: technologies_used,
+      description: description,
+      github_url: github_url,
+      demo_url: demo_url,
+      thumbnail_url: thumbnail_url
     }
 
     try {
       if (projectToEdit) {
-        // update the skill
+        // update the project
         const editPayload = {
-          prevCompany: projectToEdit.company,
-          prevJob: projectToEdit.job_title,
-          updatedExperience: newExperience
+          prevProjectID: projectToEdit.id,
+          updatedProject: newProject
         }
-        const res = await fetch("/api/internal/user/experience", {
+        const res = await fetch("/api/internal/user/projects", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(editPayload),
@@ -105,20 +109,30 @@ export default function ProjectsPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
 
+        const newProjectInternal: IProjectInternal = {
+          id: projectToEdit.id,
+          ...newProject
+        }
+
         // update cached state
-        dispatch({ type: "UPDATE_EXPERIENCE", payload: { old: projectToEdit, new: newExperience } });
+        dispatch({ type: "UPDATE_PROJECT", payload: { old: projectToEdit, new: newProjectInternal } });
       } else {
         // Add the skill
-        const res = await fetch("/api/internal/user/experience", {
+        const res = await fetch("/api/internal/user/projects", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newExperience),
+          body: JSON.stringify(newProject),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
 
+        const newProjectInternal: IProjectInternal = {
+          id: data.id,
+          ...newProject
+        }
+
         // update the cached user
-        dispatch({ type: "ADD_EXPERIENCE", payload: newExperience });
+        dispatch({ type: "ADD_PROJECT", payload: newProjectInternal });
       }
 
     } catch (err) {
@@ -128,7 +142,7 @@ export default function ProjectsPage() {
     }
 
     // reset form
-    setFormValues({ company: "", job_title: "", job_description: null, date_start: "", date_end: "" });
+    setFormValues(EMPTY_PROJECT_INPUT);
     setIsFormOpen(false);
     setProjectToEdit(null);
   }
@@ -140,13 +154,7 @@ export default function ProjectsPage() {
   const buttonOne: IButton = {
     name: "Add Project",
     onClick: () => {
-      setFormValues({
-        company: "",
-        job_title: "",
-        job_description: null,
-        date_start: null,
-        date_end: null,
-      });
+      setFormValues(EMPTY_PROJECT_INPUT);
       setProjectToEdit(null);
       setIsFormOpen(true);
     },
@@ -155,24 +163,13 @@ export default function ProjectsPage() {
   const inputRows: IInputFormRow[] = [
     {
       inputOne: {
-        label: "Company Name",
-        name: "company",
+        label: "Project Name",
+        name: "name",
         type: "text",
-        placeholder: "Enter company name",
+        placeholder: "Enter project name",
         required: true,
         onChange: handleChange,
-        value: formValues.company
-      }
-    },
-    {
-      inputOne: {
-        label: "Job Title",
-        name: "job_title",
-        type: "text",
-        placeholder: "Enter job title",
-        required: true,
-        onChange: handleChange,
-        value: formValues.job_title
+        value: formValues.name
       }
     },
     {
@@ -181,45 +178,87 @@ export default function ProjectsPage() {
         name: "date_start",
         type: "date",
         placeholder: "Enter start date",
-        required: false,
+        required: true,
         onChange: handleChange,
-        value: formValues.date_start ? `${formValues.date_start}` : ""
+        value: formValues.date_start
       },
       inputTwo: {
         label: "Date End",
         name: "date_end",
         type: "date",
         placeholder: "Enter end date",
-        required: false,
+        required: true,
         onChange: handleChange,
-        value: formValues.date_end ? `${formValues.date_end}` : ""
+        value: formValues.date_end
       }
     },
     {
       inputOne: {
-        label: "Job Description",
-        name: "job_description",
-        type: "textarea",
-        placeholder: "Enter job description",
+        label: "GitHub URL",
+        name: "github_url",
+        type: "text",
+        placeholder: "Enter GitHub url",
         required: false,
         onChange: handleChange,
-        value: formValues.job_description ? formValues.job_description : "",
-        textAreaRows: 8
+        value: formValues.github_url ? formValues.github_url : ""
+      },
+      inputTwo: {
+        label: "Demo URL",
+        name: "demo_url",
+        type: "text",
+        placeholder: "Enter demo url",
+        required: false,
+        onChange: handleChange,
+        value: formValues.demo_url ? formValues.demo_url : ""
+      }
+    },
+    {
+      inputOne: {
+        label: "Programming Languages Used",
+        name: "languages_used",
+        type: "text",
+        placeholder: "Enter programming languages separated by commas",
+        required: false,
+        onChange: handleChange,
+        value: formValues.languages_used ? formValues.languages_used.join(", ") : ""
+      }
+    },
+    {
+      inputOne: {
+        label: "Frameworks Used",
+        name: "frameworks_used",
+        type: "text",
+        placeholder: "Enter frameworks separated by commas",
+        required: false,
+        onChange: handleChange,
+        value: formValues.frameworks_used ? formValues.frameworks_used.join(", ") : ""
+      },
+      inputTwo: {
+        label: "Technologies Used",
+        name: "technologies_used",
+        type: "text",
+        placeholder: "Enter technologies separated by commas",
+        required: false,
+        onChange: handleChange,
+        value: formValues.technologies_used ? formValues.technologies_used.join(", ") : ""
+      }
+    },
+    {
+      inputOne: {
+        label: "Description",
+        name: "description",
+        type: "text",
+        placeholder: "Enter project description",
+        required: true,
+        onChange: handleChange,
+        value: formValues.date_start,
       }
     },
   ];
 
-  const rows = state.experiences.map((experience) => ({
-    "Company": experience.company,
-    "Title": experience.job_title,
-    "Start": experience.date_start,
-    "End": experience.date_end,
-    "Description": experience.job_description,
-  }));
-
   const formProps: IInputFormProps = {
-    title: projectToEdit ? "Edit Experience Information" : "Add Experience Information",
-    buttonLabel: projectToEdit ? "Save Changes" : "Add Experience",
+    title: projectToEdit ? "Edit Project Information" : "Add Project Information",
+    buttonLabel: projectToEdit ? "Save Changes" : "Add Project",
     onSubmit: onSubmit,
     inputRows: inputRows,
     onClose: onClose
@@ -227,14 +266,8 @@ export default function ProjectsPage() {
 
   return (
     <PageContentWrapper>
-      <PageContentHeader title="Work Experiences" buttonOne={buttonOne} />
-      <Table
-        columns={columns}
-        rows={rows}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
-        columnWidths={columnWidths}
-      />
+      <PageContentHeader title="Projects" buttonOne={buttonOne} />
+      {/* Add the project cards here */}
 
       {
         isFormOpen &&
