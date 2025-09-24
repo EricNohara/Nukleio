@@ -47,7 +47,7 @@ export default function LoginForm() {
   };
 
   const handleSignUp = () => {
-    router.push("/user/create")
+    router.push("/user/signup")
   }
 
   return (

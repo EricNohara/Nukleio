@@ -20,7 +20,7 @@ export default function LandingPage() {
   }, [isLoggedIn, router]);
 
   const handleSignUp = () => {
-    router.push("/user/create")
+    router.push("/user/signup")
   }
 
   return (

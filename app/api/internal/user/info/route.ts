@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
-import { IUserInfoInternal } from "@/app/interfaces/IUserInfoInternal";
+import {
+  IUserInfoInternal,
+  IUserEducationInternal,
+  IProjectInternal,
+} from "@/app/interfaces/IUserInfoInternal";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 
 export async function GET(_req: NextRequest): Promise<NextResponse> {
@@ -37,7 +40,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
     const { data: userProject, error: userProjectError } = await supabase
       .from("projects")
       .select(
-        "name, date_start, date_end, languages_used, frameworks_used, technologies_used, description, github_url, demo_url, thumbnail_url"
+        "id, name, date_start, date_end, languages_used, frameworks_used, technologies_used, description, github_url, demo_url, thumbnail_url"
       )
       .eq("user_id", user.id);
     if (userProjectError) throw userProjectError;

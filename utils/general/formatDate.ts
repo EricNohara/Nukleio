@@ -1,4 +1,4 @@
-const months = [
+const monthsFull = [
   "January",
   "February",
   "March",
@@ -13,9 +13,29 @@ const months = [
   "December",
 ];
 
-export default function formatDate(date: string) {
+const monthsShort = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+export default function formatDate(date: string, shortMonth = false) {
   const [year, month, day] = date.split("-");
-  return `${months[parseInt(month) - 1]} ${day} ${year}`;
+  const monthIndex = parseInt(month, 10) - 1;
+  const monthName = shortMonth
+    ? monthsShort[monthIndex]
+    : monthsFull[monthIndex];
+  const dayNum = parseInt(day, 10);
+  return `${monthName} ${dayNum}, ${year}`;
 }
 
 export function formatSimpleDate(date: string) {

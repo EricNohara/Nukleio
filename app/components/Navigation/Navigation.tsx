@@ -25,7 +25,7 @@ export default function Navigation() {
     }, [setIsLoggedIn]);
 
     const isLanding = pathname === "/";
-    const isLoginOrSignUp = pathname === "/user/login" || pathname === "/user/create";
+    const isLoginOrSignUp = pathname === "/user/login" || pathname === "/user/signup";
 
     if (isLanding) return <LandingNav />;
     else if (isLoginOrSignUp) return <LoginNav />;

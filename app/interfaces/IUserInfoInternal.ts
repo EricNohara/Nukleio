@@ -11,7 +11,7 @@ export interface IUserInfoInternal extends IUser {
   public_api_logs: IPublicApiLogInternal[];
   skills: ISkillsInput[];
   experiences: IExperience[];
-  projects: IProjectInput[];
+  projects: IProjectInternal[];
   education: IUserEducationInternal[];
 }
 
@@ -26,4 +26,18 @@ export interface IUserEducationInternal {
   year_start: number | null;
   year_end: number | null;
   courses: ICourseInput[];
+}
+
+export interface IProjectInternal {
+  id: number;
+  name: string;
+  date_start: string;
+  date_end: string;
+  languages_used: string[] | null;
+  frameworks_used: string[] | null;
+  technologies_used: string[] | null;
+  description: string;
+  github_url: string | null;
+  demo_url: string | null;
+  thumbnail_url: string | null;
 }

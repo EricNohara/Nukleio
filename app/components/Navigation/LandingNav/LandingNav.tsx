@@ -14,7 +14,7 @@ export default function LandingNav() {
     }
 
     const handleSignUp = () => {
-        router.push("/user/create")
+        router.push("/user/signup")
     }
 
     return (

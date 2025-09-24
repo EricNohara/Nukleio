@@ -5,12 +5,10 @@ import { createContext, useContext, useReducer, useEffect } from "react";
 import { IApiKeyInternal } from "../interfaces/IApiKey";
 import { ICourseInput } from "../interfaces/ICourse";
 import { IExperience } from "../interfaces/IExperience";
-import { IProjectInput } from "../interfaces/IProject";
 import { IPublicApiLogInternal } from "../interfaces/IPublicApiLog";
 import { ISkillsInput } from "../interfaces/ISkills";
 import IUser from "../interfaces/IUser";
-import { IUserEducationInternal } from "../interfaces/IUserInfoInternal";
-import { IUserInfoInternal } from "../interfaces/IUserInfoInternal";
+import { IUserEducationInternal, IUserInfoInternal, IProjectInternal } from "../interfaces/IUserInfoInternal";
 
 type Action =
     | { type: "SET_ALL_DATA"; payload: IUserInfoInternal }
@@ -21,9 +19,9 @@ type Action =
     | { type: "ADD_SKILL"; payload: ISkillsInput }
     | { type: "UPDATE_SKILL"; payload: { old: ISkillsInput, new: ISkillsInput } }
     | { type: "DELETE_SKILL"; payload: ISkillsInput }
-    | { type: "ADD_PROJECT"; payload: IProjectInput }
-    | { type: "UPDATE_PROJECT"; payload: { old: IProjectInput, new: IProjectInput } }
-    | { type: "DELETE_PROJECT"; payload: IProjectInput }
+    | { type: "ADD_PROJECT"; payload: IProjectInternal }
+    | { type: "UPDATE_PROJECT"; payload: { old: IProjectInternal, new: IProjectInternal } }
+    | { type: "DELETE_PROJECT"; payload: IProjectInternal }
     | { type: "ADD_EDUCATION"; payload: IUserEducationInternal }
     | { type: "UPDATE_EDUCATION"; payload: { old: IUserEducationInternal, new: IUserEducationInternal } }
     | { type: "DELETE_EDUCATION"; payload: IUserEducationInternal }
