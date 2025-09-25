@@ -49,7 +49,7 @@ body {
   --page-box-bg: white;
   --page-box-border: #d1d1d1;
 
-  --search-bg: #cfcfcf;
+  --search-bg: #e3e3e3;
   --search-txt: #696969;
 
   --page-txt-1: black;
@@ -74,6 +74,14 @@ body {
   --input-form-input-focus: #2f2f2f;
   --input-form-input-label-txt: #0f0e0e;
   /* add more later */
+
+  /* projects page */
+  --project-list-container: white;
+  --project-card: #e3e3e3;
+  --project-card-hover: #d1d1d1;
+  --project-card-btn-hover: #adadad;
+  --project-card-date-txt: rgb(69, 69, 69);
+  --project-card-active: #d6e2f2;
 
   /* sizes */
   --global-border-radius: 10px;

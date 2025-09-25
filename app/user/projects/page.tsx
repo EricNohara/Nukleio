@@ -8,6 +8,8 @@ import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentW
 import { useUser } from "@/app/context/UserProvider";
 import { IProjectInput } from "@/app/interfaces/IProject";
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
+import ProjectCard from "@/app/components/ProjectCard/ProjectCard";
+import styles from "./ProjectsPage.module.css";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
@@ -268,6 +270,9 @@ export default function ProjectsPage() {
     <PageContentWrapper>
       <PageContentHeader title="Projects" buttonOne={buttonOne} />
       {/* Add the project cards here */}
+      <div className={styles.container}>
+        {state.projects.map((project, i) => <ProjectCard project={project} key={i} />)}
+      </div>
 
       {
         isFormOpen &&

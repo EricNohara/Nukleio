@@ -1,8 +1,8 @@
 "use client";
 
-import { EllipsisVertical } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Maximize, Pencil, Trash, EllipsisVertical } from "lucide-react";
 
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
 import formatDate from "@/utils/general/formatDate";
@@ -15,28 +15,66 @@ interface IProjectCardProps {
 
 export default function ProjectCard({ project }: IProjectCardProps) {
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    // close menu
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsExpanded(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const getFormattedDate = (): string => {
         if (project.date_start) {
-            return `${formatDate(project.date_start)}${project.date_end && ` - ${formatDate(project.date_end)}`}`;
+            return `${formatDate(project.date_start, true)}${project.date_end && ` - ${formatDate(project.date_end)}`}`;
         } else {
-            return project.date_end ? formatDate(project.date_end) : "";
+            return project.date_end ? formatDate(project.date_end, true) : "";
         }
     }
 
     return (
-        <div className={styles.cardContainer}>
+        <div className={`${styles.cardContainer} ${isExpanded && styles.cardContainerActive}`}>
             <div className={styles.headerContainer}>
-                <h2 className={styles.title}>{project.name}</h2>
-                <button className={styles.expandBtn}>
-                    <EllipsisVertical />
-                </button>
+                <div className={styles.titleContainer}>
+                    <h2 className={styles.title}>{project.name}</h2>
+                </div>
+                <div className={styles.dropdownWrapper} ref={menuRef}>
+                    <button
+                        className={`${styles.expandBtn} ${isExpanded && styles.expandBtnActive}`}
+                        onClick={() => setIsExpanded(!isExpanded)}
+                    >
+                        <EllipsisVertical />
+                    </button>
+                    {isExpanded && (
+                        <div className={styles.dropdownMenu}>
+                            <button className={styles.dropdownButton}>
+                                Open
+                                <Maximize strokeWidth={1.5} />
+                            </button>
+                            <button className={styles.dropdownButton}>
+                                Edit
+                                <Pencil strokeWidth={1.5} />
+                            </button>
+                            <button className={styles.dropdownButton}>
+                                Delete
+                                <Trash strokeWidth={1.5} />
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
-            <Image
-                className={styles.thumbnail}
-                src={project.thumbnail_url ? project.thumbnail_url : "/images/default-project.svg"}
-                alt={project.name}
-            />
+            <div className={styles.thumbnailContainer}>
+                <Image
+                    className={styles.thumbnail}
+                    src={project.thumbnail_url ? project.thumbnail_url : "/images/default-project.svg"}
+                    alt={project.name}
+                    fill
+                />
+            </div>
             <p className={styles.date}>{getFormattedDate()}</p>
         </div>
     );

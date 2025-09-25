@@ -1,0 +1,10 @@
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  overflow-y: scroll;
+  overflow-x: hidden;
+  width: 100%;
+  padding: 1rem;
+  border-radius: var(--global-border-radius);
+  background-color: var(--project-list-container);
+}
