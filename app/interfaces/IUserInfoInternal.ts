@@ -1,7 +1,6 @@
 import { IApiKeyInternal } from "./IApiKey";
 import { ICourseInput } from "./ICourse";
 import { IExperience } from "./IExperience";
-import { IProjectInput } from "./IProject";
 import { IPublicApiLogInternal } from "./IPublicApiLog";
 import { ISkillsInput } from "./ISkills";
 import IUser from "./IUser";

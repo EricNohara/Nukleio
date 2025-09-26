@@ -77,9 +77,9 @@ body {
 
   /* projects page */
   --project-list-container: white;
-  --project-card: #e3e3e3;
-  --project-card-hover: #d1d1d1;
-  --project-card-btn-hover: #adadad;
+  --project-card: #eeeeee;
+  --project-card-hover: #e6e6e6;
+  --project-card-btn-hover: rgb(187, 187, 187, 0.5);
   --project-card-date-txt: rgb(69, 69, 69);
   --project-card-active: #d6e2f2;
 

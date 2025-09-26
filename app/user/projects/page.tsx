@@ -5,12 +5,12 @@ import { useState } from "react";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
+import ProjectCard from "@/app/components/ProjectCard/ProjectCard";
 import { useUser } from "@/app/context/UserProvider";
 import { IProjectInput } from "@/app/interfaces/IProject";
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
-import ProjectCard from "@/app/components/ProjectCard/ProjectCard";
-import styles from "./ProjectsPage.module.css";
 
+import styles from "./ProjectsPage.module.css";
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
 const EMPTY_PROJECT_INPUT: IProjectInput = {
@@ -31,6 +31,7 @@ export default function ProjectsPage() {
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [formValues, setFormValues] = useState<IProjectInput>(EMPTY_PROJECT_INPUT);
   const [projectToEdit, setProjectToEdit] = useState<IProjectInternal | null>(null);
+  const [openProject, setOpenProject] = useState<number | null>(null);
 
   const handleEdit = (rowIndex: number) => {
     const project = state.projects[rowIndex];
@@ -54,8 +55,15 @@ export default function ProjectsPage() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormValues(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  }
+    const { name, value } = e.target;
+
+    // For CSV fields
+    if (["languages_used", "frameworks_used", "technologies_used"].includes(name)) {
+      setFormValues(prev => ({ ...prev, [name]: value.split(",").map(v => v.trim()) }));
+    } else {
+      setFormValues(prev => ({ ...prev, [name]: value }));
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,6 +159,10 @@ export default function ProjectsPage() {
 
   const onClose = () => {
     setIsFormOpen(false);
+  }
+
+  const handleOpenProject = (rowIndex: number) => {
+    setOpenProject(rowIndex);
   }
 
   const buttonOne: IButton = {
@@ -253,7 +265,7 @@ export default function ProjectsPage() {
         placeholder: "Enter project description",
         required: true,
         onChange: handleChange,
-        value: formValues.date_start,
+        value: formValues.description,
       }
     },
   ];
@@ -269,9 +281,16 @@ export default function ProjectsPage() {
   return (
     <PageContentWrapper>
       <PageContentHeader title="Projects" buttonOne={buttonOne} />
-      {/* Add the project cards here */}
       <div className={styles.container}>
-        {state.projects.map((project, i) => <ProjectCard project={project} key={i} />)}
+        {state.projects.map((project, i) =>
+          <ProjectCard
+            project={project}
+            key={i}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onOpen={handleOpenProject}
+            index={i}
+          />)}
       </div>
 
       {
@@ -283,6 +302,12 @@ export default function ProjectsPage() {
           inputRows={formProps.inputRows}
           onClose={formProps.onClose}
         />
+      }
+
+      {/* add the open project page here */}
+      {
+        openProject && ""
+        // <ProjectPage />
       }
     </PageContentWrapper>
   );

@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   IUserInfoInternal,
   IUserEducationInternal,
-  IProjectInternal,
 } from "@/app/interfaces/IUserInfoInternal";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 

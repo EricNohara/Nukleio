@@ -1,8 +1,8 @@
 "use client";
 
+import { Maximize, Pencil, Trash, EllipsisVertical } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
-import { Maximize, Pencil, Trash, EllipsisVertical } from "lucide-react";
 
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
 import formatDate from "@/utils/general/formatDate";
@@ -11,9 +11,13 @@ import styles from "./ProjectCard.module.css";
 
 interface IProjectCardProps {
     project: IProjectInternal;
+    onEdit: (n: number) => void;
+    onDelete: (n: number) => Promise<void>;
+    onOpen: (n: number) => void;
+    index: number;
 }
 
-export default function ProjectCard({ project }: IProjectCardProps) {
+export default function ProjectCard({ project, onEdit, onDelete, onOpen, index }: IProjectCardProps) {
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -51,15 +55,15 @@ export default function ProjectCard({ project }: IProjectCardProps) {
                     </button>
                     {isExpanded && (
                         <div className={styles.dropdownMenu}>
-                            <button className={styles.dropdownButton}>
+                            <button className={styles.dropdownButton} onClick={() => onOpen(index)}>
                                 Open
                                 <Maximize strokeWidth={1.5} />
                             </button>
-                            <button className={styles.dropdownButton}>
+                            <button className={styles.dropdownButton} onClick={() => onEdit(index)}>
                                 Edit
                                 <Pencil strokeWidth={1.5} />
                             </button>
-                            <button className={styles.dropdownButton}>
+                            <button className={styles.dropdownButton} onClick={async () => await onDelete(index)}>
                                 Delete
                                 <Trash strokeWidth={1.5} />
                             </button>
