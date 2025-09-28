@@ -2,10 +2,10 @@
 
 import { X } from "lucide-react";
 import { ChangeEvent } from "react";
-import { useEffect } from "react";
 
 import styles from "./InputForm.module.css";
 import { ButtonOne, ExitButton } from "../Buttons/Buttons";
+import Overlay from "../Overlay/Overlay";
 import TextInput from "../TextInput/TextInput";
 
 export interface IInputFormInput {
@@ -34,24 +34,8 @@ export interface IInputFormProps {
 }
 
 export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onClose }: IInputFormProps) {
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                onClose();
-            }
-        };
-        document.addEventListener("keydown", handleKeyDown);
-        return () => document.removeEventListener("keydown", handleKeyDown);
-    }, [onClose]);
-
-    const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget) {
-            onClose();
-        }
-    };
-
     return (
-        <div className={styles.overlay} onClick={handleOverlayClick}>
+        <Overlay onClose={onClose}>
             <form
                 onSubmit={onSubmit}
                 className={styles.form}
@@ -104,6 +88,6 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                     <ButtonOne type="submit">{buttonLabel}</ButtonOne>
                 </div>
             </form>
-        </div >
+        </Overlay>
     );
 }

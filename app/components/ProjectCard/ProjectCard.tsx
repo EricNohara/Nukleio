@@ -15,9 +15,11 @@ interface IProjectCardProps {
     onDelete: (n: number) => Promise<void>;
     onOpen: (n: number) => void;
     index: number;
+    isActive: boolean;
+    onSingleClick: (n: number) => void;
 }
 
-export default function ProjectCard({ project, onEdit, onDelete, onOpen, index }: IProjectCardProps) {
+export default function ProjectCard({ project, onEdit, onDelete, onOpen, index, isActive, onSingleClick }: IProjectCardProps) {
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +43,11 @@ export default function ProjectCard({ project, onEdit, onDelete, onOpen, index }
     }
 
     return (
-        <div className={`${styles.cardContainer} ${isExpanded && styles.cardContainerActive}`}>
+        <div
+            className={`${styles.cardContainer} ${isActive && styles.cardContainerActive}`}
+            onClick={() => onSingleClick(index)}
+            onDoubleClick={() => onOpen(index)}
+        >
             <div className={styles.headerContainer}>
                 <div className={styles.titleContainer}>
                     <h2 className={styles.title}>{project.name}</h2>
@@ -49,7 +55,11 @@ export default function ProjectCard({ project, onEdit, onDelete, onOpen, index }
                 <div className={styles.dropdownWrapper} ref={menuRef}>
                     <button
                         className={`${styles.expandBtn} ${isExpanded && styles.expandBtnActive}`}
-                        onClick={() => setIsExpanded(!isExpanded)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onSingleClick(index);
+                            setIsExpanded(!isExpanded);
+                        }}
                     >
                         <EllipsisVertical />
                     </button>

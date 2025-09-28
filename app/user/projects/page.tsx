@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRef, useEffect } from "react";
 
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
+import OpenProjectOverlay from "@/app/components/OpenProjectOverlay/OpenProjectOverlay";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import ProjectCard from "@/app/components/ProjectCard/ProjectCard";
 import { useUser } from "@/app/context/UserProvider";
@@ -32,6 +34,19 @@ export default function ProjectsPage() {
   const [formValues, setFormValues] = useState<IProjectInput>(EMPTY_PROJECT_INPUT);
   const [projectToEdit, setProjectToEdit] = useState<IProjectInternal | null>(null);
   const [openProject, setOpenProject] = useState<number | null>(null);
+  const [activeProjectIndex, setActiveProjectIndex] = useState<number | null>(null); // for single and double clicks
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setActiveProjectIndex(null); // clear active card
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleEdit = (rowIndex: number) => {
     const project = state.projects[rowIndex];
@@ -165,6 +180,10 @@ export default function ProjectsPage() {
     setOpenProject(rowIndex);
   }
 
+  const handleSingleClick = (rowIndex: number) => {
+    setActiveProjectIndex(rowIndex);
+  }
+
   const buttonOne: IButton = {
     name: "Add Project",
     onClick: () => {
@@ -281,7 +300,7 @@ export default function ProjectsPage() {
   return (
     <PageContentWrapper>
       <PageContentHeader title="Projects" buttonOne={buttonOne} />
-      <div className={styles.container}>
+      <div className={styles.container} ref={containerRef}>
         {state.projects.map((project, i) =>
           <ProjectCard
             project={project}
@@ -289,7 +308,9 @@ export default function ProjectsPage() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onOpen={handleOpenProject}
+            onSingleClick={handleSingleClick}
             index={i}
+            isActive={activeProjectIndex === i}
           />)}
       </div>
 
@@ -306,8 +327,14 @@ export default function ProjectsPage() {
 
       {/* add the open project page here */}
       {
-        openProject && ""
-        // <ProjectPage />
+        openProject &&
+        <OpenProjectOverlay
+          project={state.projects[openProject]}
+          index={openProject}
+          onEdit={(n: number) => { handleEdit(n); setOpenProject(null) }}
+          onDelete={async (n: number) => { handleDelete(n); setOpenProject(null) }}
+          onClose={() => setOpenProject(null)}
+        />
       }
     </PageContentWrapper>
   );

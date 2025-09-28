@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import styles from "./ApiKeyDisplay.module.css";
 import { ExitButton, ButtonOne } from "../Buttons/Buttons";
 import inputFormStyles from "../InputForm/InputForm.module.css";
+import Overlay from "../Overlay/Overlay";
 import textInputStyles from "../TextInput/TextInput.module.css";
 
 export interface IApiKeyDisplayProps {
@@ -74,24 +75,8 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
         return s.replace(/./g, '*');
     };
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                onClose();
-            }
-        };
-        document.addEventListener("keydown", handleKeyDown);
-        return () => document.removeEventListener("keydown", handleKeyDown);
-    }, [onClose]);
-
-    const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget) {
-            onClose();
-        }
-    };
-
     return (
-        <div className={inputFormStyles.overlay} onClick={handleOverlayClick}>
+        <Overlay onClose={onClose}>
             <div className={inputFormStyles.form} onClick={(e) => e.stopPropagation()}>
                 <header className={inputFormStyles.header}>
                     <h1 className={inputFormStyles.title}>API Key Generated</h1>
@@ -121,6 +106,6 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
                     <ButtonOne type="submit" onClick={handleDownload}>Download</ButtonOne>
                 </div>
             </div>
-        </div>
+        </Overlay>
     );
 }
