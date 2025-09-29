@@ -1,7 +1,7 @@
 .thumbnailContainer {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 250px;
   overflow: hidden;
   border-radius: var(--global-border-radius);
 }
@@ -9,4 +9,107 @@
 .thumbnail {
   object-fit: cover;
   object-position: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2rem;
+  gap: 2rem;
+  color: var(--project-txt);
+  width: 100%;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  width: 100%;
+}
+
+.description {
+  grid-column: span 2;
+  padding: 1rem;
+  border-radius: var(--global-border-radius);
+  border: 2px solid var(--project-card-hover);
+  height: 250px;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+
+.description > p {
+  margin: 0;
+}
+
+.buttonContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid var(--project-card-hover);
+  border-radius: var(--global-border-radius);
+  height: 250px;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+
+.date {
+  margin: 0;
+  margin-bottom: 2rem;
+}
+
+.csvList {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-left: 1rem;
+}
+
+.csvList > li > p {
+  margin: 0;
+  padding-left: 0.5rem;
+}
+
+.csvNone {
+  font-style: italic;
+  color: var(--project-txt-secondary);
+}
+
+.deleteBtn {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.iconLinks {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.iconLink {
+  background-color: var(--btn-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: var(--global-border-radius);
+  color: white;
+  transition: 0.2s ease;
+}
+
+.iconLink:hover {
+  background-color: var(--btn-1-hover);
 }

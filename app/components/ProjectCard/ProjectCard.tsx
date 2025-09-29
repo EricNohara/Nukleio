@@ -36,7 +36,7 @@ export default function ProjectCard({ project, onEdit, onDelete, onOpen, index, 
 
     const getFormattedDate = (): string => {
         if (project.date_start) {
-            return `${formatDate(project.date_start, true)}${project.date_end && ` - ${formatDate(project.date_end)}`}`;
+            return `${formatDate(project.date_start, true)}${project.date_end && ` - ${formatDate(project.date_end, true)}`}`;
         } else {
             return project.date_end ? formatDate(project.date_end, true) : "";
         }

@@ -82,6 +82,8 @@ body {
   --project-card-btn-hover: rgb(187, 187, 187, 0.5);
   --project-card-date-txt: rgb(69, 69, 69);
   --project-card-active: #d6e2f2;
+  --project-txt: #2b2b2b;
+  --project-txt-secondary: #5d5d5d;
 
   /* sizes */
   --global-border-radius: 10px;

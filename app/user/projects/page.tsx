@@ -327,12 +327,12 @@ export default function ProjectsPage() {
 
       {/* add the open project page here */}
       {
-        openProject &&
+        openProject !== null &&
         <OpenProjectOverlay
           project={state.projects[openProject]}
           index={openProject}
           onEdit={(n: number) => { handleEdit(n); setOpenProject(null) }}
-          onDelete={async (n: number) => { handleDelete(n); setOpenProject(null) }}
+          onDelete={async (n: number) => { await handleDelete(n); setOpenProject(null) }}
           onClose={() => setOpenProject(null)}
         />
       }

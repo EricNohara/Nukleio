@@ -10,26 +10,6 @@
   gap: 1rem;
 }
 
-.header {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(
-    to right,
-    var(--input-form-gradient-1) 0%,
-    var(--input-form-gradient-2) 100%
-  );
-  padding: 1rem 2rem;
-  color: var(--input-form-title-txt);
-  border-radius: var(--global-border-radius) var(--global-border-radius) 0 0;
-}
-
-.title {
-  font-size: 2rem;
-  margin: 0;
-}
-
 .inputRowsContainer {
   display: flex;
   flex-direction: column;

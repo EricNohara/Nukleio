@@ -1,9 +1,10 @@
-import { TriangleAlert, X, Copy, Eye, EyeClosed } from "lucide-react";
+import { TriangleAlert, Copy, Eye, EyeClosed } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import styles from "./ApiKeyDisplay.module.css";
-import { ExitButton, ButtonOne } from "../Buttons/Buttons";
+import { ButtonOne } from "../Buttons/Buttons";
 import inputFormStyles from "../InputForm/InputForm.module.css";
+import InputFormHeader from "../InputForm/InputFormHeader/InputFormHeader";
 import Overlay from "../Overlay/Overlay";
 import textInputStyles from "../TextInput/TextInput.module.css";
 
@@ -78,10 +79,7 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
     return (
         <Overlay onClose={onClose}>
             <div className={inputFormStyles.form} onClick={(e) => e.stopPropagation()}>
-                <header className={inputFormStyles.header}>
-                    <h1 className={inputFormStyles.title}>API Key Generated</h1>
-                    <ExitButton onClick={onClose}><X size={15} /></ExitButton>
-                </header>
+                <InputFormHeader title="API Key Generated" onClose={onClose} />
                 <div className={styles.inputContainer}>
                     <div className={inputFormStyles.inputRow}>
                         <div className={textInputStyles.inputDiv}>

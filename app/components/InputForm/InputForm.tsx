@@ -1,12 +1,12 @@
 "use client";
 
-import { X } from "lucide-react";
 import { ChangeEvent } from "react";
 
 import styles from "./InputForm.module.css";
-import { ButtonOne, ExitButton } from "../Buttons/Buttons";
+import { ButtonOne } from "../Buttons/Buttons";
 import Overlay from "../Overlay/Overlay";
 import TextInput from "../TextInput/TextInput";
+import InputFormHeader from "./InputFormHeader/InputFormHeader";
 
 export interface IInputFormInput {
     label: string;
@@ -47,10 +47,7 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                     }
                 }}
             >
-                <header className={styles.header}>
-                    <h1 className={styles.title}>{title}</h1>
-                    <ExitButton onClick={onClose}><X size={15} /></ExitButton>
-                </header>
+                <InputFormHeader title={title} onClose={onClose} />
                 <div className={styles.inputRowsContainer}>
                     {inputRows.map((row, i) => (
                         <div className={styles.inputRow} key={i}>
