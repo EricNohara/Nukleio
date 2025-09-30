@@ -2,6 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import FileUploadBox from "@/app/components/FileUploadBox/FileUploadBox";
+import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
+import styles from "./DocumentsPage.module.css";
+import { IButton } from "@/app/components/PageContentHeader/PageContentHeader";
 
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 
@@ -32,9 +36,36 @@ export default function DocumentsPage() {
     authenticator();
   }, [router]);
 
+  const buttonOne: IButton = {
+    name: "Save Documents",
+    onClick: () => { },
+  }
+
   return (
     <PageContentWrapper>
-      <DocumentsList user={user} />
+      <PageContentHeader title="Documents" buttonOne={buttonOne} />
+      {/* <DocumentsList user={user} /> */}
+      <div className={styles.fileUploadBoxContainer}>
+        <FileUploadBox
+          label="Upload Profile Picture"
+          accepts="image/*"
+          uploadInstructions="Upload image files of up to 50 MB and click save documents"
+          onFileSelect={(file) => console.log("Selected file:", file)}
+        />
+        <FileUploadBox
+          label="Upload Resume File"
+          accepts=".pdf"
+          uploadInstructions="Upload PDF files of up to 50 MB and click save documents"
+          onFileSelect={(file) => console.log("Selected file:", file)}
+        />
+        <FileUploadBox
+          label="Upload Transcript File"
+          accepts=".pdf"
+          uploadInstructions="Upload PDF files of up to 50 MB and click save documents"
+          onFileSelect={(file) => console.log("Selected file:", file)}
+        />
+      </div>
+
     </PageContentWrapper>
   );
 }
