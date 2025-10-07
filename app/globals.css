@@ -90,6 +90,8 @@ body {
   --file-upload-border: #848484;
   --file-upload-border-hover: black;
   --file-upload-label: black;
+  --file-display: white;
+  --file-uploaded: #6a9681;
 
   /* sizes */
   --global-border-radius: 10px;

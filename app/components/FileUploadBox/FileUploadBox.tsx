@@ -1,17 +1,20 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+
 import styles from "./FileUploadBox.module.css";
-import { ButtonOne } from "../Buttons/Buttons";
+import { ButtonOne, ButtonTwo } from "../Buttons/Buttons";
 
 interface IFileUploadBoxProps {
     label?: string;
     accepts?: string;
     uploadInstructions?: string;
-    onFileSelect: (file: File) => void
+    isEditView?: boolean;
+    onExitEditView?: () => void;
+    onFileSelect: (file: File) => void;
 }
 
-export default function FileUploadBox({ label, accepts, uploadInstructions, onFileSelect }: IFileUploadBoxProps) {
+export default function FileUploadBox({ label, accepts, uploadInstructions, isEditView, onExitEditView, onFileSelect }: IFileUploadBoxProps) {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [dragging, setDragging] = useState(false);
     const [fileName, setFileName] = useState("");
@@ -65,6 +68,10 @@ export default function FileUploadBox({ label, accepts, uploadInstructions, onFi
                     <p className={styles.uploadInstructions}>{uploadInstructions}</p>
                 </div>
             }
+
+            {/* cancel button only for edit view */}
+            {isEditView && <ButtonTwo className={styles.exitEditBtn} onClick={onExitEditView}>Cancel</ButtonTwo>}
+
         </div>
     );
 }

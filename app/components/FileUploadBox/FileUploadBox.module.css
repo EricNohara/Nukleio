@@ -1,5 +1,5 @@
 .uploadBox {
-  /* border: 2px dashed var(--file-upload-border); */
+  position: relative;
   border-radius: var(--global-border-radius);
   padding: 2rem;
   text-align: center;
@@ -53,4 +53,9 @@
 
 .uploadInstructionsContainer {
   width: 300px;
+}
+
+.exitEditBtn {
+  position: absolute;
+  bottom: 2rem;
 }

@@ -13,6 +13,8 @@ import { IUserEducationInternal, IUserInfoInternal, IProjectInternal } from "../
 type Action =
     | { type: "SET_ALL_DATA"; payload: IUserInfoInternal }
     | { type: "SET_USER"; payload: IUser }
+    | { type: "UPDATE_DOCUMENT"; payload: { url: string, docType: string } }
+    | { type: "DELETE_DOCUMENT"; payload: { docType: string } }
     | { type: "ADD_EXPERIENCE"; payload: IExperience }
     | { type: "UPDATE_EXPERIENCE"; payload: { old: IExperience, new: IExperience } }
     | { type: "DELETE_EXPERIENCE"; payload: IExperience }
@@ -81,6 +83,31 @@ function reducer(state: IUserInfoInternal, action: Action): IUserInfoInternal {
                 api_keys,
                 public_api_logs
             };
+
+        // --- DOCUMENTS ---
+        case "UPDATE_DOCUMENT":
+            switch (action.payload.docType) {
+                case "portrait_url":
+                    return { ...state, portrait_url: action.payload.url };
+                case "resume_url":
+                    return { ...state, resume_url: action.payload.url };
+                case "transcript_url":
+                    return { ...state, transcript_url: action.payload.url };
+                default:
+                    break;
+            }
+
+        case "DELETE_DOCUMENT":
+            switch (action.payload.docType) {
+                case "portrait_url":
+                    return { ...state, portrait_url: null };
+                case "resume_url":
+                    return { ...state, resume_url: null };
+                case "transcript_url":
+                    return { ...state, transcript_url: null };
+                default:
+                    return state;
+            }
 
         // --- EXPERIENCES ---
         case "ADD_EXPERIENCE":
