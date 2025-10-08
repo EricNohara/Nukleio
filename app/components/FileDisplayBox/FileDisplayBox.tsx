@@ -2,6 +2,7 @@ import { Pencil, Trash } from "lucide-react";
 import Image from "next/image";
 
 import styles from "./FileDisplayBox.module.css";
+import { AsyncButtonWrapper } from "../AsyncButtonWrapper/AsyncButtonWrapper";
 import { ButtonOne, DeleteButton } from "../Buttons/Buttons";
 import PDFThumbnail from "../PDFThumbnail/PDFThumbnail";
 
@@ -36,9 +37,12 @@ export default function FileDisplayBox({ imageUrl, alt, pdfUrl, uploadedItemName
                 }
                 <div className={styles.buttonsContainer}>
                     <ButtonOne onClick={() => onEdit(docType)} className={styles.editBtn}><Pencil /></ButtonOne>
-                    <DeleteButton onClick={() => onDelete(imageUrl, docType)}><Trash /></DeleteButton>
+                    <AsyncButtonWrapper
+                        button={<DeleteButton><Trash /></DeleteButton>}
+                        onClick={() => onDelete(imageUrl, docType)}
+                    />
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

@@ -2,6 +2,7 @@ import { Trash, Pencil } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 import styles from "./Table.module.css";
+import { AsyncButtonWrapper } from "../AsyncButtonWrapper/AsyncButtonWrapper";
 import { EditButton, DeleteButton } from "../Buttons/Buttons";
 
 export interface ITableProps {
@@ -61,12 +62,17 @@ export default function Table({
                                             return <EditIcon size={20} strokeWidth={2} />;
                                         })()}
                                     </EditButton>
-                                    <DeleteButton onClick={() => handleDelete(i)}>
-                                        {(() => {
-                                            const DeleteIcon = deleteButtonOverride ?? Trash;
-                                            return <DeleteIcon size={20} strokeWidth={2} />;
-                                        })()}
-                                    </DeleteButton>
+                                    <AsyncButtonWrapper
+                                        button={
+                                            <DeleteButton >
+                                                {(() => {
+                                                    const DeleteIcon = deleteButtonOverride ?? Trash;
+                                                    return <DeleteIcon size={20} strokeWidth={2} />;
+                                                })()}
+                                            </DeleteButton>
+                                        }
+                                        onClick={() => handleDelete(i)}
+                                    />
                                 </div>
                             </td>
                         </tr>

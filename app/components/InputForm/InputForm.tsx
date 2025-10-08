@@ -1,12 +1,14 @@
 "use client";
 
 import { ChangeEvent } from "react";
+import { useState, FormEvent, useRef } from "react";
 
 import styles from "./InputForm.module.css";
 import { ButtonOne } from "../Buttons/Buttons";
 import Overlay from "../Overlay/Overlay";
 import TextInput from "../TextInput/TextInput";
 import InputFormHeader from "./InputFormHeader/InputFormHeader";
+import { AsyncButtonWrapper } from "../AsyncButtonWrapper/AsyncButtonWrapper";
 
 export interface IInputFormInput {
     label: string;
@@ -34,10 +36,14 @@ export interface IInputFormProps {
 }
 
 export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onClose }: IInputFormProps) {
+    const [isDisabled, setIsDisabled] = useState<boolean>(false);
+    const formRef = useRef<HTMLFormElement>(null);
+
     return (
         <Overlay onClose={onClose}>
             <form
-                onSubmit={onSubmit}
+                ref={formRef}
+                onSubmit={(e: FormEvent<HTMLFormElement>) => { onSubmit(e); setIsDisabled(false) }}
                 className={styles.form}
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e: React.KeyboardEvent<HTMLFormElement>) => {
@@ -82,7 +88,11 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                     ))}
                 </div>
                 <div className={styles.buttonContainer}>
-                    <ButtonOne type="submit">{buttonLabel}</ButtonOne>
+                    <AsyncButtonWrapper
+                        button={<ButtonOne type="button">{buttonLabel}</ButtonOne>}
+                        onClick={() => { setIsDisabled(true); formRef.current?.requestSubmit() }}
+                        isDisabled={isDisabled}
+                    />
                 </div>
             </form>
         </Overlay>

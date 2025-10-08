@@ -64,6 +64,9 @@
 
 .editBtn {
   padding: 0.5rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .previewImageContainer {

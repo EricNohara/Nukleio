@@ -111,12 +111,18 @@ export default function DocumentsPage() {
 
   const buttonOne: IButton = {
     name: "Save Documents",
-    onClick: handleUpload
+    onClick: handleUpload,
+    isAsync: true
+  }
+
+  // only render save button if needed
+  const shouldRenderButton = () => {
+    return !state.portrait_url || !state.resume_url || !state.transcript_url || isEditing.portrait_url || isEditing.resume_url || isEditing.transcript_url;
   }
 
   return (
     <PageContentWrapper>
-      <PageContentHeader title="Documents" buttonOne={buttonOne} />
+      <PageContentHeader title="Documents" buttonOne={shouldRenderButton() ? buttonOne : undefined} />
       <div className={styles.fileUploadBoxContainer}>
         {
           state.portrait_url && !isEditing.portrait_url ?

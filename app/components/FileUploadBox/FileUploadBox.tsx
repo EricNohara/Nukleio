@@ -65,8 +65,8 @@ export default function FileUploadBox({ label, accepts, uploadInstructions, isEd
             {/* checkmark when a file is uploaded */}
             {isChecked &&
                 <div className={styles.saveMsg}>
-                    <div className={styles.checkmark}><Check /></div>
-                    Click save documents to upload
+                    <div className={styles.checkmark}><Check size={20} /></div>
+                    <i>Click save documents to upload</i>
                 </div>
             }
 
