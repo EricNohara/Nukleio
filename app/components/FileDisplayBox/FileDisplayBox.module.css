@@ -28,6 +28,7 @@
   background-color: var(--file-uploaded);
   border-radius: var(--global-border-radius);
   color: white;
+  font-weight: bold;
   font-size: 0.8rem;
 }
 
@@ -38,7 +39,7 @@
   justify-content: center;
   height: 100%;
   width: 100%;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .title {
@@ -58,7 +59,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .editBtn {

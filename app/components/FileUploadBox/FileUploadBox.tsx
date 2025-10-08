@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "lucide-react";
 import React, { useRef, useState } from "react";
 
 import styles from "./FileUploadBox.module.css";
@@ -19,12 +20,14 @@ export default function FileUploadBox({ label, accepts, uploadInstructions, isEd
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [dragging, setDragging] = useState(false);
     const [fileName, setFileName] = useState("");
+    const [isChecked, setIsChecked] = useState<boolean>(false);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             setFileName(file.name);
             onFileSelect(file, docType);
+            setIsChecked(true);
         }
     };
 
@@ -37,6 +40,7 @@ export default function FileUploadBox({ label, accepts, uploadInstructions, isEd
         if (file && (!accepts || file.type.match(accepts) || accepts.split(",").some(a => file.name.endsWith(a.trim())))) {
             setFileName(file.name);
             onFileSelect(file, docType);
+            setIsChecked(true);
         }
     };
 
@@ -57,6 +61,15 @@ export default function FileUploadBox({ label, accepts, uploadInstructions, isEd
                 className={styles.fileInput}
                 onChange={handleFileChange}
             />
+
+            {/* checkmark when a file is uploaded */}
+            {isChecked &&
+                <div className={styles.saveMsg}>
+                    <div className={styles.checkmark}><Check /></div>
+                    Click save documents to upload
+                </div>
+            }
+
             <div className={styles.labelContainer}>
                 {label && <h1 className={styles.label}>{label}</h1>}
                 <h2 className={styles.subLabel}>{fileName || "Drag and drop or select a file"}</h2>

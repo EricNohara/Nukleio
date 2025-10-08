@@ -44,6 +44,13 @@
   font-size: 1rem;
   font-weight: normal;
   margin: 0;
+
+  /* Ellipsis setup */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  width: 300px;
 }
 
 .uploadInstructions {
@@ -58,4 +65,24 @@
 .exitEditBtn {
   position: absolute;
   bottom: 2rem;
+}
+
+.saveMsg {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.checkmark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: var(--global-border-radius);
+  background-color: var(--file-uploaded);
+  color: white;
 }
