@@ -13,7 +13,7 @@ import { IUserEducationInternal, IUserInfoInternal, IProjectInternal } from "../
 type Action =
     | { type: "SET_ALL_DATA"; payload: IUserInfoInternal }
     | { type: "SET_USER"; payload: IUser }
-    | { type: "UPDATE_DOCUMENT"; payload: { url: string, docType: string } }
+    | { type: "UPDATE_DOCUMENT"; payload: { url: string | null, docType: string } }
     | { type: "DELETE_DOCUMENT"; payload: { docType: string } }
     | { type: "ADD_EXPERIENCE"; payload: IExperience }
     | { type: "UPDATE_EXPERIENCE"; payload: { old: IExperience, new: IExperience } }

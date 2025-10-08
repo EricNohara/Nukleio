@@ -11,10 +11,11 @@ interface IFileUploadBoxProps {
     uploadInstructions?: string;
     isEditView?: boolean;
     onExitEditView?: () => void;
-    onFileSelect: (file: File) => void;
+    onFileSelect: (file: File, docType: string) => void;
+    docType: string;
 }
 
-export default function FileUploadBox({ label, accepts, uploadInstructions, isEditView, onExitEditView, onFileSelect }: IFileUploadBoxProps) {
+export default function FileUploadBox({ label, accepts, uploadInstructions, isEditView, onExitEditView, onFileSelect, docType }: IFileUploadBoxProps) {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [dragging, setDragging] = useState(false);
     const [fileName, setFileName] = useState("");
@@ -23,7 +24,7 @@ export default function FileUploadBox({ label, accepts, uploadInstructions, isEd
         const file = e.target.files?.[0];
         if (file) {
             setFileName(file.name);
-            onFileSelect(file);
+            onFileSelect(file, docType);
         }
     };
 
@@ -35,7 +36,7 @@ export default function FileUploadBox({ label, accepts, uploadInstructions, isEd
         // check file extension
         if (file && (!accepts || file.type.match(accepts) || accepts.split(",").some(a => file.name.endsWith(a.trim())))) {
             setFileName(file.name);
-            onFileSelect(file);
+            onFileSelect(file, docType);
         }
     };
 

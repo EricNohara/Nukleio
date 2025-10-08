@@ -10,25 +10,12 @@ interface IFileDisplayBoxProps {
     alt?: string;
     pdfUrl?: string;
     uploadedItemName: string;
+    docType: string;
     onEdit: (docType: string | undefined) => void;
     onDelete: (url: string | undefined, docType: string | undefined) => Promise<void>;
 }
 
-export default function FileDisplayBox({ imageUrl, alt, pdfUrl, uploadedItemName, onEdit, onDelete }: IFileDisplayBoxProps) {
-    // maps a name to the correct field
-    const getDocType = () => {
-        switch (uploadedItemName) {
-            case "Profile Picture":
-                return "portrait_url";
-            case "Resume":
-                return "resume_url";
-            case "Transcript":
-                return "transcript_url";
-            default:
-                return undefined;
-        }
-    }
-
+export default function FileDisplayBox({ imageUrl, alt, pdfUrl, uploadedItemName, docType, onEdit, onDelete }: IFileDisplayBoxProps) {
     return (
         <div className={styles.container}>
             <div className={styles.badgeContainer}>
@@ -48,8 +35,8 @@ export default function FileDisplayBox({ imageUrl, alt, pdfUrl, uploadedItemName
                             <PDFThumbnail pdfUrl={pdfUrl} title={`${uploadedItemName} PDF Preview`} /> : null
                 }
                 <div className={styles.buttonsContainer}>
-                    <ButtonOne onClick={() => onEdit(getDocType())} className={styles.editBtn}><Pencil /></ButtonOne>
-                    <DeleteButton onClick={() => onDelete(imageUrl, getDocType())}><Trash /></DeleteButton>
+                    <ButtonOne onClick={() => onEdit(docType)} className={styles.editBtn}><Pencil /></ButtonOne>
+                    <DeleteButton onClick={() => onDelete(imageUrl, docType)}><Trash /></DeleteButton>
                 </div>
             </div>
         </div>
