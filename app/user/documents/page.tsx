@@ -11,7 +11,6 @@ import { useUser } from "@/app/context/UserProvider";
 import { compressImage, compressPDF } from "@/utils/file-upload/compress";
 import { uploadFile } from "@/utils/file-upload/upload";
 
-// import DocumentsList from "./documents-list";
 import styles from "./DocumentsPage.module.css";
 
 export default function DocumentsPage() {
