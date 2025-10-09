@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ReactElement, cloneElement } from "react";
+import { useState, ReactElement, cloneElement, useRef } from "react";
 
 import styles from "./AsyncButtonWrapper.module.css";
 
@@ -13,16 +13,19 @@ interface AsyncButtonWrapperProps {
 // button wrapper making a button clickable once
 export function AsyncButtonWrapper({ button, onClick, isDisabled }: AsyncButtonWrapperProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const isLoadingRef = useRef(false); // tracks loading immediately
 
     const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (isDisabled) setIsLoading(isDisabled);
-        if (isLoading) return;
+        if (isDisabled || isLoadingRef.current) return; // block instantly
+
+        isLoadingRef.current = true;
         setIsLoading(true);
 
         if (onClick) {
             try {
                 await onClick(e);
             } finally {
+                isLoadingRef.current = false;
                 setIsLoading(false);
             }
         }
