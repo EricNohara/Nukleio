@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
 import TextInput from "@/app/components/TextInput/TextInput";
 
@@ -10,6 +11,7 @@ import styles from "./LoginPage.module.css";
 
 export default function LoginForm() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [credentials, setCredentials] = useState({
     email: "",
     password: "",
@@ -25,6 +27,8 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setIsLoading(true);
 
     try {
       const res = await fetch("/api/internal/auth/login", {
@@ -43,6 +47,7 @@ export default function LoginForm() {
     } catch (err) {
       alert(err);
       setCredentials({ email: "", password: "" });
+      setIsLoading(false);
     }
   };
 
@@ -70,7 +75,9 @@ export default function LoginForm() {
           required
           type="password"
         />
-        <ButtonOne type="submit" className={styles.loginButton}>Sign in</ButtonOne>
+        <ButtonOne type="submit" className={styles.loginButton} disabled={isLoading}>
+          <LoadableButtonContent isLoading={isLoading} buttonLabel="Sign in" />
+        </ButtonOne>
       </form >
 
       {/* Form Footer */}

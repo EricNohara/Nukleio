@@ -19,7 +19,6 @@
 
 .avatar {
   border-radius: var(--global-border-radius);
-  box-shadow: 0 0 1px var(--search-txt);
 }
 
 .relativeContainer {

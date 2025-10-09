@@ -3,6 +3,7 @@
 import { useState, ReactElement, cloneElement, useRef } from "react";
 
 import styles from "./AsyncButtonWrapper.module.css";
+import LoadingSpinner from "./LoadingSpinner/LoadingSpinner";
 
 interface AsyncButtonWrapperProps {
     button: ReactElement;
@@ -38,7 +39,7 @@ export function AsyncButtonWrapper({ button, onClick, isDisabled }: AsyncButtonW
         children: (
             <div className={styles.buttonContent}>
                 <span className={`${styles.contentWrapper} ${isLoading ? styles.invisible : ""}`}>{button.props.children}</span>
-                {isLoading && <span className={styles.spinner} />}
+                {isLoading && <LoadingSpinner />}
             </div>
         ),
     });

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
 import TextInput from "@/app/components/TextInput/TextInput";
 
@@ -16,6 +17,7 @@ interface IInputData {
 
 export default function SignUpForm() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<IInputData>({
     email: "",
     password: "",
@@ -34,6 +36,8 @@ export default function SignUpForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    setIsLoading(true);
 
     try {
       if (userData.password.length < minPasswordLen) {
@@ -96,7 +100,9 @@ export default function SignUpForm() {
           required
           type="password"
         />
-        <ButtonOne type="submit" className={styles.loginButton}>Sign up</ButtonOne>
+        <ButtonOne type="submit" className={styles.loginButton} disabled={isLoading}>
+          <LoadableButtonContent isLoading={isLoading} buttonLabel="Sign up" />
+        </ButtonOne>
       </form>
 
       {/* Form Footer */}

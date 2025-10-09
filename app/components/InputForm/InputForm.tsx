@@ -8,6 +8,7 @@ import { ButtonOne } from "../Buttons/Buttons";
 import Overlay from "../Overlay/Overlay";
 import TextInput from "../TextInput/TextInput";
 import InputFormHeader from "./InputFormHeader/InputFormHeader";
+import LoadableButtonContent from "../AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 
 export interface IInputFormInput {
     label: string;
@@ -35,11 +36,11 @@ export interface IInputFormProps {
 }
 
 export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onClose }: IInputFormProps) {
-    const [isDisabled, setIsDisabled] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setIsDisabled(true);
+        setIsLoading(true);
         onSubmit(e);
     }
 
@@ -91,7 +92,9 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                     ))}
                 </div>
                 <div className={styles.buttonContainer}>
-                    <ButtonOne type="submit" disabled={isDisabled}>{buttonLabel}</ButtonOne>
+                    <ButtonOne type="submit" disabled={isLoading}>
+                        <LoadableButtonContent isLoading={isLoading} buttonLabel={buttonLabel} />
+                    </ButtonOne>
                 </div>
             </form>
         </Overlay>
