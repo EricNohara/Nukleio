@@ -51,6 +51,7 @@ body {
 
   --search-bg: #e3e3e3;
   --search-txt: #696969;
+  --search-overlay: rgba(0, 0, 0, 0.4);
 
   --page-txt-1: black;
   --page-txt-2: #5f5f5f;

@@ -12,6 +12,7 @@
 
 .cardContainer:hover {
   background-color: var(--project-card-hover);
+  cursor: pointer;
 }
 
 .cardContainerActive {

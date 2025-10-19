@@ -6,6 +6,7 @@
   border: none;
   border-radius: var(--global-border-radius);
   background-color: inherit;
+  transition: 0.2s ease;
 }
 
 .container:hover {
@@ -13,8 +14,9 @@
 }
 
 .openContainer {
-  background-color: var(--search-bg);
-  color: var(--page-txt-1);
+  background-color: var(--popup-hover);
+  transition: 0.2s ease;
+  color: var(--page-txt);
 }
 
 .avatar {

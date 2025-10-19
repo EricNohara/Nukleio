@@ -1,4 +1,7 @@
+"use client";
+
 import { ReactNode } from "react"
+import { useState } from "react";
 
 import styles from "./PageContentWrapper.module.css";
 import Navigation from "../Navigation/Navigation";
@@ -10,12 +13,15 @@ interface IPageContentWrapperProps {
 }
 
 export default function PageContentWrapper({ children }: IPageContentWrapperProps) {
+    const [searchActive, setSearchActive] = useState(false);
+
     return (
         <div className={styles.pageContainer} >
             <Navigation />
             <div className={styles.pageContentContainer}>
+                {searchActive && <div className={styles.overlay} />}
                 <div className={styles.pageContentHeader}>
-                    <SearchBar />
+                    <SearchBar onFocusChange={setSearchActive} />
                     <UserDropdown />
                 </div>
                 <div className={styles.content}>
