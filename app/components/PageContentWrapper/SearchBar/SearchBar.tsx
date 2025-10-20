@@ -18,16 +18,16 @@ interface ISearchBarProps {
 }
 
 const DEFAULT_SUGGESTIONS: ISuggestion[] = [
-    { label: "Home", path: "/user" },
-    { label: "Documents", path: "/user/documents" },
+    { label: "Home Page", path: "/user" },
+    { label: "Documents Page", path: "/user/documents" },
     { label: "Profile Picture", path: "/user/documents" },
     { label: "Resume", path: "/user/documents" },
     { label: "Transcript", path: "/user/documents" },
-    { label: "Experience", path: "/user/experience" },
-    { label: "Education", path: "/user/education" },
-    { label: "Projects", path: "/user/projects" },
-    { label: "Skills", path: "/user/skills" },
-    { label: "Connect", path: "/user/connect" },
+    { label: "Experience Page", path: "/user/experience" },
+    { label: "Education Page", path: "/user/education" },
+    { label: "Projects Page", path: "/user/projects" },
+    { label: "Skills Page", path: "/user/skills" },
+    { label: "Connect Page", path: "/user/connect" },
     { label: "User Settings", path: "/user/settings" },
     { label: "App Settings", path: "/user/settings/app" },
 ]
