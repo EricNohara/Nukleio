@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useRef, useEffect } from "react";
 
@@ -36,6 +37,21 @@ export default function ProjectsPage() {
   const [openProject, setOpenProject] = useState<number | null>(null);
   const [activeProjectIndex, setActiveProjectIndex] = useState<number | null>(null); // for single and double clicks
   const containerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const indexParam = searchParams.get("index");
+
+  // used to open given project if inputted as search param
+  useEffect(() => {
+    if (indexParam !== null && state.projects.length > 0) {
+      const project = state.projects[Number(indexParam)];
+      if (project) {
+        setProjectToEdit(project);
+        setFormValues(project);
+        setIsFormOpen(true);
+      }
+    }
+  }, [indexParam, state])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -174,6 +190,15 @@ export default function ProjectsPage() {
 
   const onClose = () => {
     setIsFormOpen(false);
+    setProjectToEdit(null);
+
+    // remove the ?index param from url
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    current.delete("index");
+    const newQuery = current.toString();
+    const newUrl = newQuery ? `?${newQuery}` : "";
+
+    router.replace(`/user/projects${newUrl}`, { scroll: false });
   }
 
   const handleOpenProject = (rowIndex: number) => {

@@ -50,44 +50,44 @@ export default function SearchBar({ onFocusChange }: ISearchBarProps) {
 
         if (state) {
             // experiences
-            for (const exp of state.experiences) {
+            state.experiences.forEach((exp, index) => {
                 dynamicSuggestions.push({
                     label: exp.company,
-                    path: "/user/experience"
+                    path: `/user/experience?index=${index}`
                 })
-            }
+            });
 
             // education
-            for (const edu of state.education) {
+            state.education.forEach((edu, index) => {
                 dynamicSuggestions.push({
                     label: edu.institution,
-                    path: "/user/education"
+                    path: `/user/education?index=${index}`
                 })
-            }
+            });
 
             // projects
-            for (const project of state.projects) {
+            state.projects.forEach((project, index) => {
                 dynamicSuggestions.push({
                     label: project.name,
-                    path: "/user/projects",
-                });
-            }
+                    path: `/user/projects?index=${index}`
+                })
+            });
 
             // skills
-            for (const skill of state.skills) {
+            state.skills.forEach((skill, index) => {
                 dynamicSuggestions.push({
                     label: skill.name,
-                    path: "/user/skills"
+                    path: `/user/skills?index=${index}`
                 })
-            }
+            });
 
             // connections
-            for (const conn of state.api_keys) {
+            state.api_keys.forEach((key, index) => {
                 dynamicSuggestions.push({
-                    label: conn.description,
-                    path: "/user/connect"
+                    label: key.description,
+                    path: `/user/connect?index=${index}`
                 })
-            }
+            });
         }
 
         // combine and remove duplicates

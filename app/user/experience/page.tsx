@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
@@ -25,6 +26,21 @@ export default function WorkExperiencePage() {
     job_description: null,
   });
   const [experienceToEdit, setExperienceToEdit] = useState<IExperience | null>(null);
+  const searchParams = useSearchParams();
+  const indexParam = searchParams.get("index");
+  const router = useRouter();
+
+  // used to open given experience if inputted as search param
+  useEffect(() => {
+    if (indexParam !== null && state.experiences.length > 0) {
+      const exp = state.experiences[Number(indexParam)];
+      if (exp) {
+        setExperienceToEdit(exp);
+        setFormValues(exp);
+        setIsFormOpen(true);
+      }
+    }
+  }, [indexParam, state])
 
   const handleEdit = (rowIndex: number) => {
     const experience = state.experiences[rowIndex];
@@ -131,6 +147,15 @@ export default function WorkExperiencePage() {
 
   const onClose = () => {
     setIsFormOpen(false);
+    setExperienceToEdit(null);
+
+    // remove the ?index param from url
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    current.delete("index");
+    const newQuery = current.toString();
+    const newUrl = newQuery ? `?${newQuery}` : "";
+
+    router.replace(`/user/experience${newUrl}`, { scroll: false });
   }
 
   const buttonOne: IButton = {

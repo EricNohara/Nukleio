@@ -1,7 +1,8 @@
 "use client";
 
 import { RefreshCcw } from "lucide-react";
-import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 import ApiKeyDisplay from "@/app/components/ApiKeyDisplay/ApiKeyDisplay";
 import InputForm from "@/app/components/InputForm/InputForm";
@@ -30,6 +31,21 @@ export default function ConnectPage() {
     expires: null,
   });
   const [apiKeyToRefresh, setApiKeyToRefresh] = useState<IApiKeyInternalInput | null>(null);
+  const searchParams = useSearchParams();
+  const indexParam = searchParams.get("index");
+  const router = useRouter();
+
+  // used to open given key if inputted as search param
+  useEffect(() => {
+    if (indexParam !== null && state.api_keys.length > 0) {
+      const key = state.api_keys[Number(indexParam)];
+      if (key) {
+        setApiKeyToRefresh(key);
+        setFormValues(key);
+        setIsFormOpen(true);
+      }
+    }
+  }, [indexParam, state])
 
   const handleEdit = (rowIndex: number) => {
     const key = state.api_keys[rowIndex];
@@ -134,6 +150,15 @@ export default function ConnectPage() {
 
   const onClose = () => {
     setIsFormOpen(false);
+    setApiKeyToRefresh(null);
+
+    // remove the ?index param from url
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    current.delete("index");
+    const newQuery = current.toString();
+    const newUrl = newQuery ? `?${newQuery}` : "";
+
+    router.replace(`/user/connect${newUrl}`, { scroll: false });
   }
 
   const onApiKeyDisplayClose = () => {

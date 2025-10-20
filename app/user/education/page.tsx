@@ -1,8 +1,8 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 import { ExternalLinkButton } from "@/app/components/Buttons/Buttons";
 import InputForm from "@/app/components/InputForm/InputForm";
@@ -34,7 +34,28 @@ export default function EducationPage() {
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [formValues, setFormValues] = useState<IEducationUserInput>(EMPTY_EDUCATION);
   const [educationToEdit, setEducationToEdit] = useState<IUserEducationInternal | null>(null);
+  const searchParams = useSearchParams();
   const router = useRouter();
+
+  const indexParam = searchParams.get("index");
+
+  // used to open given education if inputted as search param
+  useEffect(() => {
+    if (indexParam !== null && state.education.length > 0) {
+      const edu = state.education[Number(indexParam)];
+      if (edu) {
+        setEducationToEdit(edu);
+        const { courses: _, ...rest } = edu;
+        setFormValues({
+          ...rest,
+          majors: rest.majors.join(", "),
+          minors: rest.minors.join(", "),
+          awards: rest.awards.join(", ")
+        });
+        setIsFormOpen(true);
+      }
+    }
+  }, [indexParam, state]);
 
   const handleEdit = (rowIndex: number) => {
     const education = state.education[rowIndex];
@@ -167,6 +188,15 @@ export default function EducationPage() {
 
   const onClose = () => {
     setIsFormOpen(false);
+    setEducationToEdit(null);
+
+    // remove the ?index param from url
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    current.delete("index");
+    const newQuery = current.toString();
+    const newUrl = newQuery ? `?${newQuery}` : "";
+
+    router.replace(`/user/education${newUrl}`, { scroll: false });
   }
 
   const buttonOne: IButton = {

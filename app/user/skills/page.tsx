@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
@@ -23,6 +24,21 @@ export default function SkillsPage() {
     years_of_experience: null
   });
   const [skillToEdit, setSkillToEdit] = useState<ISkillsInput | null>(null);
+  const searchParams = useSearchParams();
+  const indexParam = searchParams.get("index");
+  const router = useRouter();
+
+  // used to open given skill if inputted as search param
+  useEffect(() => {
+    if (indexParam !== null && state.skills.length > 0) {
+      const skill = state.skills[Number(indexParam)];
+      if (skill) {
+        setSkillToEdit(skill);
+        setFormValues(skill);
+        setIsFormOpen(true);
+      }
+    }
+  }, [indexParam, state])
 
   const handleEdit = (rowIndex: number) => {
     const skill = state.skills[rowIndex];
@@ -123,6 +139,15 @@ export default function SkillsPage() {
 
   const onClose = () => {
     setIsFormOpen(false);
+    setSkillToEdit(null);
+
+    // remove the ?index param from url
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    current.delete("index");
+    const newQuery = current.toString();
+    const newUrl = newQuery ? `?${newQuery}` : "";
+
+    router.replace(`/user/skills${newUrl}`, { scroll: false });
   }
 
   const buttonOne: IButton = {
