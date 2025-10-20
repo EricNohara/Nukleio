@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, use } from "react";
 
 import InputForm from "@/app/components/InputForm/InputForm";
@@ -32,6 +32,8 @@ export default function CoursePage({ params, }: { params: Promise<{ educationID:
   const router = useRouter();
   const { educationID } = use(params);
   const educationIDNum = Number(educationID);
+  const searchParams = useSearchParams();
+  const indexParam = searchParams.get("index");
 
   useEffect(() => {
     const education = state.education.find((edu) => edu.id === educationIDNum);
@@ -47,6 +49,20 @@ export default function CoursePage({ params, }: { params: Promise<{ educationID:
 
     setRows(rows);
   }, [education])
+
+  // open course from index param once education is loaded
+  useEffect(() => {
+    if (!education) return; // wait until education is loaded
+    if (indexParam === null) return;
+
+    const courseIndex = Number(indexParam);
+    const course = education.courses?.[courseIndex];
+    if (!course) return;
+
+    setCourseToEdit(course);
+    setFormValues(course);
+    setIsFormOpen(true);
+  }, [indexParam, education]);
 
   const handleEdit = (rowIndex: number) => {
     if (!education) return;
@@ -144,6 +160,15 @@ export default function CoursePage({ params, }: { params: Promise<{ educationID:
 
   const onClose = () => {
     setIsFormOpen(false);
+    setCourseToEdit(null);
+
+    // remove the ?index param from url
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    current.delete("index");
+    const newQuery = current.toString();
+    const newUrl = newQuery ? `?${newQuery}` : "";
+
+    router.replace(`/user/education/${educationID}/course${newUrl}`, { scroll: false });
   }
 
   const buttonOne: IButton = {

@@ -52,7 +52,7 @@ export default function SearchBar({ onFocusChange }: ISearchBarProps) {
             // experiences
             state.experiences.forEach((exp, index) => {
                 dynamicSuggestions.push({
-                    label: exp.company,
+                    label: `Experience: ${exp.company}`,
                     path: `/user/experience?index=${index}`
                 })
             });
@@ -60,15 +60,23 @@ export default function SearchBar({ onFocusChange }: ISearchBarProps) {
             // education
             state.education.forEach((edu, index) => {
                 dynamicSuggestions.push({
-                    label: edu.institution,
+                    label: `Education: ${edu.institution}`,
                     path: `/user/education?index=${index}`
+                })
+
+                // add its courses
+                edu.courses.forEach((course, index) => {
+                    dynamicSuggestions.push({
+                        label: `Course: ${course.name} (${edu.institution})`,
+                        path: `/user/education/${edu.id}/course?index=${index}`
+                    })
                 })
             });
 
             // projects
             state.projects.forEach((project, index) => {
                 dynamicSuggestions.push({
-                    label: project.name,
+                    label: `Project: ${project.name}`,
                     path: `/user/projects?index=${index}`
                 })
             });
@@ -76,7 +84,7 @@ export default function SearchBar({ onFocusChange }: ISearchBarProps) {
             // skills
             state.skills.forEach((skill, index) => {
                 dynamicSuggestions.push({
-                    label: skill.name,
+                    label: `Skill: ${skill.name}`,
                     path: `/user/skills?index=${index}`
                 })
             });
@@ -84,7 +92,7 @@ export default function SearchBar({ onFocusChange }: ISearchBarProps) {
             // connections
             state.api_keys.forEach((key, index) => {
                 dynamicSuggestions.push({
-                    label: key.description,
+                    label: `Connection: ${key.description}`,
                     path: `/user/connect?index=${index}`
                 })
             });
