@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 
 import { ExternalLink } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
