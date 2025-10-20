@@ -1,8 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState, Suspense } from "react";
 
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
@@ -12,6 +11,7 @@ import ProjectCard from "@/app/components/ProjectCard/ProjectCard";
 import { useUser } from "@/app/context/UserProvider";
 import { IProjectInput } from "@/app/interfaces/IProject";
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
 import styles from "./ProjectsPage.module.css";
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
@@ -323,44 +323,46 @@ export default function ProjectsPage() {
   }
 
   return (
-    <PageContentWrapper>
-      <PageContentHeader title="Projects" buttonOne={buttonOne} />
-      <div className={styles.container} ref={containerRef}>
-        {state.projects.map((project, i) =>
-          <ProjectCard
-            project={project}
-            key={i}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onOpen={handleOpenProject}
-            onSingleClick={handleSingleClick}
-            index={i}
-            isActive={activeProjectIndex === i}
-          />)}
-      </div>
+    <Suspense fallback={<LoadingSpinner />}>
+      <PageContentWrapper>
+        <PageContentHeader title="Projects" buttonOne={buttonOne} />
+        <div className={styles.container} ref={containerRef}>
+          {state.projects.map((project, i) =>
+            <ProjectCard
+              project={project}
+              key={i}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onOpen={handleOpenProject}
+              onSingleClick={handleSingleClick}
+              index={i}
+              isActive={activeProjectIndex === i}
+            />)}
+        </div>
 
-      {
-        isFormOpen &&
-        <InputForm
-          title={formProps.title}
-          buttonLabel={formProps.buttonLabel}
-          onSubmit={formProps.onSubmit}
-          inputRows={formProps.inputRows}
-          onClose={formProps.onClose}
-        />
-      }
+        {
+          isFormOpen &&
+          <InputForm
+            title={formProps.title}
+            buttonLabel={formProps.buttonLabel}
+            onSubmit={formProps.onSubmit}
+            inputRows={formProps.inputRows}
+            onClose={formProps.onClose}
+          />
+        }
 
-      {/* add the open project page here */}
-      {
-        openProject !== null &&
-        <OpenProjectOverlay
-          project={state.projects[openProject]}
-          index={openProject}
-          onEdit={(n: number) => { handleEdit(n); setOpenProject(null) }}
-          onDelete={async (n: number) => { await handleDelete(n); setOpenProject(null) }}
-          onClose={() => setOpenProject(null)}
-        />
-      }
-    </PageContentWrapper>
+        {/* add the open project page here */}
+        {
+          openProject !== null &&
+          <OpenProjectOverlay
+            project={state.projects[openProject]}
+            index={openProject}
+            onEdit={(n: number) => { handleEdit(n); setOpenProject(null) }}
+            onDelete={async (n: number) => { await handleDelete(n); setOpenProject(null) }}
+            onClose={() => setOpenProject(null)}
+          />
+        }
+      </PageContentWrapper>
+    </Suspense>
   );
 }

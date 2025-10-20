@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
@@ -9,6 +9,7 @@ import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentW
 import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
 import { ISkillsInput } from "@/app/interfaces/ISkills";
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
@@ -211,26 +212,28 @@ export default function SkillsPage() {
   }
 
   return (
-    <PageContentWrapper>
-      <PageContentHeader title="Skills" buttonOne={buttonOne} />
-      <Table
-        columns={columns}
-        rows={rows}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
-        columnWidths={columnWidths}
-      />
-
-      {
-        isFormOpen &&
-        <InputForm
-          title={formProps.title}
-          buttonLabel={formProps.buttonLabel}
-          onSubmit={formProps.onSubmit}
-          inputRows={formProps.inputRows}
-          onClose={formProps.onClose}
+    <Suspense fallback={<LoadingSpinner />}>
+      <PageContentWrapper>
+        <PageContentHeader title="Skills" buttonOne={buttonOne} />
+        <Table
+          columns={columns}
+          rows={rows}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          columnWidths={columnWidths}
         />
-      }
-    </PageContentWrapper>
+
+        {
+          isFormOpen &&
+          <InputForm
+            title={formProps.title}
+            buttonLabel={formProps.buttonLabel}
+            onSubmit={formProps.onSubmit}
+            inputRows={formProps.inputRows}
+            onClose={formProps.onClose}
+          />
+        }
+      </PageContentWrapper>
+    </Suspense>
   );
 }

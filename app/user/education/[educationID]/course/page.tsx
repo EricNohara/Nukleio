@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, Suspense } from "react";
 
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
@@ -10,6 +10,7 @@ import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
 import { ICourseInput } from "@/app/interfaces/ICourse";
 import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
 import PageContentHeader, { IButton } from "../../../../components/PageContentHeader/PageContentHeader";
 
@@ -231,26 +232,28 @@ export default function CoursePage({ params, }: { params: Promise<{ educationID:
   }
 
   return (
-    <PageContentWrapper>
-      <PageContentHeader title={education ? `${education.institution} Courses` : "Courses"} buttonOne={buttonOne} buttonFour={buttonFour} />
-      <Table
-        columns={columns}
-        rows={rows}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
-        columnWidths={columnWidths}
-      />
-
-      {
-        isFormOpen &&
-        <InputForm
-          title={formProps.title}
-          buttonLabel={formProps.buttonLabel}
-          onSubmit={formProps.onSubmit}
-          inputRows={formProps.inputRows}
-          onClose={formProps.onClose}
+    <Suspense fallback={<LoadingSpinner />}>
+      <PageContentWrapper>
+        <PageContentHeader title={education ? `${education.institution} Courses` : "Courses"} buttonOne={buttonOne} buttonFour={buttonFour} />
+        <Table
+          columns={columns}
+          rows={rows}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          columnWidths={columnWidths}
         />
-      }
-    </PageContentWrapper>
+
+        {
+          isFormOpen &&
+          <InputForm
+            title={formProps.title}
+            buttonLabel={formProps.buttonLabel}
+            onSubmit={formProps.onSubmit}
+            inputRows={formProps.inputRows}
+            onClose={formProps.onClose}
+          />
+        }
+      </PageContentWrapper>
+    </Suspense>
   );
 }

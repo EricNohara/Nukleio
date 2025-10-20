@@ -2,7 +2,7 @@
 
 import { ExternalLink } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 
 import { ExternalLinkButton } from "@/app/components/Buttons/Buttons";
 import InputForm from "@/app/components/InputForm/InputForm";
@@ -12,6 +12,7 @@ import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
 import { IEducationInput, IEducationUserInput, } from "@/app/interfaces/IEducation";
 import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
@@ -319,26 +320,28 @@ export default function EducationPage() {
   }
 
   return (
-    <PageContentWrapper>
-      <PageContentHeader title="Education" buttonOne={buttonOne} />
-      <Table
-        columns={columns}
-        rows={rows}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
-        columnWidths={columnWidths}
-      />
-
-      {
-        isFormOpen &&
-        <InputForm
-          title={formProps.title}
-          buttonLabel={formProps.buttonLabel}
-          onSubmit={formProps.onSubmit}
-          inputRows={formProps.inputRows}
-          onClose={formProps.onClose}
+    <Suspense fallback={<LoadingSpinner />}>
+      <PageContentWrapper>
+        <PageContentHeader title="Education" buttonOne={buttonOne} />
+        <Table
+          columns={columns}
+          rows={rows}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          columnWidths={columnWidths}
         />
-      }
-    </PageContentWrapper>
+
+        {
+          isFormOpen &&
+          <InputForm
+            title={formProps.title}
+            buttonLabel={formProps.buttonLabel}
+            onSubmit={formProps.onSubmit}
+            inputRows={formProps.inputRows}
+            onClose={formProps.onClose}
+          />
+        }
+      </PageContentWrapper>
+    </Suspense>
   );
 }

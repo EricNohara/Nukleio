@@ -2,7 +2,7 @@
 
 import { RefreshCcw } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 
 import ApiKeyDisplay from "@/app/components/ApiKeyDisplay/ApiKeyDisplay";
 import InputForm from "@/app/components/InputForm/InputForm";
@@ -11,6 +11,7 @@ import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentW
 import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
 import { IApiKeyInternal, IApiKeyInternalInput } from "@/app/interfaces/IApiKey";
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
@@ -218,32 +219,34 @@ export default function ConnectPage() {
   }
 
   return (
-    <PageContentWrapper>
-      <PageContentHeader title="Connect" buttonOne={buttonOne} buttonFour={buttonFour} />
-      <Table
-        columns={columns}
-        rows={rows}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
-        columnWidths={columnWidths}
-        editButtonOverride={RefreshCcw}
-      />
-
-      {
-        isFormOpen &&
-        <InputForm
-          title={formProps.title}
-          buttonLabel={formProps.buttonLabel}
-          onSubmit={formProps.onSubmit}
-          inputRows={formProps.inputRows}
-          onClose={formProps.onClose}
+    <Suspense fallback={<LoadingSpinner />}>
+      <PageContentWrapper>
+        <PageContentHeader title="Connect" buttonOne={buttonOne} buttonFour={buttonFour} />
+        <Table
+          columns={columns}
+          rows={rows}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          columnWidths={columnWidths}
+          editButtonOverride={RefreshCcw}
         />
-      }
 
-      {
-        keyToDisplay &&
-        <ApiKeyDisplay keyDescription={keyToDisplay} onClose={onApiKeyDisplayClose} />
-      }
-    </PageContentWrapper>
+        {
+          isFormOpen &&
+          <InputForm
+            title={formProps.title}
+            buttonLabel={formProps.buttonLabel}
+            onSubmit={formProps.onSubmit}
+            inputRows={formProps.inputRows}
+            onClose={formProps.onClose}
+          />
+        }
+
+        {
+          keyToDisplay &&
+          <ApiKeyDisplay keyDescription={keyToDisplay} onClose={onApiKeyDisplayClose} />
+        }
+      </PageContentWrapper>
+    </Suspense>
   );
 }
