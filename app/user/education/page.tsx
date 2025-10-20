@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 import { ExternalLinkButton } from "@/app/components/Buttons/Buttons";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
@@ -12,7 +13,6 @@ import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
 import { IEducationInput, IEducationUserInput, } from "@/app/interfaces/IEducation";
 import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
-import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 

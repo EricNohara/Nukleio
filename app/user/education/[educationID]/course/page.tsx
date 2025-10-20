@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, use, Suspense } from "react";
 
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
@@ -10,7 +11,6 @@ import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
 import { ICourseInput } from "@/app/interfaces/ICourse";
 import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
-import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
 import PageContentHeader, { IButton } from "../../../../components/PageContentHeader/PageContentHeader";
 
