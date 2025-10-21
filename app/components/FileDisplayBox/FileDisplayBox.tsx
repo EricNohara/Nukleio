@@ -1,6 +1,8 @@
 import { Pencil, Trash } from "lucide-react";
 import Image from "next/image";
 
+import { headerFont } from "@/app/localFonts";
+
 import styles from "./FileDisplayBox.module.css";
 import { AsyncButtonWrapper } from "../AsyncButtonWrapper/AsyncButtonWrapper";
 import { ButtonOne, DeleteButton } from "../Buttons/Buttons";
@@ -20,11 +22,11 @@ export default function FileDisplayBox({ imageUrl, alt, pdfUrl, uploadedItemName
     return (
         <div className={styles.container}>
             <div className={styles.badgeContainer}>
-                <div className={styles.badge}>Uploaded</div>
+                <div className={`${styles.badge} ${headerFont.className}`}>Uploaded</div>
             </div>
             <div className={styles.contentContainer}>
                 <div className={styles.headerContainer}>
-                    <h1 className={styles.title}>{`Uploaded ${uploadedItemName}`}</h1>
+                    <h1 className={`${styles.title} ${headerFont.className}`}>{`Uploaded ${uploadedItemName}`}</h1>
                     <h2 className={styles.subTitle}>Click buttons to edit or delete</h2>
                 </div>
                 {

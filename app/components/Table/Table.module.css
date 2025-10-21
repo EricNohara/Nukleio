@@ -60,3 +60,9 @@
   width: 7rem;
   min-width: 7rem;
 }
+
+.noData {
+  font-style: italic;
+  padding: 1rem 0;
+  color: var(--table-head-txt);
+}

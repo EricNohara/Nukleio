@@ -4,6 +4,7 @@ import { House, File, Briefcase, GraduationCap, Rocket, Brain, Cable, Settings, 
 import { useRouter, usePathname } from "next/navigation";
 
 import { useAuth } from "@/app/context/AuthProvider";
+import { headerFont } from "@/app/localFonts";
 
 import styles from "./AppNav.module.css";
 import TitleLogo from "../../TitleLogo/TitleLogo";
@@ -62,7 +63,7 @@ export default function AppNav() {
                         <button
                             key={i}
                             onClick={() => handleClick(item)}
-                            className={`${styles.navButton} ${isActive ? styles.activeNavButton : ""}`}
+                            className={`${styles.navButton} ${isActive ? styles.activeNavButton : ""} ${headerFont.className}`}
                         >
                             <Icon />
                             {item.label}
@@ -72,11 +73,11 @@ export default function AppNav() {
                 )}
             </div>
             <div className={styles.navSection}>
-                <button onClick={() => router.push("/user/settings")} className={styles.navButton}>
+                <button onClick={() => router.push("/user/settings")} className={`${styles.navButton} ${headerFont.className}`}>
                     <Settings />
                     Settings
                 </button>
-                <button onClick={handleSignOut} className={styles.navButton}>
+                <button onClick={handleSignOut} className={`${styles.navButton} ${headerFont.className}`}>
                     <LogOut />
                     Sign Out
                 </button>

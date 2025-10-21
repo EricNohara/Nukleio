@@ -4,10 +4,12 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+
 import { ButtonOne, ButtonTwo } from "./components/Buttons/Buttons";
 import Navigation from "./components/Navigation/Navigation";
 import { useAuth } from "./context/AuthProvider";
 import styles from "./LandingPage.module.css";
+import { titleFont } from "./localFonts";
 
 export default function LandingPage() {
   const { isLoggedIn } = useAuth();
@@ -38,7 +40,7 @@ export default function LandingPage() {
       </div>
 
       <div className={styles.content}>
-        <h1 className={styles.hero}>
+        <h1 className={`${styles.hero} ${titleFont.className}`}>
           Portfolio management <span>simplified</span>
         </h1>
         <div className={styles.subtextContainer}>
@@ -51,7 +53,7 @@ export default function LandingPage() {
         </div>
         <div className={styles.ctaButtonsContainer}>
           <ButtonOne onClick={handleSignUp}>Get Started Free</ButtonOne>
-          <ButtonTwo>Read Docs</ButtonTwo>
+          <ButtonTwo onClick={() => router.push("/documentation/doc")}>Read Docs</ButtonTwo>
         </div>
       </div>
     </>

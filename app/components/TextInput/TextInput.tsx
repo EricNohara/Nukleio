@@ -2,6 +2,8 @@
 
 import React, { ChangeEvent } from "react";
 
+import { headerFont } from "@/app/localFonts";
+
 import styles from "./TextInput.module.css";
 
 interface TextInputProps {
@@ -31,7 +33,7 @@ export default function TextInput({
 }: TextInputProps) {
     return (
         <div className={styles.inputDiv}>
-            <label className={`${styles.inputLabel} ${isInInputForm && styles.inputFormInputLabel}`} htmlFor={name}>
+            <label className={`${styles.inputLabel} ${isInInputForm && styles.inputFormInputLabel} ${headerFont.className}`} htmlFor={name}>
                 {label}
             </label>
             {type === "textarea" ?

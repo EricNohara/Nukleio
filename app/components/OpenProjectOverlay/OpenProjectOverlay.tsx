@@ -2,10 +2,11 @@ import { GitBranch, Link2 } from "lucide-react";
 import Image from "next/image";
 
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
+import { headerFont } from "@/app/localFonts";
 import formatDate from "@/utils/general/formatDate";
 
 import styles from "./OpenProjectOverlay.module.css";
-import { ExitButton, ButtonOne } from "../Buttons/Buttons";
+import { DeleteButton, ButtonOne } from "../Buttons/Buttons";
 import inputFormStyles from "../InputForm/InputForm.module.css";
 import InputFormHeader from "../InputForm/InputFormHeader/InputFormHeader";
 import Overlay from "../Overlay/Overlay";
@@ -48,7 +49,7 @@ export default function OpenProjectOverlay({ project, index, onEdit, onDelete, o
                         </div>
                         <div className={styles.info}>
                             <div>
-                                <h3 className={styles.date}>{getFormattedDate()}</h3>
+                                <h3 className={`${styles.date} ${headerFont.className}`}>{getFormattedDate()}</h3>
                                 <ul className={styles.csvList}>
                                     <li>
                                         <p className={`${!project.languages_used || project.languages_used.length === 0 ? styles.csvNone : ""}`}>
@@ -100,7 +101,7 @@ export default function OpenProjectOverlay({ project, index, onEdit, onDelete, o
                     </div>
                     <div className={styles.buttonContainer}>
                         <ButtonOne onClick={() => onEdit(index)}>Edit</ButtonOne>
-                        <ExitButton className={styles.deleteBtn} onClick={() => onDelete(index)}>Delete</ExitButton>
+                        <DeleteButton className={styles.deleteBtn} onClick={() => onDelete(index)}>Delete</DeleteButton>
                     </div>
                 </div>
             </div>

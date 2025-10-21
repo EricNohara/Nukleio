@@ -4,6 +4,7 @@
   height: 250px;
   overflow: hidden;
   border-radius: var(--global-border-radius);
+  border: 2px solid var(--project-card-hover);
 }
 
 .thumbnail {

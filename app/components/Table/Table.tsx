@@ -1,6 +1,8 @@
 import { Trash, Pencil } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
+import { headerFont } from "@/app/localFonts";
+
 import styles from "./Table.module.css";
 import { AsyncButtonWrapper } from "../AsyncButtonWrapper/AsyncButtonWrapper";
 import { EditButton, DeleteButton } from "../Buttons/Buttons";
@@ -32,7 +34,7 @@ export default function Table({
                         {columns.map((col, i) => (
                             <th
                                 key={i}
-                                className={styles.th}
+                                className={`${styles.th} ${headerFont.className}`}
                                 style={columnWidths ? { width: `${columnWidths[i]}%` } : undefined}
                             >
                                 {col}
@@ -42,41 +44,45 @@ export default function Table({
                     </tr>
                 </thead>
                 <tbody>
-                    {rows.map((row, i) => (
-                        <tr key={i} className={styles.tr}>
-                            {columns.map((col, j) => (
-                                <td
-                                    key={col}
-                                    className={styles.td}
-                                    style={columnWidths ? { width: `${columnWidths[j]}%` } : undefined}
-                                >
-                                    {row[col]}
-                                </td>
-                            ))}
-                            <td className={styles.actions}>
-                                <div className={styles.actionsContent}>
+                    {
+                        rows.length === 0 ? (
+                            <tr><td className={styles.noData}>No data to display</td></tr>
+                        ) : (
+                            rows.map((row, i) => (
+                                <tr key={i} className={styles.tr}>
+                                    {columns.map((col, j) => (
+                                        <td
+                                            key={col}
+                                            className={styles.td}
+                                            style={columnWidths ? { width: `${columnWidths[j]}%` } : undefined}
+                                        >
+                                            {row[col]}
+                                        </td>
+                                    ))}
+                                    <td className={styles.actions}>
+                                        <div className={styles.actionsContent}>
 
-                                    <EditButton onClick={() => handleEdit(i)}>
-                                        {(() => {
-                                            const EditIcon = editButtonOverride ?? Pencil;
-                                            return <EditIcon size={20} strokeWidth={2} />;
-                                        })()}
-                                    </EditButton>
-                                    <AsyncButtonWrapper
-                                        button={
-                                            <DeleteButton >
+                                            <EditButton onClick={() => handleEdit(i)}>
                                                 {(() => {
-                                                    const DeleteIcon = deleteButtonOverride ?? Trash;
-                                                    return <DeleteIcon size={20} strokeWidth={2} />;
+                                                    const EditIcon = editButtonOverride ?? Pencil;
+                                                    return <EditIcon size={20} strokeWidth={2} />;
                                                 })()}
-                                            </DeleteButton>
-                                        }
-                                        onClick={() => handleDelete(i)}
-                                    />
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
+                                            </EditButton>
+                                            <AsyncButtonWrapper
+                                                button={
+                                                    <DeleteButton >
+                                                        {(() => {
+                                                            const DeleteIcon = deleteButtonOverride ?? Trash;
+                                                            return <DeleteIcon size={20} strokeWidth={2} />;
+                                                        })()}
+                                                    </DeleteButton>
+                                                }
+                                                onClick={() => handleDelete(i)}
+                                            />
+                                        </div>
+                                    </td>
+                                </tr>
+                            )))}
                 </tbody>
             </table>
         </div>

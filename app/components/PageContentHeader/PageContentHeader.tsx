@@ -1,3 +1,5 @@
+import { headerFont } from "@/app/localFonts";
+
 import styles from "./PageContentHeader.module.css";
 import { AsyncButtonWrapper } from "../AsyncButtonWrapper/AsyncButtonWrapper";
 import { ButtonOne, ButtonFour } from "../Buttons/Buttons";
@@ -17,7 +19,7 @@ export interface IPageContentHeaderProps {
 export default function PageContentHeader({ title, buttonOne, buttonFour }: IPageContentHeaderProps) {
     return (
         <div className={styles.container}>
-            <h1 className={styles.title}>{title}</h1>
+            <h1 className={`${styles.title} ${headerFont.className}`}>{title}</h1>
             <div className={styles.buttons}>
                 {buttonFour &&
                     ((buttonFour.isAsync ?? false) ?

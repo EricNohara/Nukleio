@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
+import { headerFont } from "@/app/localFonts";
 import formatDate from "@/utils/general/formatDate";
 
 import styles from "./ProjectCard.module.css";
@@ -50,7 +51,7 @@ export default function ProjectCard({ project, onEdit, onDelete, onOpen, index, 
         >
             <div className={styles.headerContainer}>
                 <div className={styles.titleContainer}>
-                    <h2 className={styles.title}>{project.name}</h2>
+                    <h2 className={`${styles.title} ${headerFont.className}`}>{project.name}</h2>
                 </div>
                 <div className={styles.dropdownWrapper} ref={menuRef}>
                     <button
@@ -65,15 +66,15 @@ export default function ProjectCard({ project, onEdit, onDelete, onOpen, index, 
                     </button>
                     {isExpanded && (
                         <div className={styles.dropdownMenu}>
-                            <button className={styles.dropdownButton} onClick={() => onOpen(index)}>
+                            <button className={`${styles.dropdownButton} ${headerFont.className}`} onClick={() => onOpen(index)}>
                                 Open
                                 <Maximize strokeWidth={1.5} />
                             </button>
-                            <button className={styles.dropdownButton} onClick={() => onEdit(index)}>
+                            <button className={`${styles.dropdownButton} ${headerFont.className}`} onClick={() => onEdit(index)}>
                                 Edit
                                 <Pencil strokeWidth={1.5} />
                             </button>
-                            <button className={styles.dropdownButton} onClick={async () => await onDelete(index)}>
+                            <button className={`${styles.dropdownButton} ${headerFont.className}`} onClick={async () => await onDelete(index)}>
                                 Delete
                                 <Trash strokeWidth={1.5} />
                             </button>
@@ -89,7 +90,7 @@ export default function ProjectCard({ project, onEdit, onDelete, onOpen, index, 
                     fill
                 />
             </div>
-            <p className={styles.date}>{getFormattedDate()}</p>
+            <i className={`${styles.date} ${headerFont.className}`}>{getFormattedDate()}</i>
         </div>
     );
 }

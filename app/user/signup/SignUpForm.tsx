@@ -6,6 +6,7 @@ import { useState } from "react";
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
 import TextInput from "@/app/components/TextInput/TextInput";
+import { headerFont } from "@/app/localFonts";
 
 import styles from "../login/LoginPage.module.css";
 
@@ -109,7 +110,7 @@ export default function SignUpForm() {
       <div className={styles.formFooterContainer}>
         <div className={styles.dividerContainer}>
           <div className={styles.divider} />
-          <p className={styles.inputLabel}>Other</p>
+          <p className={`${styles.inputLabel} ${headerFont.className}`}>Other</p>
           <div className={styles.divider} />
         </div>
         <div className={styles.otherContent}>

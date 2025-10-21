@@ -40,6 +40,7 @@
 .inputLabel {
   color: var(--login-txt-2);
   font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .inputFormInputLabel {
