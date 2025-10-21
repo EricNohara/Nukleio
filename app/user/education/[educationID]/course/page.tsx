@@ -4,10 +4,12 @@ import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/L
 
 import CoursesPage from "./CoursesPage";
 
-export default function CoursesPageWrapper({ params, }: { params: { educationID: string }; }) {
+export default async function CoursesPageWrapper({ params, }: { params: Promise<{ educationID: string }> }) {
+  const { educationID } = await params;
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <CoursesPage educationID={params.educationID} />
+      <CoursesPage educationID={educationID} />
     </Suspense>
   );
 }
