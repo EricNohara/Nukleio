@@ -73,7 +73,7 @@ export default function AppNav() {
                 )}
             </div>
             <div className={styles.navSection}>
-                <button onClick={() => router.push("/user/settings")} className={`${styles.navButton} ${headerFont.className}`}>
+                <button onClick={() => router.push("/user/settings/app")} className={`${styles.navButton} ${headerFont.className}`}>
                     <Settings />
                     Settings
                 </button>

@@ -1,5 +1,6 @@
 import { LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { headerFont } from "@/app/localFonts";
 
 import styles from "./ButtonListPopup.module.css";
 
@@ -40,7 +41,7 @@ export default function ButtonListPopup({ buttons }: IButtonListPopupProps) {
                     onClick={() => handleClick(button)}
                 >
                     <button.icon strokeWidth={1} />
-                    <p className={styles.buttonName}>{button.name}</p>
+                    <p className={`${styles.buttonName} ${headerFont.className}`}>{button.name}</p>
                 </button>
             ))}
         </div >

@@ -1,0 +1,43 @@
+.settingsNav {
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+  height: 100%;
+  width: 200px;
+  margin: 0;
+  border-right: 2px solid var(--settings-border);
+}
+
+.settingsNavList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navItem {
+  padding: 1rem;
+  color: var(--search-txt);
+  font-weight: bold;
+
+  transition: 0.2s ease;
+}
+
+.navItem:hover {
+  cursor: pointer;
+  background-color: var(--popup-hover);
+  color: var(--page-txt-1);
+  transition: 0.2s ease;
+}
+
+.activeItem {
+  background-color: var(--popup-hover);
+  color: var(--page-txt-1);
+}
+
+/* settings content container */
+.settingsContentWithNav {
+  width: 100%;
+  height: 100%;
+  border-top: 2px solid var(--settings-border);
+  display: flex;
+}

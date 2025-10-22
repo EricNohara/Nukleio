@@ -5,6 +5,7 @@ import { UserCog, SlidersHorizontal, LogOut } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import { headerFont } from "@/app/localFonts";
 
 import { useAuth } from "@/app/context/AuthProvider";
 
@@ -86,7 +87,7 @@ export default function UserDropdown() {
                     alt="User profile picture"
                     className={styles.avatar}
                 />
-                <p className={styles.name}>{userDropdownInfo.name ? userDropdownInfo.name : "Default User"}</p>
+                <p className={`${styles.name} ${headerFont.className}`}>{userDropdownInfo.name ? userDropdownInfo.name : "Default User"}</p>
                 <ChevronDown />
             </button>
             {isOpen && (

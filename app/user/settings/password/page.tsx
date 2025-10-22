@@ -3,14 +3,13 @@
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
 import SettingsContentWithNav from "@/app/components/Navigation/SettingsNav/SettingsContentWithNav";
-import EditUserForm from "./EditUserForm";
 
-export default function UserSettingsPage() {
+export default function PasswordSettingsPage() {
     return (
         <PageContentWrapper>
             <PageContentHeader title="Settings" />
-            <SettingsContentWithNav activeSetting="User Settings">
-                <EditUserForm />
+            <SettingsContentWithNav activeSetting="Password">
+                <p>Password Settings...</p>
             </SettingsContentWithNav>
         </PageContentWrapper>
     );

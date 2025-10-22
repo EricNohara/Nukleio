@@ -27,6 +27,7 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" crossOrigin="use-credentials" />
         <link rel="preload" href="/fonts/baseFont.woff2" as="font" type="font/woff2" crossOrigin="" />
         <link rel="preload" href="/fonts/titleFont.woff2" as="font" type="font/woff2" crossOrigin="" />
+        <link rel="preload" href="/fonts/headerFont.woff2" as="font" type="font/woff2" crossOrigin="" />
         <meta name="theme-color" content="#FFFFFF"></meta>
       </head>
       <body>
