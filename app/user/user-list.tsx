@@ -68,7 +68,7 @@ export default function UserList({ user }: { user: User | null }) {
 
   const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    router.push("/user/edit");
+    router.push("/user/settings/user");
   };
 
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {

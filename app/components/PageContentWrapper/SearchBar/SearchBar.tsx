@@ -28,7 +28,7 @@ const DEFAULT_SUGGESTIONS: ISuggestion[] = [
     { label: "Projects Page", path: "/user/projects" },
     { label: "Skills Page", path: "/user/skills" },
     { label: "Connect Page", path: "/user/connect" },
-    { label: "User Settings", path: "/user/settings" },
+    { label: "User Settings", path: "/user/settings/user" },
     { label: "App Settings", path: "/user/settings/app" },
 ]
 

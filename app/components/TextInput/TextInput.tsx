@@ -17,6 +17,7 @@ interface TextInputProps {
     isInInputForm?: boolean;
     textAreaRows?: number;
     disabled?: boolean;
+    className?: string;
 }
 
 export default function TextInput({
@@ -29,16 +30,19 @@ export default function TextInput({
     required = false,
     isInInputForm = false,
     textAreaRows = 4,
-    disabled = false
+    disabled = false,
+    className = ""
 }: TextInputProps) {
+    const inputClass = `${isInInputForm ? styles.inputFormInput : styles.textInput} ${className}`;
+
     return (
         <div className={styles.inputDiv}>
             <label className={`${styles.inputLabel} ${isInInputForm && styles.inputFormInputLabel} ${headerFont.className}`} htmlFor={name}>
-                {label}
+                {required ? `${label} *` : label}
             </label>
             {type === "textarea" ?
                 <textarea
-                    className={isInInputForm ? styles.inputFormInput : styles.textInput}
+                    className={inputClass}
                     id={name}
                     name={name}
                     value={value}
@@ -50,7 +54,7 @@ export default function TextInput({
                 />
                 :
                 <input
-                    className={isInInputForm ? styles.inputFormInput : styles.textInput}
+                    className={inputClass}
                     id={name}
                     name={name}
                     value={value}
