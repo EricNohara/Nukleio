@@ -1,8 +1,9 @@
 "use client";
 
-import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
-import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
 import SettingsContentWithNav from "@/app/components/Navigation/SettingsNav/SettingsContentWithNav";
+import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
+import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
+
 import EditUserForm from "./EditUserForm";
 
 export default function UserSettingsPage() {

@@ -1,6 +1,8 @@
-import styles from "./SettingsNav.module.css";
-import { headerFont } from "@/app/localFonts";
 import { useRouter } from "next/navigation";
+
+import { headerFont } from "@/app/localFonts";
+
+import styles from "./SettingsNav.module.css";
 
 interface ISettingsLink {
     name: string;

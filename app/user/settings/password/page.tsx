@@ -1,8 +1,8 @@
 "use client";
 
-import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
-import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
 import SettingsContentWithNav from "@/app/components/Navigation/SettingsNav/SettingsContentWithNav";
+import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
+import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 
 export default function PasswordSettingsPage() {
     return (

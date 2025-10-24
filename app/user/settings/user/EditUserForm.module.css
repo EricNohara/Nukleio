@@ -21,6 +21,7 @@
 
 .formSubtitle {
   margin: 0;
+  margin-top: 0.25rem;
   font-size: 0.9rem;
   font-weight: normal;
   color: var(--search-txt);

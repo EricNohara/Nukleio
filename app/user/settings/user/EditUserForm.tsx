@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useUser } from "@/app/context/UserProvider";
-import styles from "./EditUserForm.module.css";
-import { ButtonOne, ButtonFour } from "@/app/components/Buttons/Buttons";
-import { headerFont } from "@/app/localFonts";
-import TextInput from "@/app/components/TextInput/TextInput";
-import IUser from "@/app/interfaces/IUser";
+
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
+import { ButtonOne, ButtonFour } from "@/app/components/Buttons/Buttons";
+import TextInput from "@/app/components/TextInput/TextInput";
+import { useUser } from "@/app/context/UserProvider";
+import IUser from "@/app/interfaces/IUser";
+import { headerFont } from "@/app/localFonts";
+
+import styles from "./EditUserForm.module.css";
+
 
 interface IInput {
     name: string;
@@ -50,7 +53,7 @@ const EMPTY_USER: IBasicUserInfo = {
 
 export default function EditUserForm() {
     const [formData, setFormData] = useState<IBasicUserInfo>(EMPTY_USER);
-    const [isEditing, setIsEditing] = useState<Boolean>(false);
+    const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const { state, dispatch } = useUser();
 

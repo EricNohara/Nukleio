@@ -95,6 +95,8 @@ body {
 
   /* settings */
   --settings-border: #d1d1d1;
+  --settings-switch-bg: #dbdbdb;
+  --settings-input-bg: #666666;
 
   /* sizes */
   --global-border-radius: 10px;

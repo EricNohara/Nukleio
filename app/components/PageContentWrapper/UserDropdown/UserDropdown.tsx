@@ -5,9 +5,10 @@ import { UserCog, SlidersHorizontal, LogOut } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { headerFont } from "@/app/localFonts";
 
 import { useAuth } from "@/app/context/AuthProvider";
+import { headerFont } from "@/app/localFonts";
+
 
 import styles from "./UserDropdown.module.css";
 import { IButtonProp } from "../../ButtonListPopup/ButtonListPopup";
