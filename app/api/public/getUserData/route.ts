@@ -216,7 +216,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   } finally {
     // add a log and update last used field for api key if we know the user id
-    if (userId) {
+    if (keyDescription && keyDescription !== "Nukleio Super Key" && userId) {
       try {
         // create the log
         const respondedAt = new Date().toISOString();
