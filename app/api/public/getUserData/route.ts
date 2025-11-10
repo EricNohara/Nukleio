@@ -19,9 +19,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     // get the api key from the authorization header
     apiKey = req.headers.get("Authorization")?.split(" ")[1];
-
-    console.log(apiKey);
-
     if (!apiKey) {
       statusCode = 401;
       return NextResponse.json(
@@ -45,8 +42,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     keyDescription = data[0].description;
-
-    console.log(keyDescription);
 
     if (keyDescription === "Nukleio Super Key") {
       // if nukleio super key get user id from header
