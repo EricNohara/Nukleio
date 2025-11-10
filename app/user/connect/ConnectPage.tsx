@@ -14,11 +14,6 @@ import { IApiKeyInternal, IApiKeyInternalInput } from "@/app/interfaces/IApiKey"
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
-const buttonFour: IButton = {
-    name: "API Docs",
-    onClick: () => { }
-}
-
 const columns = ["Description", "Created", "Expires", "Last Used"];
 const columnWidths = [40, 20, 20, 20];
 
@@ -34,6 +29,11 @@ export default function ConnectPage() {
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
     const router = useRouter();
+
+    const buttonFour: IButton = {
+        name: "API Docs",
+        onClick: () => { router.push("/documentation/doc"); }
+    }
 
     // used to open given key if inputted as search param
     useEffect(() => {

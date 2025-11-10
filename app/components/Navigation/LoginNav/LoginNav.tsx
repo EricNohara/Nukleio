@@ -7,10 +7,10 @@ export default function LoginNav() {
     return (
         <nav className={styles.loginNav}>
             <ul className={`${landingStyles.landingLinks} ${headerFont.className}`}>
-                <li><a href="">Product</a></li>
-                <li><a href="">Docs</a></li>
-                <li><a href="">Pricing</a></li>
-                <li><a href="">Contact</a></li>
+                <li className={headerFont.className}><a href="/documentation/product">Product</a></li>
+                <li className={headerFont.className}><a href="/documentation/doc">Docs</a></li>
+                <li className={headerFont.className}><a href="/documentation/pricing">Pricing</a></li>
+                <li className={headerFont.className}><a href="/documentation/contact">Contact</a></li>
             </ul>
         </nav>
     );

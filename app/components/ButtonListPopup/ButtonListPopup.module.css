@@ -7,8 +7,7 @@
   background-color: var(--popup-bg);
   color: var(--page-txt-1);
   border-radius: var(--global-border-radius);
-  width: 300px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .button {
