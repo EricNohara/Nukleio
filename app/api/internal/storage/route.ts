@@ -115,7 +115,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
 
       return NextResponse.json(
-        { message: "Upload successful" },
+        { publicURL: publicURL.publicUrl },
         { status: 201 }
       );
     } else {

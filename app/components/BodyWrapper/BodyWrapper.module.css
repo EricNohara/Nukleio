@@ -1,0 +1,17 @@
+/* Layout Styling */
+.landing {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(#131624 0%, #142132 33%, #000000 60%);
+}
+
+.app {
+  flex-direction: row;
+  background-color: var(--page-bg);
+}
+
+.landing,
+.app {
+  height: 100vh;
+  width: 100vw;
+}

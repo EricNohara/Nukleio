@@ -1,0 +1,16 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: white;
+  transition: 0.2s ease;
+}
+
+.container > h1 {
+  font-size: var(--title-font-size);
+}
+
+.container:hover {
+  cursor: pointer;
+  transform: scale(0.9);
+}

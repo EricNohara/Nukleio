@@ -1,13 +1,17 @@
 "use client";
 
-import { Typography, Container, Button, Box } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { useAuth } from "./context/AuthProvider";
 
-export default function Home() {
+import { ButtonOne, ButtonTwo } from "./components/Buttons/Buttons";
+import Navigation from "./components/Navigation/Navigation";
+import { useAuth } from "./context/AuthProvider";
+import styles from "./LandingPage.module.css";
+import { titleFont } from "./localFonts";
+
+export default function LandingPage() {
   const { isLoggedIn } = useAuth();
   const router = useRouter();
 
@@ -17,68 +21,41 @@ export default function Home() {
     }
   }, [isLoggedIn, router]);
 
+  const handleSignUp = () => {
+    router.push("/user/signup")
+  }
+
   return (
-    <Container
-      maxWidth="lg"
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "2.5rem",
-        backgroundColor: "#f5f5f5",
-        borderRadius: "1rem",
-      }}
-    >
-      <Typography
-        variant="h2"
-        component="h2"
-        gutterBottom
-        sx={{ fontWeight: "bold" }}
-      >
-        PORTFOLIO WEBSITE MANAGER
-      </Typography>
-      <Typography
-        variant="h5"
-        component="h2"
-        gutterBottom
-        sx={{
-          color: "#616161",
-          fontStyle: "italic",
-          textAlign: "center",
-          marginBottom: "1rem",
-        }}
-      >
-        Effortlessly manage portfolio websites with an all-in-one platform.
-        Update information in one place. Automatically synced to connected
-        websites through a provided API, eliminating manual updates.
-      </Typography>
-      <Typography
-        variant="h5"
-        component="h2"
-        sx={{
-          color: "#616161",
-          textAlign: "center",
-        }}
-      >
-        Powered by Supabase and Next.js, keeping websites up-to-date is simple.
-      </Typography>
-      <Box display="flex" alignItems="center" gap="2rem">
-        <Image src="/images/clouds.png" alt="clouds" width={300} height={300} />
+    <>
+      <Navigation />
+
+      <div className={styles.backgroundImage}>
         <Image
-          src="/images/website.png"
-          alt="website"
-          width={200}
-          height={200}
+          src="/images/home-logo.png"
+          fill
+          alt="Nukleio home page logo"
+          style={{ objectFit: "contain" }}
+          priority
         />
-      </Box>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => router.push("/user/login")}
-        sx={{ fontSize: "1.5rem" }}
-      >
-        Get Started
-      </Button>
-    </Container>
+      </div>
+
+      <div className={styles.content}>
+        <h1 className={`${styles.hero} ${titleFont.className}`}>
+          Portfolio management <span>simplified</span>
+        </h1>
+        <div className={styles.subtextContainer}>
+          <h2 className={styles.subtext}>
+            Update fast, sync across connected sites instantly.
+          </h2>
+          <h2 className={styles.subtext}>
+            Free, fast, and secure API for developers.
+          </h2>
+        </div>
+        <div className={styles.ctaButtonsContainer}>
+          <ButtonOne onClick={handleSignUp}>Get Started Free</ButtonOne>
+          <ButtonTwo onClick={() => router.push("/documentation/doc")}>Read Docs</ButtonTwo>
+        </div>
+      </div>
+    </>
   );
 }

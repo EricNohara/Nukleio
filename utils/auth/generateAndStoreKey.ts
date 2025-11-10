@@ -9,7 +9,7 @@ export async function generateAndStoreKey(
   email: string,
   description: string,
   expires: string | null
-): Promise<{ encryptedKey: string }> {
+) {
   // generate api key
   const apiKey: string = await generateAPIKey(userId, email);
 
@@ -27,8 +27,12 @@ export async function generateAndStoreKey(
     expires,
   };
 
-  const { error } = await supabase.from("api_keys").insert(keyData);
+  const { data, error } = await supabase
+    .from("api_keys")
+    .insert(keyData)
+    .select("description, created, expires")
+    .single();
   if (error) throw new Error("Error inserting API key into database");
 
-  return { encryptedKey };
+  return { key: data };
 }

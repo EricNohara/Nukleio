@@ -1,13 +1,15 @@
 "use client";
 
-import { Container } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import UserList from "./user-list";
+import PageContentWrapper from "../components/PageContentWrapper/PageContentWrapper";
+// import PageContentHeader from "../components/PageContentHeader/PageContentHeader";
 
+// import { IButton } from "../components/PageContentHeader/PageContentHeader";
 
-export default function AccountPage() {
+export default function UserHomePage() {
   const router = useRouter();
 
   const [user, setUser] = useState(null);
@@ -32,11 +34,15 @@ export default function AccountPage() {
     authenticator();
   }, [router]);
 
+  // const buttonOne: IButton = {
+  //   name: "Add Skill",
+  //   onClick: () => { }
+  // }
+
   return (
-    <Container
-      sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-    >
+    <PageContentWrapper>
       <UserList user={user} />
-    </Container>
+      {/* <PageContentHeader title="Skills" buttonOne={buttonOne} /> */}
+    </PageContentWrapper>
   );
 }

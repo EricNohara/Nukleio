@@ -1,0 +1,39 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--page-txt-2);
+  border: none;
+  border-radius: var(--global-border-radius);
+  background-color: inherit;
+  transition: 0.2s ease;
+}
+
+.container:hover {
+  cursor: pointer;
+}
+
+.openContainer {
+  background-color: var(--popup-hover);
+  transition: 0.2s ease;
+  color: var(--page-txt);
+}
+
+.avatar {
+  border-radius: var(--global-border-radius);
+}
+
+.relativeContainer {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.popupContainer {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  z-index: 999;
+  width: 100%;
+}

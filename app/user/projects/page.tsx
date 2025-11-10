@@ -1,34 +1,13 @@
-"use client";
+import { Suspense } from "react";
 
-import { Typography, Button, Container } from "@mui/material";
-import { useRouter } from "next/navigation";
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
-import ProjectsList from "./projects-list";
+import ProjectsPage from "./ProjectsPage";
 
-export default function WorkExperiencePage() {
-  const router = useRouter();
-
+export default function ProjectsPageWrapper() {
   return (
-    <Container maxWidth="lg">
-      <Typography
-        variant="h3"
-        component="h2"
-        className="text-center"
-        fontWeight="bold"
-        marginBottom="5%"
-      >
-        Projects
-      </Typography>
-      <ProjectsList />
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        onClick={() => router.push("/user/projects/add")}
-        fullWidth
-      >
-        Add Projects
-      </Button>
-    </Container>
+    <Suspense fallback={<LoadingSpinner />}>
+      <ProjectsPage />
+    </Suspense>
   );
 }

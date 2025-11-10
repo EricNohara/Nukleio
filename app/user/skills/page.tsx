@@ -1,34 +1,13 @@
-"use client";
+import { Suspense } from "react";
 
-import { Typography, Button, Container } from "@mui/material";
-import { useRouter } from "next/navigation";
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
-import SkillsList from "./skills-list";
+import SkillsPage from "./SkillsPage";
 
-export default function WorkExperiencePage() {
-  const router = useRouter();
-
+export default function SkillsPageWrapper() {
   return (
-    <Container maxWidth="md">
-      <Typography
-        variant="h3"
-        component="h2"
-        className="text-center"
-        fontWeight="bold"
-        marginBottom="5%"
-      >
-        Skills
-      </Typography>
-      <SkillsList />
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        onClick={() => router.push("/user/skills/add")}
-        fullWidth
-      >
-        Add Skills
-      </Button>
-    </Container>
+    <Suspense fallback={<LoadingSpinner />}>
+      <SkillsPage />
+    </Suspense>
   );
 }

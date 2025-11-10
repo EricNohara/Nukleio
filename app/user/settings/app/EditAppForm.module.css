@@ -1,0 +1,84 @@
+.inputForm {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-left: 2rem;
+}
+
+.formHeader {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+  padding: 2rem 0 1rem 0;
+  border-bottom: 2px solid var(--settings-border);
+}
+
+.formTitle {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.formSubtitle {
+  margin: 0;
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: normal;
+  color: var(--search-txt);
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.inputList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* Language dropdown styling */
+.settingItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--settings-switch-bg);
+  border-radius: var(--global-border-radius);
+}
+
+.label {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.settingItem select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-color: var(--settings-input-bg);
+  color: white;
+  border-radius: var(--global-border-radius);
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  width: 300px;
+  position: relative;
+}
+
+.settingItem select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settingItem select option {
+  background-color: var(--settings-input-bg);
+  color: white;
+}

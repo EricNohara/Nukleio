@@ -1,0 +1,9 @@
+.loginNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginNav > div {
+  width: 40%;
+}

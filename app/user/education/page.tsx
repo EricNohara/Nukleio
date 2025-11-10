@@ -1,34 +1,13 @@
-"use client";
+import { Suspense } from "react";
 
-import { Typography, Button, Container } from "@mui/material";
-import { useRouter } from "next/navigation";
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
-import EducationList from "./education-list";
+import EducationPage from "./EducationPage";
 
-export default function WorkExperiencePage() {
-  const router = useRouter();
-
+export default function EducationPageWrapper() {
   return (
-    <Container maxWidth="lg">
-      <Typography
-        variant="h3"
-        component="h2"
-        className="text-center"
-        fontWeight="bold"
-        marginBottom="5%"
-      >
-        Education
-      </Typography>
-      <EducationList />
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        onClick={() => router.push("/user/education/add")}
-        fullWidth
-      >
-        Add Education
-      </Button>
-    </Container>
+    <Suspense fallback={<LoadingSpinner />}>
+      <EducationPage />
+    </Suspense>
   );
 }

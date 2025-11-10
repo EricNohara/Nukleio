@@ -1,0 +1,30 @@
+.horizontalNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 3rem;
+}
+
+.landingLinks {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+}
+
+.landingLinks > li > a {
+  text-decoration: none;
+  font-size: 1.1rem;
+  color: white;
+  transition: 0.2s ease;
+}
+
+.landingLinks > li > a:hover {
+  color: var(--home-txt-3);
+}
+
+.buttonsContainer {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}

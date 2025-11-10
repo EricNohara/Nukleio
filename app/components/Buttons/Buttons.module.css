@@ -1,0 +1,100 @@
+.one,
+.two,
+.three,
+.four {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border: none;
+  border-radius: var(--global-border-radius);
+  color: white;
+  transition: 0.2s ease;
+}
+
+.one:hover,
+.two:hover,
+.three:hover,
+.four:hover {
+  cursor: pointer;
+}
+
+.one {
+  background-color: var(--btn-1);
+}
+
+.one:hover {
+  background-color: var(--btn-1-hover);
+}
+
+.two {
+  background-color: var(--btn-2);
+}
+
+.two:hover {
+  background-color: var(--btn-2-hover);
+}
+
+.three {
+  background-color: var(--btn-3);
+}
+
+.three:hover {
+  background-color: var(--btn-3-hover);
+}
+
+.four {
+  box-shadow: inset 0 0 0 2px var(--btn-4);
+  background-color: inherit;
+  color: var(--btn-4-txt);
+}
+
+.four:hover {
+  background-color: var(--btn-4-hover);
+}
+
+.edit,
+.delete,
+.exit,
+.external {
+  border: none;
+  border-radius: var(--global-border-radius);
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: 0.2s ease;
+}
+
+.edit:hover,
+.delete:hover,
+.exit:hover,
+.external:hover {
+  cursor: pointer;
+}
+
+.edit {
+  background-color: var(--btn-1);
+}
+
+.edit:hover {
+  background-color: var(--btn-1-hover);
+}
+
+.delete,
+.exit {
+  background-color: var(--exit-btn);
+}
+
+.delete:hover,
+.exit:hover {
+  background-color: var(--exit-btn-hover);
+}
+
+.external {
+  background-color: var(--btn-2);
+}
+
+.external:hover {
+  background-color: var(--btn-2-hover);
+}

@@ -1,22 +1,13 @@
-"use client";
+import { Suspense } from "react";
 
-import { Typography, Container } from "@mui/material";
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
-import ConnectList from "./connect-list";
+import ConnectPage from "./ConnectPage";
 
-export default function Page() {
+export default function ConnectPageWrapper() {
   return (
-    <Container maxWidth="md">
-      <Typography
-        variant="h3"
-        component="h2"
-        className="text-center"
-        fontWeight="bold"
-        marginBottom="5%"
-      >
-        Connect to the API
-      </Typography>
-      <ConnectList />
-    </Container>
+    <Suspense fallback={<LoadingSpinner />}>
+      <ConnectPage />
+    </Suspense>
   );
 }

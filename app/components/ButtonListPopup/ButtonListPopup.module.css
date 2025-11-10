@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+  background-color: var(--popup-bg);
+  color: var(--page-txt-1);
+  border-radius: var(--global-border-radius);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: inherit;
+  border: none;
+  width: 100%;
+  padding: 0 1rem;
+  transition: 0.2s ease;
+}
+
+.button:hover {
+  background-color: var(--popup-hover);
+  cursor: pointer;
+}

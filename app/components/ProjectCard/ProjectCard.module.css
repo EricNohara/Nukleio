@@ -1,0 +1,135 @@
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background-color: var(--project-card);
+  border-radius: var(--global-border-radius);
+  margin-right: 1rem;
+  margin-bottom: 1rem;
+  gap: 0.75rem;
+  transition: 0.2s ease;
+}
+
+.cardContainer:hover {
+  background-color: var(--project-card-hover);
+  cursor: pointer;
+}
+
+.cardContainerActive {
+  background-color: var(--project-card-active) !important;
+}
+
+.headerContainer {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.titleContainer {
+  width: 275px;
+  overflow: hidden;
+}
+
+.title {
+  margin: 0;
+  font-weight: bold;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.expandBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: inherit;
+  border: none;
+  border-radius: var(--global-border-radius);
+  color: var(--project-card-date-txt);
+  padding: 0.25rem 0;
+  transition: 0.2s;
+}
+
+.expandBtn:hover {
+  cursor: pointer;
+  background-color: var(--project-card-btn-hover);
+}
+
+.expandBtnActive {
+  background-color: var(--project-card-btn-hover) !important;
+}
+
+.date {
+  margin: 0;
+  color: var(--project-card-date-txt);
+  font-size: 0.8rem;
+}
+
+.thumbnailContainer {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: var(--global-border-radius);
+}
+
+.thumbnail {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* dropdown menu */
+.dropdownWrapper {
+  position: relative;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 2.2rem;
+  right: 0;
+  background-color: var(--project-card);
+  border-radius: var(--global-border-radius);
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  z-index: 10;
+  padding: 0.5rem 0;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.dropdownButton {
+  background: none;
+  border: none;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  color: var(--project-card-date-txt);
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1rem;
+}
+
+.dropdownButton:hover {
+  background-color: var(--project-card-active);
+}
+
+.dropdownWrapper {
+  position: relative;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  background-color: var(--project-list-container);
+  border-radius: var(--global-border-radius);
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  z-index: 10;
+}

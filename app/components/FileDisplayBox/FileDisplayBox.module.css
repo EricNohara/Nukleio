@@ -1,0 +1,83 @@
+.container {
+  position: relative;
+  border: 2px solid var(--file-upload);
+  border-radius: var(--global-border-radius);
+  padding: 2rem;
+  text-align: center;
+  transition: 0.2s ease;
+  background: var(--file-display);
+  color: var(--file-upload-border);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-width: 400px;
+}
+
+.badgeContainer {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+}
+
+.badge {
+  padding: 0.5rem 1rem;
+  background-color: var(--file-uploaded);
+  border-radius: var(--global-border-radius);
+  color: white;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.contentContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  gap: 1.5rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  color: var(--file-upload-label);
+  margin: 0;
+  margin-bottom: 0.25rem;
+}
+
+.subTitle {
+  font-size: 1rem;
+  font-weight: normal;
+  margin: 0;
+}
+
+.buttonsContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.editBtn {
+  padding: 0.5rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewImageContainer {
+  position: relative;
+  width: 90%;
+  height: 350px;
+  overflow: hidden;
+  border-radius: var(--global-border-radius);
+}
+
+.previewImage {
+  object-fit: cover;
+  object-position: center;
+}
