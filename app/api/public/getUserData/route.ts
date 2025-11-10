@@ -43,33 +43,49 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     keyDescription = data[0].description;
 
-    // decrypt the api key
-    const decryptedKey = decrypt(apiKey);
-    if (!decryptedKey || typeof decryptedKey !== "string") {
-      statusCode = 401;
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: statusCode }
-      );
-    }
+    if (keyDescription === "Nukleio Super Key") {
+      // if nukleio super key get user id from header
+      const queryUserId = req.headers.get("X-Target-User-Id");
+      if (!queryUserId) {
+        statusCode = 400;
+        return NextResponse.json(
+          {
+            message:
+              "X-Target-User-Id header is required for Nukleio Super Key",
+          },
+          { status: statusCode }
+        );
+      }
+      userId = queryUserId;
+    } else {
+      // decrypt the api key
+      const decryptedKey = decrypt(apiKey);
+      if (!decryptedKey || typeof decryptedKey !== "string") {
+        statusCode = 401;
+        return NextResponse.json(
+          { message: "Unauthorized" },
+          { status: statusCode }
+        );
+      }
 
-    // validate user's key
-    const isValid = await validateKey(decryptedKey, data[0].hashed_key);
-    if (!isValid) {
-      statusCode = 401;
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: statusCode }
-      );
-    }
+      // validate user's key
+      const isValid = await validateKey(decryptedKey, data[0].hashed_key);
+      if (!isValid) {
+        statusCode = 401;
+        return NextResponse.json(
+          { message: "Unauthorized" },
+          { status: statusCode }
+        );
+      }
 
-    userId = data[0].user_id;
-    if (!userId) {
-      statusCode = 404;
-      return NextResponse.json(
-        { message: "User id not found" },
-        { status: statusCode }
-      );
+      userId = data[0].user_id;
+      if (!userId) {
+        statusCode = 404;
+        return NextResponse.json(
+          { message: "User id not found" },
+          { status: statusCode }
+        );
+      }
     }
 
     // get and clean information to add to the userInfo super object that is returned to the user
