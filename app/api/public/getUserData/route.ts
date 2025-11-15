@@ -43,9 +43,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     keyDescription = data[0].description;
 
-    console.log(keyDescription);
-    console.log(apiKey);
-
     if (keyDescription === "Nukleio Super Key") {
       // if nukleio super key get user id from header
       const queryUserId = req.headers.get("X-Target-User-Id");
