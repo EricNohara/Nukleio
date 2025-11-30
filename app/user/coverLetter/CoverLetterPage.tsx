@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 
-import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
-import styles from "./CoverLetterPage.module.css";
-
-import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
-import TextInput from "@/app/components/TextInput/TextInput";
 import LoadingMessageSpinner from "@/app/components/LoadingMessageSpinner/LoadingMessageSpinner";
-import { cacheDraft, cleanupDraftCache, getJobCacheKey, loadCachedDraft } from "@/utils/coverLetter/coverLetterCache";
+import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
+import TextInput from "@/app/components/TextInput/TextInput";
+import { cacheDraft, cleanupDraftCache, loadCachedDraft } from "@/utils/coverLetter/coverLetterCache";
+
+import styles from "./CoverLetterPage.module.css";
+import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
 export default function CoverLetterPage() {
     const [userId, setUserId] = useState<string>("");

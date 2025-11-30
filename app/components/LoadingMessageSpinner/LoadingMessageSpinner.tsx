@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PrimaryLoadingSpinner } from "../AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
+
 import styles from "./LoadingMessageSpinner.module.css";
+import { PrimaryLoadingSpinner } from "../AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
 interface Props {
     messages: string[]; // list of messages to cycle through
