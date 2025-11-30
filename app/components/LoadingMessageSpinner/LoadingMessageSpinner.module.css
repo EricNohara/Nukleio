@@ -1,0 +1,29 @@
+.wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem; /* space between spinner and text */
+  width: 100%;
+  height: 100%;
+}
+
+.message {
+  margin-top: 125px; /* ensures text sits under an absolutely-positioned spinner */
+  font-size: 1.1rem;
+  animation: fadeIn 0.4s ease;
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
