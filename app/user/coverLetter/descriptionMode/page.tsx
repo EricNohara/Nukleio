@@ -1,28 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 import LoadingMessageSpinner from "@/app/components/LoadingMessageSpinner/LoadingMessageSpinner";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import TextInput from "@/app/components/TextInput/TextInput";
-import { cacheDraft, cleanupDraftCache, loadCachedDraft } from "@/utils/coverLetter/coverLetterCache";
 
-import styles from "./CoverLetterPage.module.css";
-import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
+import styles from "../CoverLetterPage.module.css";
+import PageContentHeader, { IButton } from "../../../components/PageContentHeader/PageContentHeader";
+import { useSearchParams, useRouter } from "next/navigation";
 
-export default function CoverLetterPage() {
+export default function CoverLetterDescriptionModePage() {
+    const params = useSearchParams();
+    const jobTitle = params.get("jobTitle") ?? "";
+    const companyName = params.get("companyName") ?? "";
+    const router = useRouter();
+
     const [userId, setUserId] = useState<string>("");
-    const [url, setUrl] = useState<string>("");
-    const [jobTitle, setJobTitle] = useState<string>("");
-    const [companyName, setCompanyName] = useState<string>("");
+    const [jobDescriptionDump, setJobDescriptionDump] = useState<string>("");
     const [writingSample, setWritingSample] = useState<string>("");
     const [conversationId, setConversationId] = useState<string>("");
     const [draft, setDraft] = useState<string>("");
     const [feedback, setFeedback] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [mode, setMode] = useState<"initial" | "revision">("initial");
-    const router = useRouter();
 
     useEffect(() => {
         const fetcher = async () => {
@@ -35,12 +36,11 @@ export default function CoverLetterPage() {
                 console.error(error);
             }
         }
-        cleanupDraftCache();
         fetcher();
     }, []);
 
     const handleGenerate = async () => {
-        if (!userId || !url || !jobTitle || !companyName) return;
+        if (!userId || !jobDescriptionDump) return;
 
         setTimeout(async () => {
             if (draft.length > 0) {
@@ -81,62 +81,32 @@ export default function CoverLetterPage() {
                 setMode("initial")
                 setLoading(true);
 
-                const cached = loadCachedDraft(url, jobTitle, companyName);
-
-                if (cached) {
-                    setTimeout(() => {
-                        setDraft(cached.draft);
-                        setConversationId(cached.conversationId);
-                        setLoading(false);
-                    }, 300); // small delay for smooth UI
-
-                    setLoading(false);
-                    return;
-                }
-
                 // FIRST GENERATION MODE
                 try {
                     const payload = {
                         userId,
-                        jobUrl: url,
-                        jobTitle,
-                        companyName,
+                        jobDescriptionDump,
                         writingSample
                     };
 
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_COVER_LETTER_AGENT_BASE_URL}/generate`, {
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_COVER_LETTER_AGENT_BASE_URL}/generateFromDescription`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(payload)
                     });
-
-                    // Detect job lookup failure and redirect
-                    if (res.status === 400) {
-                        const err = await res.json();
-                        if (
-                            err.error?.includes("No job data found")
-                        ) {
-                            // Redirect to description-mode page with prefilled fields
-                            router.push(
-                                `/user/coverLetter/descriptionMode?jobTitle=${encodeURIComponent(jobTitle)}&companyName=${encodeURIComponent(companyName)}`
-                            );
-                            return;
-                        }
-                    }
 
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.error);
 
                     setDraft(data.currentDraft);
                     setConversationId(data.conversationId);
-                    cacheDraft(url, jobTitle, companyName, data.currentDraft, data.conversationId);
                 } catch (err) {
                     console.error(err);
                 } finally {
                     setLoading(false);
                 }
             }
-        }, 0); // Key: allow the event loop to flush before heavy work
+        }, 0);
     };
 
     const buttonOne: IButton = {
@@ -148,19 +118,13 @@ export default function CoverLetterPage() {
     const backButton: IButton = {
         name: "Back",
         onClick: () => {
-            setCompanyName("");
-            setJobTitle("");
-            setUrl("");
-            setWritingSample("");
-            setDraft("");
-            setFeedback("");
-            setConversationId("");
+            router.push("/user/coverLetter")
         }
     }
 
     return (
         <PageContentWrapper>
-            <PageContentHeader title="Cover Letter Generation" buttonOne={buttonOne} buttonFour={draft.length > 0 ? backButton : null} />
+            <PageContentHeader title={`${companyName} Cover Letter Generation`} buttonOne={buttonOne} buttonFour={backButton} />
 
             <div className={styles.coverLetterPageContainer}>
 
@@ -195,41 +159,25 @@ export default function CoverLetterPage() {
                 {/* ------------------- INITIAL FORM ------------------- */}
                 {!loading && !draft && !conversationId && (
                     <>
-                        <p>Generate a polished cover letter tailored using your personal data.</p>
+                        <p>{`No data found for the inputted job ${jobTitle} at company ${companyName}. Please input a dump of the job posting description to continue.`}</p>
 
                         <div className={styles.inputsContainer}>
                             <TextInput
-                                label="Job Posting URL"
-                                name="url"
-                                value={url}
+                                label="Job Description Dump"
+                                name="jobDescriptionDump"
+                                type="textarea"
+                                textAreaRows={8}
+                                value={jobDescriptionDump}
                                 isInInputForm={true}
-                                placeholder="Enter a job posting url"
-                                onChange={(e) => setUrl(e.target.value)}
-                                required
-                            />
-                            <TextInput
-                                label="Job Title"
-                                name="jobTitle"
-                                value={jobTitle}
-                                isInInputForm={true}
-                                placeholder="Enter a job title"
-                                onChange={(e) => setJobTitle(e.target.value)}
-                                required
-                            />
-                            <TextInput
-                                label="Company Name"
-                                name="companyName"
-                                value={companyName}
-                                isInInputForm={true}
-                                placeholder="Enter a company name"
-                                onChange={(e) => setCompanyName(e.target.value)}
+                                placeholder="Enter a dump of the job posting description"
+                                onChange={(e) => setJobDescriptionDump(e.target.value)}
                                 required
                             />
                             <TextInput
                                 label="Optional Writing Sample"
                                 name="writingSample"
                                 type="textarea"
-                                textAreaRows={6}
+                                textAreaRows={8}
                                 value={writingSample}
                                 isInInputForm={true}
                                 placeholder="Enter an optional writing sample for the agent to match its writing style to"
