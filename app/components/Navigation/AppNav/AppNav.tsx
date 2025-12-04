@@ -1,6 +1,6 @@
 "use client";
 
-import { House, File, Briefcase, GraduationCap, Rocket, Brain, Cable, Settings, LogOut } from "lucide-react";
+import { House, File, Briefcase, GraduationCap, Rocket, Brain, Cable, Settings, LogOut, Mail } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 import { useAuth } from "@/app/context/AuthProvider";
@@ -26,6 +26,7 @@ const navItems: INavItem[] = [
     { label: "Projects", path: "/user/projects", icon: Rocket },
     { label: "Skills", path: "/user/skills", icon: Brain },
     { label: "Connect", path: "/user/connect", icon: Cable },
+    { label: "Cover Letter", path: "/user/coverLetter", icon: Mail }
 ];
 
 export default function AppNav() {

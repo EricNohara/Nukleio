@@ -30,6 +30,7 @@ const DEFAULT_SUGGESTIONS: ISuggestion[] = [
     { label: "Connect Page", path: "/user/connect" },
     { label: "User Settings", path: "/user/settings/user" },
     { label: "App Settings", path: "/user/settings/app" },
+    { label: "Cover Letter", path: "/user/coverLetter" }
 ]
 
 export default function SearchBar({ onFocusChange }: ISearchBarProps) {
