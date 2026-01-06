@@ -1,0 +1,59 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.chart {
+  flex: 1;
+  min-width: 0; /* important for ResponsiveContainer inside flex */
+}
+
+.legend {
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legendSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legendText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.legendName {
+  font-size: 13px;
+  color: #374151;
+}
+
+.legendValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.centerValue {
+  font-size: 22px;
+  font-weight: 700;
+  fill: #111827;
+}
+
+.centerSubtext {
+  font-size: 12px;
+  fill: #6b7280;
+}

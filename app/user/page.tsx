@@ -3,16 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import UserList from "./user-list";
+// import UserList from "./user-list";
 import PageContentWrapper from "../components/PageContentWrapper/PageContentWrapper";
-// import PageContentHeader from "../components/PageContentHeader/PageContentHeader";
-
-// import { IButton } from "../components/PageContentHeader/PageContentHeader";
+import RecentActivityChart from "../components/Chart/RecentActivityChart";
+import SuccessFailureDonut from "../components/Chart/SuccessFailureDonut";
 
 export default function UserHomePage() {
   const router = useRouter();
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const authenticator = async () => {
@@ -34,15 +33,11 @@ export default function UserHomePage() {
     authenticator();
   }, [router]);
 
-  // const buttonOne: IButton = {
-  //   name: "Add Skill",
-  //   onClick: () => { }
-  // }
-
   return (
     <PageContentWrapper>
-      <UserList user={user} />
-      {/* <PageContentHeader title="Skills" buttonOne={buttonOne} /> */}
+      {user ? <RecentActivityChart /> : null}
+      <SuccessFailureDonut successCount={123} failedCount={100} />
+
     </PageContentWrapper>
   );
 }
