@@ -21,7 +21,7 @@ export default function GenericAreaChart<T extends Record<string, string | numbe
     data,
     xKey,
     series,
-    height = 380,
+    height = 300,
     showDevtools = false,
     isAnimationActive = true,
 }: GenericAreaChartProps<T>) {
@@ -52,6 +52,7 @@ export default function GenericAreaChart<T extends Record<string, string | numbe
                         verticalAlign="top"
                         align="right"
                         iconType="circle"
+                        wrapperStyle={{ paddingBottom: 8 }}
                     />
                     <Tooltip />
 

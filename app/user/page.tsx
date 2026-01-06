@@ -2,16 +2,22 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useUser } from "../context/UserProvider";
 
 // import UserList from "./user-list";
 import PageContentWrapper from "../components/PageContentWrapper/PageContentWrapper";
 import RecentActivityChart from "../components/Chart/RecentActivityChart";
 import SuccessFailureDonut from "../components/Chart/SuccessFailureDonut";
+import TopConnectionsDonut from "../components/Chart/TopConnectionsDonut";
+import RecentLatencyChart from "../components/Chart/RecentLatencyChart";
+
+import styles from "./UserHomePage.module.css";
 
 export default function UserHomePage() {
   const router = useRouter();
 
   const [user, setUser] = useState<any>(null);
+  const { state } = useUser();
 
   useEffect(() => {
     const authenticator = async () => {
@@ -35,9 +41,26 @@ export default function UserHomePage() {
 
   return (
     <PageContentWrapper>
-      {user ? <RecentActivityChart /> : null}
-      <SuccessFailureDonut successCount={123} failedCount={100} />
+      {user ? (
+        <div className={styles.grid}>
+          <div className={styles.recentActivity}>
+            <RecentActivityChart />
+          </div>
 
+          <div className={styles.recentLatency}>
+            <RecentLatencyChart />
+          </div>
+
+          <div className={styles.successFailure}>
+            <SuccessFailureDonut successCount={123} failedCount={100} />
+          </div>
+
+          <div className={styles.topConnections}>
+            <TopConnectionsDonut />
+          </div>
+
+        </div>
+      ) : null}
     </PageContentWrapper>
   );
 }
