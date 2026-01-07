@@ -1,5 +1,6 @@
 "use client";
 
+import { Clock, CircleArrowUp, Zap, CircleCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -39,8 +40,7 @@ export default function UserHomePage() {
 
   const refreshButton: IButton = {
     name: "Refresh",
-    onClick: () => {
-    }
+    onClick: () => { window.location.reload() }
   }
 
   return (
@@ -49,18 +49,34 @@ export default function UserHomePage() {
       {user ? (
         <div className={styles.grid}>
           <div className={styles.recentActivity}>
+            <div className={styles.chartTitle}>
+              <Clock size={20} />
+              <h3>Recent Activity</h3>
+            </div>
             <RecentActivityChart height="100%" />
           </div>
 
           <div className={styles.recentLatency}>
+            <div className={styles.chartTitle}>
+              <Zap size={20} />
+              <h3>Recent Latency</h3>
+            </div>
             <RecentLatencyHistogram height="100%" />
           </div>
 
           <div className={styles.topConnections}>
+            <div className={styles.chartTitle}>
+              <CircleArrowUp size={20} />
+              <h3>Top Connections</h3>
+            </div>
             <TopConnectionsDonut height="100%" />
           </div>
 
           <div className={styles.successFailure}>
+            <div className={styles.chartTitle}>
+              <CircleCheck size={20} />
+              <h3>Availability</h3>
+            </div>
             <SuccessFailureDonut height="100%" />
           </div>
 
