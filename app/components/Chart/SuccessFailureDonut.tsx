@@ -2,11 +2,13 @@
 
 import React from "react";
 import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip } from "recharts";
-import styles from "./DonutChart.module.css";
+
 import { createClient } from "@/utils/supabase/client";
 
+import styles from "./DonutChart.module.css";
+
 type Props = {
-    height?: number;
+    height?: number | string;
 };
 
 const SUCCESS_COLOR = "#82ca9d";
@@ -25,7 +27,7 @@ type RpcRow = {
     failed: number | null;
 };
 
-export default function SuccessFailureDonut({ height = 280 }: Props) {
+export default function SuccessFailureDonut({ height = "100%" }: Props) {
     const supabase = createClient();
 
     const [successCount, setSuccessCount] = React.useState(0);
@@ -69,20 +71,27 @@ export default function SuccessFailureDonut({ height = 280 }: Props) {
     const failed = clamp(failedCount);
     const total = success + failed;
 
-    const data = [
+    const chartData = [
         { name: "Successful", value: success, color: SUCCESS_COLOR },
         { name: "Failed", value: failed, color: FAILED_COLOR },
     ];
 
     const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
-    const active = activeIndex !== null ? data[activeIndex] : null;
+    const active = activeIndex !== null ? chartData[activeIndex] : null;
 
     const cx = "50%";
     const cy = "50%";
 
+    const containerStyle: React.CSSProperties = {
+        width: "100%",
+        minWidth: 0,
+        minHeight: 0, // important for grid/flex
+        height,       // number OR "100%"
+    };
+
     return (
-        <div className={styles.root}>
-            <div className={styles.chart} style={{ height }}>
+        <div className={styles.root} style={containerStyle}>
+            <div className={styles.chart} style={{ height: "100%" }}>
                 {loading ? (
                     <div
                         style={{
@@ -100,7 +109,7 @@ export default function SuccessFailureDonut({ height = 280 }: Props) {
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                             <Pie
-                                data={data}
+                                data={chartData}
                                 dataKey="value"
                                 nameKey="name"
                                 cx={cx}
@@ -117,7 +126,7 @@ export default function SuccessFailureDonut({ height = 280 }: Props) {
                                 onMouseMove={(_, i) => setActiveIndex(i)}
                                 onMouseLeave={() => setActiveIndex(null)}
                             >
-                                {data.map((d, i) => (
+                                {chartData.map((d, i) => (
                                     <Cell
                                         key={d.name}
                                         fill={d.color}
@@ -126,7 +135,7 @@ export default function SuccessFailureDonut({ height = 280 }: Props) {
                                 ))}
                             </Pie>
 
-                            {/* Center label (stacked + vertically centered) */}
+                            {/* Center label */}
                             <g>
                                 {total > 0 ? (
                                     active ? (

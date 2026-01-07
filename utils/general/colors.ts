@@ -6,9 +6,9 @@ function hexToHsl(hex: string) {
 
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  let h = 0,
-    s = 0,
-    l = (max + min) / 2;
+  const l = (max + min) / 2;
+  let h = 0;
+  let s = 0;
 
   if (max !== min) {
     const d = max - min;
@@ -64,7 +64,7 @@ function generateShades(baseHex: string, count: number): string[] {
 
   return Array.from({ length: count }, (_, i) => {
     const lightness = Math.min(0.9, Math.max(0.25, l + (i - count / 2) * 0.2));
-    return hslToHex(h, 1, lightness);
+    return hslToHex(h, s, lightness);
   });
 }
 

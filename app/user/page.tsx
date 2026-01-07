@@ -2,22 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useUser } from "../context/UserProvider";
-
-// import UserList from "./user-list";
-import PageContentWrapper from "../components/PageContentWrapper/PageContentWrapper";
-import RecentActivityChart from "../components/Chart/RecentActivityChart";
-import SuccessFailureDonut from "../components/Chart/SuccessFailureDonut";
-import TopConnectionsDonut from "../components/Chart/TopConnectionsDonut";
-import RecentLatencyChart from "../components/Chart/RecentLatencyChart";
 
 import styles from "./UserHomePage.module.css";
+import RecentActivityChart from "../components/Chart/RecentActivityChart";
+import RecentLatencyHistogram from "../components/Chart/RecentLatencyHistogram";
+import SuccessFailureDonut from "../components/Chart/SuccessFailureDonut";
+import TopConnectionsDonut from "../components/Chart/TopConnectionsDonut";
+import PageContentHeader, { IButton } from "../components/PageContentHeader/PageContentHeader";
+import PageContentWrapper from "../components/PageContentWrapper/PageContentWrapper";
+import IUser from "../interfaces/IUser";
 
 export default function UserHomePage() {
   const router = useRouter();
 
-  const [user, setUser] = useState<any>(null);
-  const { state } = useUser();
+  const [user, setUser] = useState<IUser | null>(null);
 
   useEffect(() => {
     const authenticator = async () => {
@@ -39,24 +37,31 @@ export default function UserHomePage() {
     authenticator();
   }, [router]);
 
+  const refreshButton: IButton = {
+    name: "Refresh",
+    onClick: () => {
+    }
+  }
+
   return (
     <PageContentWrapper>
+      <PageContentHeader title="Dashboard" buttonOne={refreshButton} />
       {user ? (
         <div className={styles.grid}>
           <div className={styles.recentActivity}>
-            <RecentActivityChart />
+            <RecentActivityChart height="100%" />
           </div>
 
           <div className={styles.recentLatency}>
-            <RecentLatencyChart />
-          </div>
-
-          <div className={styles.successFailure}>
-            <SuccessFailureDonut successCount={123} failedCount={100} />
+            <RecentLatencyHistogram height="100%" />
           </div>
 
           <div className={styles.topConnections}>
-            <TopConnectionsDonut />
+            <TopConnectionsDonut height="100%" />
+          </div>
+
+          <div className={styles.successFailure}>
+            <SuccessFailureDonut height="100%" />
           </div>
 
         </div>

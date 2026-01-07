@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import GenericAreaChart from "./GenericAreaChart";
+
 import { createClient } from "@/utils/supabase/client";
+
+import GenericAreaChart from "./GenericAreaChart";
 
 type ApiLogChartRow = {
     name: string;
@@ -41,7 +43,7 @@ function buildLast7DaysSeries(rows: {
     return result;
 }
 
-export default function RecentActivityChart() {
+export default function RecentActivityChart({ height = "100%" }: { height?: number | string }) {
     const supabase = createClient();
 
     const [chartData, setChartData] = useState<ApiLogChartRow[]>([]);
@@ -84,6 +86,7 @@ export default function RecentActivityChart() {
                 { key: "success", color: "#82ca9d", name: "Successful Requests" },
                 { key: "failed", color: "#F87777", name: "Failed Requests" },
             ]}
+            height={height}
         />
     );
 }

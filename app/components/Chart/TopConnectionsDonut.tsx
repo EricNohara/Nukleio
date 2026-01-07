@@ -1,13 +1,20 @@
 "use client";
 
-import React from "react";
 import { useRouter } from "next/navigation";
+import React from "react";
 import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip } from "recharts";
-import styles from "./DonutChart.module.css";
-import { generateShades } from "@/utils/general/colors";
-import { createClient } from "@/utils/supabase/client";
+
 import { useUser } from "@/app/context/UserProvider";
 import type { IApiKeyInternal } from "@/app/interfaces/IApiKey";
+import { generateShades } from "@/utils/general/colors";
+import { createClient } from "@/utils/supabase/client";
+
+import styles from "./DonutChart.module.css";
+
+type Props = {
+    height?: number | string;
+    topN?: number;
+};
 
 type RpcRow = { name: string; count: number };
 
@@ -21,12 +28,9 @@ function formatInt(n: number) {
 }
 
 export default function TopConnectionsDonut({
-    height = 280,
+    height = "100%",
     topN = 6,
-}: {
-    height?: number;
-    topN?: number;
-}) {
+}: Props) {
     const router = useRouter();
     const supabase = createClient();
     const { state } = useUser();
@@ -57,8 +61,8 @@ export default function TopConnectionsDonut({
                 return;
             }
 
-            // Normalize + clamp
-            const cleaned = ((data ?? []) as any[]).map((r) => ({
+            // Normalize + clamp (no `any`)
+            const cleaned = (((data as unknown) as RpcRow[]) ?? []).map((r) => ({
                 name: String(r?.name ?? "Unknown"),
                 count: clamp(r?.count),
             }));
@@ -144,9 +148,16 @@ export default function TopConnectionsDonut({
         );
     }
 
+    const containerStyle: React.CSSProperties = {
+        width: "100%",
+        minWidth: 0,
+        minHeight: 0, // important for grid/flex
+        height, // number OR "100%"
+    };
+
     return (
-        <div className={styles.root}>
-            <div className={styles.chart} style={{ height }}>
+        <div className={styles.root} style={containerStyle}>
+            <div className={styles.chart} style={{ height: "100%" }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
