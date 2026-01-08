@@ -13,6 +13,8 @@ import {
 
 import { createClient } from "@/utils/supabase/client";
 
+import LoadingMessageSpinner from "../LoadingMessageSpinner/LoadingMessageSpinner";
+
 type RpcRow = { latency_ms: number };
 
 type HistRow = {
@@ -49,11 +51,11 @@ function buildHistogram(values: number[], binSizeMs: number, maxMs?: number): Hi
 }
 
 export default function RecentLatencyHistogram({
-    height = "100%",          // ✅ fill parent by default
+    height = "100%",
     binSizeMs = 50,
     maxMs = 2000,
 }: {
-    height?: number | string; // ✅ allow "100%"
+    height?: number | string;
     binSizeMs?: number;
     maxMs?: number;
 }) {
@@ -95,25 +97,12 @@ export default function RecentLatencyHistogram({
     const containerStyle: React.CSSProperties = {
         width: "100%",
         minWidth: 0,
-        minHeight: 0,     // ✅ important in grids/flex
-        height,           // ✅ number OR "100%"
+        minHeight: 0,
+        height,
     };
 
     if (loading) {
-        return (
-            <div
-                style={{
-                    ...containerStyle,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#6b7280",
-                    fontSize: 13,
-                }}
-            >
-                Loading response time distribution…
-            </div>
-        );
+        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
     }
 
     if (!rows.length) {
@@ -136,21 +125,21 @@ export default function RecentLatencyHistogram({
     return (
         <div style={containerStyle}>
             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={rows} margin={{ top: 10, right: 16, bottom: 24, left: 0 }}>
+                <BarChart data={rows} margin={{ top: 20, right: 16, bottom: 24, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
 
                     <XAxis
                         dataKey="start"
                         tickFormatter={(v) => `${v} ms`}
                         minTickGap={36}
-                        tick={{ fontSize: 12, fill: "#4b5563" }}
+                        tick={{ fontSize: 12, fill: "var(--page-txt-2)" }}
                         tickLine={false}
                         axisLine={false}
                     />
 
                     <YAxis
                         width={32}
-                        tick={{ fontSize: 12 }}
+                        tick={{ fontSize: 12, fill: "var(--page-txt-2)" }}
                         tickLine={false}
                         axisLine={false}
                         allowDecimals={false}
@@ -174,7 +163,7 @@ export default function RecentLatencyHistogram({
                         radius={[6, 6, 0, 0]}
                         barSize={22}
                         isAnimationActive
-                        animationDuration={700}
+                        animationDuration={900}
                         animationEasing="ease-out"
                     />
 
@@ -183,7 +172,7 @@ export default function RecentLatencyHistogram({
                         y="100%"
                         dy={-6}
                         textAnchor="middle"
-                        style={{ fontSize: 12, fill: "var(--page-txt-2)" }}
+                        style={{ fontSize: 14, fill: "var(--page-txt-2)" }}
                     >
                         Response time (milliseconds)
                     </text>

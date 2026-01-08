@@ -4,12 +4,14 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip } from "recharts";
 
+
 import { useUser } from "@/app/context/UserProvider";
 import type { IApiKeyInternal } from "@/app/interfaces/IApiKey";
 import { generateShades } from "@/utils/general/colors";
 import { createClient } from "@/utils/supabase/client";
 
 import styles from "./DonutChart.module.css";
+import LoadingMessageSpinner from "../LoadingMessageSpinner/LoadingMessageSpinner";
 
 type Props = {
     height?: number | string;
@@ -72,12 +74,12 @@ export default function TopConnectionsDonut({
         }
 
         // Only run once user state exists (so auth/session is likely ready)
-        if (state) load();
+        load();
 
         return () => {
             cancelled = true;
         };
-    }, [state, supabase]);
+    }, [supabase]);
 
     // 2) Shape the chart data (topN + other)
     const chartData = React.useMemo(() => {
@@ -125,15 +127,7 @@ export default function TopConnectionsDonut({
 
     // 3) Render states
     if (loading) {
-        return (
-            <div className={styles.root}>
-                <div className={styles.chart} style={{ height }}>
-                    <div style={{ display: "grid", placeItems: "center", height: "100%" }}>
-                        <span style={{ fontSize: 13, color: "#6b7280" }}>Loading…</span>
-                    </div>
-                </div>
-            </div>
-        );
+        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
     }
 
     if (!chartData.length || total === 0) {
@@ -151,8 +145,8 @@ export default function TopConnectionsDonut({
     const containerStyle: React.CSSProperties = {
         width: "100%",
         minWidth: 0,
-        minHeight: 0, // important for grid/flex
-        height, // number OR "100%"
+        minHeight: 0,
+        height,
     };
 
     return (
@@ -166,15 +160,15 @@ export default function TopConnectionsDonut({
                             nameKey="name"
                             cx={cx}
                             cy={cy}
-                            innerRadius="56%"
+                            innerRadius="60%"
                             outerRadius="90%"
                             startAngle={90}
                             endAngle={-270}
-                            paddingAngle={2}
+                            // paddingAngle={2}
                             isAnimationActive
-                            animationDuration={700}
+                            animationBegin={0}
+                            animationDuration={900}
                             animationEasing="ease-out"
-                            onMouseMove={(_, i) => setActiveIndex(i)}
                             onMouseLeave={() => setActiveIndex(null)}
                             onClick={(_, i) => {
                                 const row = chartData[i];
@@ -187,6 +181,7 @@ export default function TopConnectionsDonut({
                                     key={`${d.name}-${i}`}
                                     fill={colors[i]}
                                     opacity={activeIndex === null || activeIndex === i ? 1 : 0.55}
+                                    onMouseEnter={() => setActiveIndex(i)}
                                     style={{ cursor: d.name === "Other" ? "default" : "pointer" }}
                                 />
                             ))}
@@ -254,14 +249,14 @@ export default function TopConnectionsDonut({
                                 return (
                                     <div
                                         style={{
-                                            fontSize: 12,
+                                            fontSize: 14,
                                             padding: "8px 10px",
                                             whiteSpace: "normal",
                                             wordBreak: "break-word",
                                             maxWidth: 320,
-                                            background: "white",
-                                            border: "1px solid rgba(0,0,0,0.12)",
-                                            borderRadius: 10,
+                                            background: "var(--page-box-bg)",
+                                            border: "1px solid var(--page-box-border)",
+                                            borderRadius: "var(--global-border-radius)",
                                             boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
                                         }}
                                     >

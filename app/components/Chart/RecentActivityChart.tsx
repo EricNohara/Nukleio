@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 
 import GenericAreaChart from "./GenericAreaChart";
+import LoadingMessageSpinner from "../LoadingMessageSpinner/LoadingMessageSpinner";
 
 type ApiLogChartRow = {
     name: string;
@@ -71,11 +72,7 @@ export default function RecentActivityChart({ height = "100%" }: { height?: numb
     }, [supabase]);
 
     if (loading) {
-        return (
-            <div className="h-[380px] flex items-center justify-center text-gray-500">
-                Loading request activity…
-            </div>
-        );
+        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
     }
 
     return (
@@ -83,8 +80,8 @@ export default function RecentActivityChart({ height = "100%" }: { height?: numb
             data={chartData}
             xKey="name"
             series={[
-                { key: "success", color: "#82ca9d", name: "Successful Requests" },
-                { key: "failed", color: "#F87777", name: "Failed Requests" },
+                { key: "success", color: "var(--success-color)", name: "Successful Requests" },
+                { key: "failed", color: "var(--fail-color)", name: "Failed Requests" },
             ]}
             height={height}
         />
