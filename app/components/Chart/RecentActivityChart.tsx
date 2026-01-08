@@ -1,11 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { useUser } from "@/app/context/UserProvider";
 import { createClient } from "@/utils/supabase/client";
 
 import GenericAreaChart from "./GenericAreaChart";
+import { ButtonOne } from "../Buttons/Buttons";
 import LoadingMessageSpinner from "../LoadingMessageSpinner/LoadingMessageSpinner";
+
 
 type ApiLogChartRow = {
     name: string;
@@ -46,7 +50,9 @@ function buildLast7DaysSeries(rows: {
 
 export default function RecentActivityChart({ height = "100%" }: { height?: number | string }) {
     const supabase = createClient();
+    const router = useRouter();
 
+    const { state } = useUser();
     const [chartData, setChartData] = useState<ApiLogChartRow[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -70,6 +76,32 @@ export default function RecentActivityChart({ height = "100%" }: { height?: numb
 
         loadChartData();
     }, [supabase]);
+
+    const containerStyle: React.CSSProperties = {
+        width: "100%",
+        minWidth: 0,
+        minHeight: 0,
+        height,
+    };
+
+    // no data states
+    if (state.api_keys.length == 0) {
+        return (
+            <div
+                style={{
+                    ...containerStyle,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--page-txt-2)",
+                }}
+            >
+                <p>No connections found</p>
+                <ButtonOne onClick={() => { router.push("/user/connect") }}>Connect Now</ButtonOne>
+            </div>
+        );
+    }
 
     if (loading) {
         return <LoadingMessageSpinner messages={["Loading metrics..."]} />

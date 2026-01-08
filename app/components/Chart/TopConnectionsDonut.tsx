@@ -11,6 +11,7 @@ import { generateShades } from "@/utils/general/colors";
 import { createClient } from "@/utils/supabase/client";
 
 import styles from "./DonutChart.module.css";
+import { ButtonOne } from "../Buttons/Buttons";
 import LoadingMessageSpinner from "../LoadingMessageSpinner/LoadingMessageSpinner";
 
 type Props = {
@@ -125,29 +126,57 @@ export default function TopConnectionsDonut({
         router.push(idx >= 0 ? `/user/connect?index=${idx}` : "/user/connect");
     }
 
-    // 3) Render states
-    if (loading) {
-        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
-    }
-
-    if (!chartData.length || total === 0) {
-        return (
-            <div className={styles.root}>
-                <div className={styles.chart} style={{ height }}>
-                    <div style={{ display: "grid", placeItems: "center", height: "100%" }}>
-                        <span style={{ fontSize: 13, color: "#6b7280" }}>No requests yet</span>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     const containerStyle: React.CSSProperties = {
         width: "100%",
         minWidth: 0,
         minHeight: 0,
         height,
     };
+
+    // 3) Render states
+    // no data states
+    if (state.api_keys.length == 0) {
+        return (
+            <div
+                style={{
+                    ...containerStyle,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--page-txt-2)",
+                }}
+            >
+                <p>No connections found</p>
+                <ButtonOne onClick={() => { router.push("/user/connect") }}>Connect Now</ButtonOne>
+            </div>
+        );
+    } else if (!chartData.length) {
+        return (
+            <div
+                style={{
+                    ...containerStyle,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--page-txt-2)",
+                    fontSize: 14
+                }}
+            >
+                No requests in the last 7 days
+            </div>
+        );
+    }
+
+    if (loading) {
+        return (
+            <div className={styles.root} style={containerStyle}>
+                <div className={styles.chart} style={{ height: "100%" }}>
+                    <LoadingMessageSpinner messages={["Loading metrics..."]} />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.root} style={containerStyle}>
@@ -164,7 +193,6 @@ export default function TopConnectionsDonut({
                             outerRadius="90%"
                             startAngle={90}
                             endAngle={-270}
-                            // paddingAngle={2}
                             isAnimationActive
                             animationBegin={0}
                             animationDuration={900}

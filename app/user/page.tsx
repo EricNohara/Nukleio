@@ -87,7 +87,7 @@ export default function UserHomePage() {
 
   return (
     <PageContentWrapper>
-      <PageContentHeader title="Dashboard" buttonOne={refreshButton} />
+      <PageContentHeader title="Home Dashboard" buttonOne={refreshButton} />
 
       <div className={styles.grid}>
         <div className={styles.recentActivity}>

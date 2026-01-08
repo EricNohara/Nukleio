@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React from "react";
 import {
     Bar,
@@ -11,8 +12,10 @@ import {
     YAxis,
 } from "recharts";
 
+import { useUser } from "@/app/context/UserProvider";
 import { createClient } from "@/utils/supabase/client";
 
+import { ButtonOne } from "../Buttons/Buttons";
 import LoadingMessageSpinner from "../LoadingMessageSpinner/LoadingMessageSpinner";
 
 type RpcRow = { latency_ms: number };
@@ -60,7 +63,9 @@ export default function RecentLatencyHistogram({
     maxMs?: number;
 }) {
     const supabase = createClient();
+    const router = useRouter();
 
+    const { state } = useUser();
     const [rows, setRows] = React.useState<HistRow[]>([]);
     const [loading, setLoading] = React.useState(true);
 
@@ -101,11 +106,24 @@ export default function RecentLatencyHistogram({
         height,
     };
 
-    if (loading) {
-        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
-    }
-
-    if (!rows.length) {
+    // no data states
+    if (state.api_keys.length == 0) {
+        return (
+            <div
+                style={{
+                    ...containerStyle,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--page-txt-2)",
+                }}
+            >
+                <p>No connections found</p>
+                <ButtonOne onClick={() => { router.push("/user/connect") }}>Connect Now</ButtonOne>
+            </div>
+        );
+    } else if (!rows.length) {
         return (
             <div
                 style={{
@@ -113,13 +131,17 @@ export default function RecentLatencyHistogram({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#6b7280",
-                    fontSize: 13,
+                    color: "var(--page-txt-2)",
+                    fontSize: 14
                 }}
             >
-                No latency data in the last 7 days.
+                No latency data in the last 7 days
             </div>
         );
+    }
+
+    if (loading) {
+        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
     }
 
     return (
