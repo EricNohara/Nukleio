@@ -1,0 +1,65 @@
+.root {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+}
+
+.chart {
+  flex: 1;
+  min-width: 0; /* important for ResponsiveContainer inside grid/flex */
+}
+
+.legend {
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legendRow {
+  all: unset;
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  cursor: default;
+}
+
+.legendRowActive {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.legendName {
+  font-size: 13px;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legendValue {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.centerTitle {
+  font-size: 14px;
+  fill: var(--page-txt-2);
+}
+
+.centerValue {
+  font-size: 30px;
+  font-weight: 700;
+  fill: var(--page-txt-1);
+}

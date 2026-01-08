@@ -101,6 +101,10 @@ body {
   /* sizes */
   --global-border-radius: 10px;
   --title-font-size: 2rem;
+
+  /* charts */
+  --success-color: #82ca9d;
+  --fail-color: #f87777;
 }
 
 /* Dark mode overrides */
