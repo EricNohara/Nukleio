@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
         <div className={styles.container}>
             <div className={styles.leftPanel}>
                 <h1 className={`${styles.formTitle} ${titleFont.className}`}>Forgot your password?</h1>
-                <h3 className={`${styles.formSubtitle} ${headerFont.className}`}>Enter your email and we'll send you a reset link</h3>
+                <h3 className={`${styles.formSubtitle} ${headerFont.className}`}>Enter your email and we&apos;ll send you a reset link</h3>
                 <ForgotPasswordForm />
             </div>
 

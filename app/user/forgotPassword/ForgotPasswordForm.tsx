@@ -7,9 +7,9 @@ import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableB
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
 import TextInput from "@/app/components/TextInput/TextInput";
 import { headerFont } from "@/app/localFonts";
+import { createClient } from "@/utils/supabase/client";
 
 import styles from "./ForgotPasswordPage.module.css";
-import { createClient } from "@/utils/supabase/client";
 
 export default function ForgotPasswordForm() {
     const router = useRouter();
