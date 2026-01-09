@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useMemo } from "react";
 import {
     Bar,
     BarChart,
@@ -62,7 +62,7 @@ export default function RecentLatencyHistogram({
     binSizeMs?: number;
     maxMs?: number;
 }) {
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
     const router = useRouter();
 
     const { state } = useUser();
@@ -107,6 +107,10 @@ export default function RecentLatencyHistogram({
     };
 
     // no data states
+    if (loading || !state) {
+        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
+    }
+
     const apiKeys = state?.api_keys ?? [];
     if (apiKeys.length === 0) {
         return (
@@ -139,10 +143,6 @@ export default function RecentLatencyHistogram({
                 No latency data in the last 7 days
             </div>
         );
-    }
-
-    if (loading) {
-        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
     }
 
     return (

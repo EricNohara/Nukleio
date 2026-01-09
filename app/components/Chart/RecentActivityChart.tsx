@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useUser } from "@/app/context/UserProvider";
 import { createClient } from "@/utils/supabase/client";
@@ -49,7 +49,7 @@ function buildLast7DaysSeries(rows: {
 }
 
 export default function RecentActivityChart({ height = "100%" }: { height?: number | string }) {
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
     const router = useRouter();
 
     const { state } = useUser();
@@ -87,6 +87,10 @@ export default function RecentActivityChart({ height = "100%" }: { height?: numb
     // no data states
     const apiKeys = state?.api_keys ?? [];
 
+    if (loading || !state) {
+        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
+    }
+
     if (apiKeys.length === 0) {
         return (
             <div
@@ -103,10 +107,6 @@ export default function RecentActivityChart({ height = "100%" }: { height?: numb
                 <ButtonOne onClick={() => { router.push("/user/connect") }}>Connect Now</ButtonOne>
             </div>
         );
-    }
-
-    if (loading) {
-        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
     }
 
     return (

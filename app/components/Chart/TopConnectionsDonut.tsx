@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useMemo } from "react";
 import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip } from "recharts";
 
 
@@ -35,7 +35,7 @@ export default function TopConnectionsDonut({
     topN = 6,
 }: Props) {
     const router = useRouter();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
     const { state } = useUser();
 
     const apiKeys = (state?.api_keys ?? []) as IApiKeyInternal[];
@@ -134,6 +134,16 @@ export default function TopConnectionsDonut({
 
     // 3) Render states
     // no data states
+    if (loading || !state) {
+        return (
+            <div className={styles.root} style={containerStyle}>
+                <div className={styles.chart} style={{ height: "100%" }}>
+                    <LoadingMessageSpinner messages={["Loading metrics..."]} />
+                </div>
+            </div>
+        );
+    }
+
     if (apiKeys.length == 0) {
         return (
             <div
@@ -163,16 +173,6 @@ export default function TopConnectionsDonut({
                 }}
             >
                 No requests in the last 7 days
-            </div>
-        );
-    }
-
-    if (loading) {
-        return (
-            <div className={styles.root} style={containerStyle}>
-                <div className={styles.chart} style={{ height: "100%" }}>
-                    <LoadingMessageSpinner messages={["Loading metrics..."]} />
-                </div>
             </div>
         );
     }

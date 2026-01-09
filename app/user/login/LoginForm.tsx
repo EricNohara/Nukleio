@@ -91,7 +91,7 @@ export default function LoginForm() {
         <div className={styles.otherContent}>
           <p>Don&apos;t have an account?</p>
           <ButtonThree onClick={handleSignUp} className={styles.loginButton}>Sign up</ButtonThree>
-          <a href="" className={headerFont.className}>Forgot password</a>
+          <a href="/user/forgotPassword" className={headerFont.className}>Forgot password</a>
         </div>
       </div>
     </>
