@@ -243,7 +243,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const fetcher = async () => {
             const res = await fetch("/api/internal/user/info");
+            if (!res.ok) return;
             const data = await res.json();
+            if (!data?.userInfoInternal) return;
             dispatch({ type: "SET_ALL_DATA", payload: data.userInfoInternal });
         };
         fetcher();

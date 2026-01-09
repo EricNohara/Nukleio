@@ -2,7 +2,7 @@
 
 import { RefreshCcw } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import ApiKeyDisplay from "@/app/components/ApiKeyDisplay/ApiKeyDisplay";
 import InputForm from "@/app/components/InputForm/InputForm";
@@ -19,6 +19,7 @@ const columnWidths = [40, 20, 20, 20];
 
 export default function ConnectPage() {
     const { state, dispatch } = useUser();
+    const apiKeys = useMemo(() => state?.api_keys ?? [], [state?.api_keys]);
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
     const [keyToDisplay, setKeyToDisplay] = useState<string | null>(null);
     const [formValues, setFormValues] = useState<IApiKeyInternalInput>({
@@ -37,25 +38,25 @@ export default function ConnectPage() {
 
     // used to open given key if inputted as search param
     useEffect(() => {
-        if (indexParam !== null && state.api_keys.length > 0) {
-            const key = state.api_keys[Number(indexParam)];
+        if (indexParam !== null && apiKeys.length > 0) {
+            const key = apiKeys[Number(indexParam)];
             if (key) {
                 setApiKeyToRefresh(key);
                 setFormValues(key);
                 setIsFormOpen(true);
             }
         }
-    }, [indexParam, state])
+    }, [indexParam, apiKeys])
 
     const handleEdit = (rowIndex: number) => {
-        const key = state.api_keys[rowIndex];
+        const key = apiKeys[rowIndex];
         setApiKeyToRefresh(key);
         setFormValues(key);
         setIsFormOpen(true);
     };
 
     const handleDelete = async (rowIndex: number) => {
-        const key = state.api_keys[rowIndex];
+        const key = apiKeys[rowIndex];
         try {
             const res = await fetch(`/api/internal/user/key?description=${key.description}`, { method: "DELETE" });
             if (!res.ok) throw new Error(`Error deleting api key: ${key.description}.`);
@@ -177,7 +178,7 @@ export default function ConnectPage() {
         }
     }
 
-    const rows = state.api_keys.map((key) => ({
+    const rows = apiKeys.map((key) => ({
         "Description": key.description,
         "Created": key.created.split("T")[0],
         "Expires": key.expires ? key.expires.split("T")[0] : "Never",

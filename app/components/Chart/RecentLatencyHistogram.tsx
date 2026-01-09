@@ -107,7 +107,8 @@ export default function RecentLatencyHistogram({
     };
 
     // no data states
-    if (state.api_keys.length == 0) {
+    const apiKeys = state?.api_keys ?? [];
+    if (apiKeys.length === 0) {
         return (
             <div
                 style={{

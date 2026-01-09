@@ -49,63 +49,60 @@ export default function SearchBar({ onFocusChange }: ISearchBarProps) {
     const suggestions = useMemo(() => {
         const dynamicSuggestions: ISuggestion[] = [];
 
-        if (state) {
-            // experiences
-            state.experiences.forEach((exp, index) => {
-                dynamicSuggestions.push({
-                    label: `Experience: ${exp.company}`,
-                    path: `/user/experience?index=${index}`
-                })
+        const experiences = state?.experiences ?? [];
+        const education = state?.education ?? [];
+        const projects = state?.projects ?? [];
+        const skills = state?.skills ?? [];
+        const apiKeys = state?.api_keys ?? [];
+
+        experiences.forEach((exp, index) => {
+            dynamicSuggestions.push({
+                label: `Experience: ${exp.company}`,
+                path: `/user/experience?index=${index}`,
+            });
+        });
+
+        education.forEach((edu, index) => {
+            dynamicSuggestions.push({
+                label: `Education: ${edu.institution}`,
+                path: `/user/education?index=${index}`,
             });
 
-            // education
-            state.education.forEach((edu, index) => {
+            (edu.courses ?? []).forEach((course, courseIndex) => {
                 dynamicSuggestions.push({
-                    label: `Education: ${edu.institution}`,
-                    path: `/user/education?index=${index}`
-                })
-
-                // add its courses
-                edu.courses.forEach((course, index) => {
-                    dynamicSuggestions.push({
-                        label: `Course: ${course.name} (${edu.institution})`,
-                        path: `/user/education/${edu.id}/course?index=${index}`
-                    })
-                })
+                    label: `Course: ${course.name} (${edu.institution})`,
+                    path: `/user/education/${edu.id}/course?index=${courseIndex}`,
+                });
             });
+        });
 
-            // projects
-            state.projects.forEach((project, index) => {
-                dynamicSuggestions.push({
-                    label: `Project: ${project.name}`,
-                    path: `/user/projects?index=${index}`
-                })
+        projects.forEach((project, index) => {
+            dynamicSuggestions.push({
+                label: `Project: ${project.name}`,
+                path: `/user/projects?index=${index}`,
             });
+        });
 
-            // skills
-            state.skills.forEach((skill, index) => {
-                dynamicSuggestions.push({
-                    label: `Skill: ${skill.name}`,
-                    path: `/user/skills?index=${index}`
-                })
+        skills.forEach((skill, index) => {
+            dynamicSuggestions.push({
+                label: `Skill: ${skill.name}`,
+                path: `/user/skills?index=${index}`,
             });
+        });
 
-            // connections
-            state.api_keys.forEach((key, index) => {
-                dynamicSuggestions.push({
-                    label: `Connection: ${key.description}`,
-                    path: `/user/connect?index=${index}`
-                })
+        apiKeys.forEach((key, index) => {
+            dynamicSuggestions.push({
+                label: `Connection: ${key.description}`,
+                path: `/user/connect?index=${index}`,
             });
-        }
+        });
 
-        // combine and remove duplicates
         const all = [...DEFAULT_SUGGESTIONS, ...dynamicSuggestions];
         const seen = new Set<string>();
         return all.filter((s) => {
-            const key = s.label.toLowerCase();
-            if (seen.has(key)) return false;
-            seen.add(key);
+            const k = s.label.toLowerCase();
+            if (seen.has(k)) return false;
+            seen.add(k);
             return true;
         });
     }, [state]);

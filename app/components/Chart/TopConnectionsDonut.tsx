@@ -118,7 +118,6 @@ export default function TopConnectionsDonut({
             return;
         }
 
-        // match the SearchBar approach: find correct index in state.api_keys
         const idx = apiKeys.findIndex(
             (k) => (k.description ?? "").trim() === sliceName.trim()
         );
@@ -135,7 +134,7 @@ export default function TopConnectionsDonut({
 
     // 3) Render states
     // no data states
-    if (state.api_keys.length == 0) {
+    if (apiKeys.length == 0) {
         return (
             <div
                 style={{
