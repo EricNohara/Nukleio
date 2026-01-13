@@ -1,45 +1,72 @@
 "use client";
 
-import { X } from "lucide-react";
-import React, { useEffect } from "react";
+import { X, TriangleAlert, CircleAlert, CircleCheck, Info, LucideIcon } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import styles from "./Snackbar.module.css";
 
-export type SnackbarVariant = "success" | "error" | "info";
+export type SnackbarVariant = "success" | "error" | "warning" | "info";
 
 type SnackbarProps = {
     message: string;
+    messageDescription?: string;
     variant?: SnackbarVariant;
     onClose?: () => void;
-    duration?: number; // ms (auto-dismiss)
+    duration?: number;
 };
+
+const EXIT_MS = 200;
 
 export default function Snackbar({
     message,
+    messageDescription = "",
     variant = "info",
     onClose,
     duration = 4000,
 }: SnackbarProps) {
+    const [isExiting, setIsExiting] = useState(false);
+
+    const startClose = useCallback(() => {
+        if (isExiting) return;
+        setIsExiting(true);
+
+        window.setTimeout(() => {
+            onClose?.();
+        }, EXIT_MS);
+    }, [isExiting, onClose]);
+
     useEffect(() => {
         if (!duration) return;
 
-        const timer = setTimeout(() => {
-            onClose?.();
+        const timer = window.setTimeout(() => {
+            startClose();
         }, duration);
 
         return () => clearTimeout(timer);
-    }, [duration, onClose]);
+    }, [duration, startClose]);
+
+    const Icon: LucideIcon =
+        variant === "error" ? TriangleAlert :
+            variant === "warning" ? CircleAlert :
+                variant === "success" ? CircleCheck :
+                    Info;
 
     return (
-        <div className={`${styles.snackbar} ${styles[variant]}`}>
-            <span>{message}</span>
+        <div className={`${styles.snackbar} ${styles[variant]} ${styles.enter} ${isExiting ? styles.exit : ""}`}>
+            <Icon size={35} color="white" />
+
+            <div className={styles.messageContainer}>
+                <h3>{message}</h3>
+                {messageDescription && <span>{messageDescription}</span>}
+            </div>
+
             {onClose && (
                 <button
                     className={styles.close}
-                    onClick={onClose}
+                    onClick={startClose}
                     aria-label="Close notification"
                 >
-                    <X />
+                    <X size={25} />
                 </button>
             )}
         </div>

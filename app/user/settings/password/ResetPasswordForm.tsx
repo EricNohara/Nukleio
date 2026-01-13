@@ -20,6 +20,7 @@ export default function ResetPasswordForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [snackbar, setSnackbar] = useState<{
         message: string;
+        messageDescription: string;
         variant: "success" | "error";
     } | null>(null);
 
@@ -43,7 +44,8 @@ export default function ResetPasswordForm() {
 
         if (!email) {
             setSnackbar({
-                message: "You need to be signed in to send a reset link.",
+                message: "Error sending email",
+                messageDescription: "You need to be signed in to send a reset link.",
                 variant: "error",
             });
             return;
@@ -59,14 +61,16 @@ export default function ResetPasswordForm() {
             if (error) throw error;
 
             setSnackbar({
-                message: "If an account exists for this email, a reset link has been sent.",
+                message: "Successfully sent email",
+                messageDescription: "If an account exists for this email, a reset link has been sent.",
                 variant: "success",
             });
             setCooldown(COOLDOWN_SECONDS);
         } catch (err) {
             console.error(err);
             setSnackbar({
-                message: "Couldn't send the reset email. Please try again.",
+                message: "Error sending email",
+                messageDescription: "Couldn't send the reset email. Please try again.",
                 variant: "error",
             });
         } finally {
@@ -124,7 +128,9 @@ export default function ResetPasswordForm() {
             {snackbar && (
                 <Snackbar
                     message={snackbar.message}
+                    messageDescription={snackbar.messageDescription}
                     variant={snackbar.variant}
+                    duration={4000}
                     onClose={() => setSnackbar(null)}
                 />
             )}

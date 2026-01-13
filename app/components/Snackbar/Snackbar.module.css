@@ -3,52 +3,113 @@
   bottom: 24px;
   right: 24px;
   min-width: 260px;
-  max-width: 360px;
-
-  padding: 14px 16px;
+  max-width: 500px;
+  padding: 18px 22px;
   border-radius: var(--global-border-radius);
+  border: 2px solid white;
 
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 24px;
 
-  font-size: 14px;
+  font-size: 0.9rem;
   color: white;
 
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  animation: slideIn 0.25s ease-out;
   z-index: 9999;
+
+  will-change: transform, opacity;
+}
+
+/* enter */
+.enter {
+  animation: slideInRight 0.2s ease-out forwards;
+}
+
+/* exit */
+.exit {
+  animation: slideOutRight 0.2s ease-in forwards;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(40px);
+  }
 }
 
 .success {
-  background-color: var(--success-color);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--success-color) 75%, black),
+    var(--success-color)
+  );
 }
 
 .error {
-  background-color: var(--fail-color);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--fail-color) 75%, black),
+    var(--fail-color)
+  );
 }
 
 .info {
-  background-color: var(--color-primary);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-primary) 75%, black),
+    var(--color-primary)
+  );
+}
+
+.warning {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, yellow 75%, black),
+    yellow
+  );
+}
+
+.messageContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.messageContainer > h3 {
+  margin: 0;
+  padding: 0;
+  color: white;
+  font-size: 1rem;
 }
 
 .close {
   background: none;
+  border-radius: var(--global-border-radius);
   border: none;
-  color: inherit;
-  font-size: 18px;
+  padding: 0;
+  padding: 0.25rem 0.25rem 0 0.25rem;
+  color: white;
   cursor: pointer;
-  line-height: 1;
+  transition: 0.2s ease;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.close:hover {
+  background-color: rgba(255, 255, 255, 0.274);
 }
