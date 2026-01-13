@@ -27,7 +27,7 @@ export default function ForgotPasswordForm() {
         try {
             // send the recovery email
             const { error } = await supabase.auth
-                .resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/passwordReset` });
+                .resetPasswordForEmail(email, { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/passwordReset` });
             if (error) throw new Error(error.message);
             alert("Password reset email sent. Check your inbox.");
         } catch (error) {
