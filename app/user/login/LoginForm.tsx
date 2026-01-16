@@ -5,15 +5,15 @@ import { useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
+import ContinueWithGithubButton from "@/app/components/OauthButtons/ContinueWithGithubButton";
+import ContinueWithLinkedinButton from "@/app/components/OauthButtons/ContinueWithLinkedinButton";
 import TextInput from "@/app/components/TextInput/TextInput";
 import { headerFont } from "@/app/localFonts";
-import { createClient } from "@/utils/supabase/client";
 
 import styles from "./LoginPage.module.css";
 
 export default function LoginForm() {
   const router = useRouter();
-  const supabase = createClient();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [credentials, setCredentials] = useState({
@@ -59,18 +59,6 @@ export default function LoginForm() {
     router.push("/user/signup")
   }
 
-  const handleGithub = async () => {
-    const base = process.env.NEXT_PUBLIC_SITE_URL;
-    const redirectTo = `${base}/api/internal/auth/callback?next=${encodeURIComponent("/user")}`;
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "github",
-      options: { redirectTo },
-    });
-
-    if (error) alert(error.message);
-  };
-
   return (
     <>
       <form onSubmit={handleSubmit} className={styles.loginForm}>
@@ -96,9 +84,8 @@ export default function LoginForm() {
         </ButtonOne>
 
         {/* testing OAUTH */}
-        <ButtonThree onClick={handleGithub} className={styles.loginButton}>
-          Continue with GitHub
-        </ButtonThree>
+        <ContinueWithGithubButton />
+        <ContinueWithLinkedinButton />
       </form >
 
       {/* Form Footer */}

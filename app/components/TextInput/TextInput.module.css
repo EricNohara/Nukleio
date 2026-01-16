@@ -41,6 +41,7 @@
   color: var(--login-txt-2);
   font-size: 0.8rem;
   font-weight: 600;
+  transition: 0.2s ease;
 }
 
 .inputFormInputLabel {
@@ -104,4 +105,40 @@
 /* Firefox tweaks */
 .inputFormInput[type="date"]::-moz-focus-inner {
   border: 0;
+}
+
+.inputDiv:focus-within .inputLabel {
+  color: var(--login-txt-1); /* same color as focused border */
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--login-txt-3);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  transition: 0.2s ease;
+}
+
+.passwordToggle:hover {
+  color: var(--login-txt-1);
+}
+
+.hasToggle {
+  padding-right: 48px; /* space for the eye button */
+}
+
+.required {
+  color: var(--fail-color);
+  font-weight: 700;
 }
