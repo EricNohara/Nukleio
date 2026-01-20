@@ -21,17 +21,24 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser();
 
-      //  TODO: remove logs later!
       if (user) {
-        console.log(
-          "[AUTH IDENTITIES] identities:",
-          user.identities?.map((i) => ({
-            provider: i.provider,
-            identity_data: i.identity_data,
-          }))
-        );
+        // TODO: autofill information for the user table
+        const providerParam = searchParams.get("provider"); // "github" | "linkedin_oidc" | null
+
+        const identity = providerParam
+          ? user.identities?.find((i) => i.provider === providerParam)
+          : user.identities?.[0];
+
+        console.log(providerParam, identity);
+
+        if (providerParam === "github") {
+          // autofill username, avatar, and projects (use github API to get repos and autofill one project per repo)
+        } else if (providerParam === "linkedin_oidc") {
+          // autofill username, avatar, resume, etc. (maybe use linkedin API)
+        }
       }
 
+      // redirect back to the app from oauth flow
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
 

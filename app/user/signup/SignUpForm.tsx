@@ -92,9 +92,6 @@ export default function SignUpForm() {
         <ButtonOne type="submit" className={styles.loginButton} disabled={isLoading}>
           <LoadableButtonContent isLoading={isLoading} buttonLabel="Sign up" />
         </ButtonOne>
-
-        <ContinueWithGithubButton />
-        <ContinueWithLinkedinButton />
       </form>
 
       {/* Form Footer */}
@@ -104,6 +101,12 @@ export default function SignUpForm() {
           <p className={`${styles.inputLabel} ${headerFont.className}`}>Other</p>
           <div className={styles.divider} />
         </div>
+
+        <div className={styles.oauthButtonsContainer}>
+          <ContinueWithGithubButton />
+          <ContinueWithLinkedinButton />
+        </div>
+
         <div className={styles.otherContent}>
           <p>Already have an account?</p>
           <ButtonThree onClick={handleLogin} className={styles.loginButton}>Sign in</ButtonThree>

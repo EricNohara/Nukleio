@@ -46,3 +46,11 @@
 .linkedin:hover {
   background-color: #004f7a;
 }
+
+.google {
+  background-color: #101010;
+}
+
+.google:hover {
+  background-color: #000000;
+}

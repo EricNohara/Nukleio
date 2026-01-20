@@ -11,9 +11,12 @@ export default function BodyWrapper({ children }: { children: React.ReactNode })
         || pathname === "/documentation/contact"
         || pathname === "/documentation/doc"
         || pathname === "/documentation/pricing";
+    const isPolicy = pathname === "/policy/privacy" || pathname === "/policy/tos";
+
+    const wrapperClass = isLandingOrDoc ? styles.landing : isPolicy ? styles.policy : styles.app;
 
     return (
-        <div className={isLandingOrDoc ? styles.landing : styles.app}>
+        <div className={wrapperClass}>
             {children}
         </div>
     );

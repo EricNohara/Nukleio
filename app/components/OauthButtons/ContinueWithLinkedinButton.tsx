@@ -1,21 +1,22 @@
-// import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
+
+import { createClient } from "@/utils/supabase/client";
 
 import styles from "./OauthButtons.module.css";
 
 export default function ContinueWithLinkedinButton() {
-    // const supabase = createClient();
+    const supabase = createClient();
 
     const handleLinkedin = async () => {
-        // const base = process.env.NEXT_PUBLIC_SITE_URL;
-        // const redirectTo = `${base}/api/internal/auth/callback?next=${encodeURIComponent("/user")}`;
+        const base = process.env.NEXT_PUBLIC_SITE_URL;
+        const redirectTo = `${base}/api/internal/auth/callback?provider=linkedin_oidc&next=${encodeURIComponent("/user")}`;
 
-        // const { error } = await supabase.auth.signInWithOAuth({
-        //     provider: "github",
-        //     options: { redirectTo },
-        // });
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: "linkedin_oidc",
+            options: { redirectTo },
+        });
 
-        // if (error) alert(error.message);
+        if (error) alert(error.message);
     };
 
     return (
@@ -29,7 +30,7 @@ export default function ContinueWithLinkedinButton() {
                 />
             </span>
 
-            <span className={styles.buttonText}>Continue with LinkedIn</span>
+            <span className={styles.buttonText}>LinkedIn</span>
         </button>
     );
 }
