@@ -5,6 +5,8 @@ import { useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
+import ContinueWithGithubButton from "@/app/components/OauthButtons/ContinueWithGithubButton";
+import ContinueWithLinkedinButton from "@/app/components/OauthButtons/ContinueWithLinkedinButton";
 import TextInput from "@/app/components/TextInput/TextInput";
 import { headerFont } from "@/app/localFonts";
 
@@ -13,7 +15,6 @@ import styles from "../login/LoginPage.module.css";
 interface IInputData {
   email: string;
   password: string;
-  confirmedPassword: string;
 }
 
 export default function SignUpForm() {
@@ -22,7 +23,6 @@ export default function SignUpForm() {
   const [userData, setUserData] = useState<IInputData>({
     email: "",
     password: "",
-    confirmedPassword: "",
   });
 
   const minPasswordLen: number = parseInt(process.env.MIN_PASSWORD_LEN || "6");
@@ -43,10 +43,6 @@ export default function SignUpForm() {
     try {
       if (userData.password.length < minPasswordLen) {
         throw new Error("Password must be at least 6 characters long");
-      }
-
-      if (userData.password !== userData.confirmedPassword) {
-        throw new Error("Confirmed password does not match inputted password")
       }
 
       const res = await fetch("/api/internal/auth/signup", {
@@ -92,15 +88,7 @@ export default function SignUpForm() {
           required
           type="password"
         />
-        <TextInput
-          label="Confirm Password"
-          name="confirmedPassword"
-          value={userData.confirmedPassword}
-          onChange={handleChange}
-          placeholder="Confirm your password"
-          required
-          type="password"
-        />
+
         <ButtonOne type="submit" className={styles.loginButton} disabled={isLoading}>
           <LoadableButtonContent isLoading={isLoading} buttonLabel="Sign up" />
         </ButtonOne>
@@ -113,6 +101,12 @@ export default function SignUpForm() {
           <p className={`${styles.inputLabel} ${headerFont.className}`}>Other</p>
           <div className={styles.divider} />
         </div>
+
+        <div className={styles.oauthButtonsContainer}>
+          <ContinueWithGithubButton />
+          <ContinueWithLinkedinButton />
+        </div>
+
         <div className={styles.otherContent}>
           <p>Already have an account?</p>
           <ButtonThree onClick={handleLogin} className={styles.loginButton}>Sign in</ButtonThree>

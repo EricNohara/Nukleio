@@ -1,0 +1,58 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 50px;
+  background-color: var(--page-box-bg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 36px;
+  line-height: 1.15;
+  margin: 0 0 10px;
+}
+
+.updated {
+  margin: 0;
+  opacity: 0.75;
+  font-size: 14px;
+}
+
+.section {
+  margin-top: 24px;
+}
+
+.h2 {
+  font-size: 20px;
+  margin: 0 0 10px;
+}
+
+.p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.ul {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.7;
+}
+
+.ul li {
+  margin: 6px 0;
+}
+
+.link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

@@ -1,13 +1,3 @@
-.landingContainer {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  overflow: hidden;
-}
-
 .backgroundImage {
   position: absolute;
   top: 45%;
@@ -62,4 +52,28 @@
   align-items: center;
   justify-content: center;
   gap: 2rem;
+}
+
+.footer {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  bottom: 1rem;
+}
+
+.footerContent {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  text-decoration: none;
+  color: var(--home-txt-2);
+  font-size: 0.8rem;
+}
+
+.footerLink {
+  text-decoration: none;
+  color: var(--btn-1);
+  font-size: 0.8rem;
 }

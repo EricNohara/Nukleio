@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { getCurrentYear } from "@/utils/general/formatDate";
 
 import { ButtonOne, ButtonTwo } from "./components/Buttons/Buttons";
 import Navigation from "./components/Navigation/Navigation";
@@ -55,6 +57,13 @@ export default function LandingPage() {
           <ButtonOne onClick={handleSignUp}>Get Started Free</ButtonOne>
           <ButtonTwo onClick={() => router.push("/documentation/doc")}>Read Docs</ButtonTwo>
         </div>
+        <footer className={styles.footer}>
+          <div className={styles.footerContent}>
+            <p>Copyright &copy; {getCurrentYear()} Nukleio, All Rights Reserved.</p>
+            <Link className={styles.footerLink} href="/policy/privacy">Privacy Policy</Link>
+            <Link className={styles.footerLink} href="/policy/tos">Terms of Service</Link>
+          </div>
+        </footer>
       </div>
     </>
   );

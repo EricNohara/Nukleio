@@ -4,12 +4,14 @@ import SettingsContentWithNav from "@/app/components/Navigation/SettingsNav/Sett
 import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 
+import ResetPasswordForm from "./ResetPasswordForm";
+
 export default function PasswordSettingsPage() {
     return (
         <PageContentWrapper>
             <PageContentHeader title="Settings" />
             <SettingsContentWithNav activeSetting="Password">
-                <p>Password Settings...</p>
+                <ResetPasswordForm />
             </SettingsContentWithNav>
         </PageContentWrapper>
     );

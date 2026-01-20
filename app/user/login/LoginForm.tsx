@@ -5,6 +5,9 @@ import { useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
+import ContinueWithGithubButton from "@/app/components/OauthButtons/ContinueWithGithubButton";
+import ContinueWithGoogleButton from "@/app/components/OauthButtons/ContinueWithGoogleButton";
+import ContinueWithLinkedinButton from "@/app/components/OauthButtons/ContinueWithLinkedinButton";
 import TextInput from "@/app/components/TextInput/TextInput";
 import { headerFont } from "@/app/localFonts";
 
@@ -12,6 +15,7 @@ import styles from "./LoginPage.module.css";
 
 export default function LoginForm() {
   const router = useRouter();
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [credentials, setCredentials] = useState({
     email: "",
@@ -34,7 +38,7 @@ export default function LoginForm() {
     try {
       const res = await fetch("/api/internal/auth/login", {
         method: "POST",
-        headers: { ContentType: "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
       });
 
@@ -85,13 +89,24 @@ export default function LoginForm() {
       <div className={styles.formFooterContainer}>
         <div className={styles.dividerContainer}>
           <div className={styles.divider} />
-          <p className={`${styles.inputLabel} ${headerFont.className}`}>Other</p>
+          <p className={`${styles.inputLabel} ${headerFont.className}`}>more</p>
           <div className={styles.divider} />
         </div>
+
+        {/* testing OAUTH */}
+        <div className={styles.oauthButtonsContainer}>
+          <ContinueWithGithubButton />
+          <ContinueWithLinkedinButton />
+        </div>
+
+        <div className={styles.oauthButtonsContainer}>
+          <ContinueWithGoogleButton />
+        </div>
+
         <div className={styles.otherContent}>
           <p>Don&apos;t have an account?</p>
           <ButtonThree onClick={handleSignUp} className={styles.loginButton}>Sign up</ButtonThree>
-          <a href="" className={headerFont.className}>Forgot password</a>
+          <a href="/user/forgotPassword" className={headerFont.className}>Forgot password</a>
         </div>
       </div>
     </>

@@ -1,3 +1,10 @@
+import Navigation from "@/app/components/Navigation/Navigation";
+
 export default function PricingPage() {
-    return <div>To be added</div>
+    return (
+        <>
+            <Navigation />
+            <div>To be added</div>
+        </>
+    );
 }
