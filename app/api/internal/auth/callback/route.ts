@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
       if (user) {
         // TODO: autofill information for the user table
-        const providerParam = searchParams.get("provider"); // "github" | "linkedin_oidc" | null
+        const providerParam = searchParams.get("provider");
 
         const identity = providerParam
           ? user.identities?.find((i) => i.provider === providerParam)
@@ -35,6 +35,7 @@ export async function GET(request: Request) {
           // autofill username, avatar, and projects (use github API to get repos and autofill one project per repo)
         } else if (providerParam === "linkedin_oidc") {
           // autofill username, avatar, resume, etc. (maybe use linkedin API)
+        } else if (providerParam === "google") {
         }
       }
 

@@ -42,3 +42,17 @@ export function formatSimpleDate(date: string) {
   const [year, month, day] = date.split("-");
   return `${parseInt(month)}/${day}/${year}`;
 }
+
+function format(d: Date) {
+  return d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "America/New_York",
+  });
+}
+
+export function getCurrentYear() {
+  const date = format(new Date());
+  return date.split(",")[1];
+}
