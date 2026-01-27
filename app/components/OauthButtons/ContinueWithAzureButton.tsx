@@ -20,7 +20,7 @@ export default function ContinueWithAzureButton() {
     };
 
     return (
-        <button onClick={handleAzure} className={`${styles.button} ${styles.azure}`}>
+        <button onClick={handleAzure} className={`${styles.button}`}>
             <Image
                 src="/images/microsoft-icon.svg"
                 alt="Azure icon"

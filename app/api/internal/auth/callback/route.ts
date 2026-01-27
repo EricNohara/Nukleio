@@ -37,6 +37,7 @@ export async function GET(request: Request) {
           // autofill username, avatar, resume, etc. (maybe use linkedin API)
         } else if (providerParam === "google") {
         } else if (providerParam === "azure") {
+        } else if (providerParam === "gitlab") {
         }
       }
 

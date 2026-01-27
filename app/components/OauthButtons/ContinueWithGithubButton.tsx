@@ -20,7 +20,7 @@ export default function ContinueWithGithubButton() {
     };
 
     return (
-        <button onClick={handleGithub} className={`${styles.button} ${styles.github}`}>
+        <button onClick={handleGithub} className={`${styles.button}`}>
             <Image
                 src="/images/github-icon.svg"
                 alt="GitHub icon"

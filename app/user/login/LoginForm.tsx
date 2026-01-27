@@ -7,6 +7,7 @@ import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableB
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
 import ContinueWithAzureButton from "@/app/components/OauthButtons/ContinueWithAzureButton";
 import ContinueWithGithubButton from "@/app/components/OauthButtons/ContinueWithGithubButton";
+import ContinueWithGitlabButton from "@/app/components/OauthButtons/ContinueWithGitlabButton";
 import ContinueWithGoogleButton from "@/app/components/OauthButtons/ContinueWithGoogleButton";
 import ContinueWithLinkedinButton from "@/app/components/OauthButtons/ContinueWithLinkedinButton";
 import TextInput from "@/app/components/TextInput/TextInput";
@@ -97,6 +98,7 @@ export default function LoginForm() {
         {/* testing OAUTH */}
         <div className={styles.oauthButtonsContainer}>
           <ContinueWithGithubButton />
+          <ContinueWithGitlabButton />
           <ContinueWithLinkedinButton />
           <ContinueWithGoogleButton />
           <ContinueWithAzureButton />

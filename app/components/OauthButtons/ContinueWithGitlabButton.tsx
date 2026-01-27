@@ -4,15 +4,15 @@ import { createClient } from "@/utils/supabase/client";
 
 import styles from "./OauthButtons.module.css";
 
-export default function ContinueWithGoogleButton() {
+export default function ContinueWithGitlabButton() {
     const supabase = createClient();
 
-    const handleGoogle = async () => {
+    const handleGitlab = async () => {
         const base = process.env.NEXT_PUBLIC_SITE_URL;
-        const redirectTo = `${base}/api/internal/auth/callback?provider=google&next=${encodeURIComponent("/user")}`;
+        const redirectTo = `${base}/api/internal/auth/callback?provider=gitlab&next=${encodeURIComponent("/user")}`;
 
         const { error } = await supabase.auth.signInWithOAuth({
-            provider: "google",
+            provider: "gitlab",
             options: { redirectTo },
         });
 
@@ -20,10 +20,10 @@ export default function ContinueWithGoogleButton() {
     };
 
     return (
-        <button onClick={handleGoogle} className={`${styles.button}`}>
+        <button onClick={handleGitlab} className={`${styles.button}`}>
             <Image
-                src="/images/google-icon.svg"
-                alt="Google icon"
+                src="/images/gitlab-icon.svg"
+                alt="Gitlab icon"
                 width={30}
                 height={30}
             />

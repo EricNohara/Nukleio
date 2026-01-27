@@ -20,7 +20,7 @@ export default function ContinueWithLinkedinButton() {
     };
 
     return (
-        <button onClick={handleLinkedin} className={`${styles.button} ${styles.linkedin}`}>
+        <button onClick={handleLinkedin} className={`${styles.button}`}>
             <Image
                 src="/images/linkedin-icon.svg"
                 alt="LinkedIn icon"
