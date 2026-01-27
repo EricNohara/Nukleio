@@ -21,16 +21,12 @@ export default function ContinueWithLinkedinButton() {
 
     return (
         <button onClick={handleLinkedin} className={`${styles.button} ${styles.linkedin}`}>
-            <span className={styles.iconWrapper}>
-                <Image
-                    src="/images/linkedin-icon.svg"
-                    alt="LinkedIn icon"
-                    width={25}
-                    height={25}
-                />
-            </span>
-
-            <span className={styles.buttonText}>LinkedIn</span>
+            <Image
+                src="/images/linkedin-icon.svg"
+                alt="LinkedIn icon"
+                width={30}
+                height={30}
+            />
         </button>
     );
 }

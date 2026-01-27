@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
+import ContinueWithAzureButton from "@/app/components/OauthButtons/ContinueWithAzureButton";
 import ContinueWithGithubButton from "@/app/components/OauthButtons/ContinueWithGithubButton";
 import ContinueWithGoogleButton from "@/app/components/OauthButtons/ContinueWithGoogleButton";
 import ContinueWithLinkedinButton from "@/app/components/OauthButtons/ContinueWithLinkedinButton";
@@ -97,10 +98,8 @@ export default function LoginForm() {
         <div className={styles.oauthButtonsContainer}>
           <ContinueWithGithubButton />
           <ContinueWithLinkedinButton />
-        </div>
-
-        <div className={styles.oauthButtonsContainer}>
           <ContinueWithGoogleButton />
+          <ContinueWithAzureButton />
         </div>
 
         <div className={styles.otherContent}>
