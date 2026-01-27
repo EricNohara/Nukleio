@@ -1,30 +1,11 @@
 .button {
-  position: relative;
-  width: 100%;
   padding: 0.75rem;
-  font-size: 1rem;
-  font-weight: 600;
   border: none;
   border-radius: var(--global-border-radius);
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  color: white;
   transition: background-color 0.2s ease;
-}
-
-.iconWrapper {
-  position: absolute;
-  left: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.buttonText {
-  pointer-events: none;
 }
 
 .button:hover {
@@ -32,11 +13,11 @@
 }
 
 .github {
-  background-color: #2d333b;
+  background-color: #3b434d;
 }
 
 .github:hover {
-  background-color: #24292f;
+  background-color: #2d333b;
 }
 
 .linkedin {
@@ -48,9 +29,17 @@
 }
 
 .google {
-  background-color: #101010;
+  background-color: #f2f2f2;
 }
 
 .google:hover {
-  background-color: #000000;
+  background-color: #dbdbdb;
+}
+
+.azure {
+  background-color: #f2f2f2;
+}
+
+.azure:hover {
+  background-color: #dbdbdb;
 }

@@ -36,6 +36,7 @@ export async function GET(request: Request) {
         } else if (providerParam === "linkedin_oidc") {
           // autofill username, avatar, resume, etc. (maybe use linkedin API)
         } else if (providerParam === "google") {
+        } else if (providerParam === "azure") {
         }
       }
 

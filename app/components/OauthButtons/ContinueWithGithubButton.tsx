@@ -21,16 +21,12 @@ export default function ContinueWithGithubButton() {
 
     return (
         <button onClick={handleGithub} className={`${styles.button} ${styles.github}`}>
-            <span className={styles.iconWrapper}>
-                <Image
-                    src="/images/github-icon.svg"
-                    alt="GitHub icon"
-                    width={25}
-                    height={25}
-                />
-            </span>
-
-            <span className={styles.buttonText}>GitHub</span>
+            <Image
+                src="/images/github-icon.svg"
+                alt="GitHub icon"
+                width={30}
+                height={30}
+            />
         </button>
     );
 }
