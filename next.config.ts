@@ -7,9 +7,50 @@ const SUPABASE_URL = "https://jfsetifsqcpkwdtcrhdt.supabase.co";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
+      // Supabase storage
       {
         protocol: "https",
         hostname: "jfsetifsqcpkwdtcrhdt.supabase.co",
+        pathname: "/**",
+      },
+
+      // Google avatars
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
+      },
+
+      // GitHub avatars
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        pathname: "/**",
+      },
+
+      // GitLab avatars
+      {
+        protocol: "https",
+        hostname: "assets.gitlab-static.net",
+        pathname: "/**",
+      },
+
+      // Microsoft avatars
+      {
+        protocol: "https",
+        hostname: "graph.microsoft.com",
+        pathname: "/**",
+      },
+
+      // LinkedIn avatars
+      {
+        protocol: "https",
+        hostname: "media.licdn.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "media-exp1.licdn.com",
         pathname: "/**",
       },
     ],
@@ -28,9 +69,29 @@ const nextConfig: NextConfig = {
               } https://vercel.analytics.edge.com https://cdn.vercel-insights.com https://vercel.live https://va.vercel-scripts.com;
               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
               img-src 'self' data: https:;
-              connect-src 'self' https://vercel.analytics.edge.com https://api.vercel.com https://m2uyqee3yri2agbs2vqroykaw40lcmud.lambda-url.us-east-2.on.aws ${SUPABASE_URL};
+              connect-src 
+                'self'
+                https://vercel.analytics.edge.com
+                https://api.vercel.com
+                https://m2uyqee3yri2agbs2vqroykaw40lcmud.lambda-url.us-east-2.on.aws
+                ${SUPABASE_URL}
+                https://graph.microsoft.com
+                https://accounts.google.com
+                https://oauth2.googleapis.com
+                https://api.github.com
+                https://www.linkedin.com
+                https://api.linkedin.com
+                https://gitlab.com;
               font-src 'self' https://fonts.gstatic.com;
-              frame-src https://vercel.live https://jfsetifsqcpkwdtcrhdt.supabase.co;
+              frame-src
+                'self'
+                https://vercel.live
+                https://jfsetifsqcpkwdtcrhdt.supabase.co
+                https://accounts.google.com
+                https://login.microsoftonline.com
+                https://github.com
+                https://www.linkedin.com
+                https://gitlab.com;
               object-src 'none';
               base-uri 'self';
               form-action 'self';

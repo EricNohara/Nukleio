@@ -12,25 +12,39 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (!email || !password) {
       return NextResponse.json(
         { message: "Email or password missing" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const data = { email, password };
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-    const { error } = await supabase.auth.signUp(data);
     if (error) throw error;
+
+    // update the created_by_oauth field to false
+    if (data.user) {
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ requires_oauth_signup: false })
+        .eq("id", data.user.id);
+
+      if (updateError) {
+        console.error("Failed to update requires_oauth_signup:", updateError);
+      }
+    }
 
     return NextResponse.json(
       { message: "Sign up successful" },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
