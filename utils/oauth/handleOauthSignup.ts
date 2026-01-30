@@ -2,6 +2,7 @@ import { SupabaseClient, User, UserIdentity } from "@supabase/supabase-js";
 
 import { handleGithubSignup } from "./providers/github";
 import { handleGoogleSignup } from "./providers/google";
+import { handleLinkedinSignup } from "./providers/linkedin";
 
 export async function handleOauthSignup(
   provider: string,
@@ -49,6 +50,10 @@ export async function handleOauthSignup(
       break;
 
     case "linkedin_oidc":
+      updates = {
+        ...updates,
+        ...(await handleLinkedinSignup(identityData)),
+      };
       break;
 
     case "azure":

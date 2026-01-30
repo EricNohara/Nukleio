@@ -1,11 +1,12 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function handleGoogleSignup(identityData: any) {
-  const username = identityData.full_name ?? identityData.name;
+export async function handleLinkedinSignup(identityData: any) {
+  const username =
+    identityData.name ?? identityData.given_name ?? identityData.family_name;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updates: Record<string, any> = {
     name: username,
-    portrait_url: identityData.avatar_url ?? identityData.picture,
+    portrait_url: identityData.picture,
   };
 
   return updates;
