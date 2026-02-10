@@ -31,6 +31,11 @@ const nextConfig: NextConfig = {
       // GitLab avatars
       {
         protocol: "https",
+        hostname: "gitlab.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "assets.gitlab-static.net",
         pathname: "/**",
       },
