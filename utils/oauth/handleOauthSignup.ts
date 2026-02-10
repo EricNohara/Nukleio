@@ -1,9 +1,9 @@
 import { SupabaseClient, User, UserIdentity } from "@supabase/supabase-js";
 
 import { handleGithubSignup } from "./providers/github";
+import { handleGitlabSignup } from "./providers/gitlab";
 import { handleGoogleSignup } from "./providers/google";
 import { handleLinkedinSignup } from "./providers/linkedin";
-import { handleGitlabSignup } from "./providers/gitlab";
 
 export async function handleOauthSignup(
   provider: string,
