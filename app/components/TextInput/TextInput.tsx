@@ -4,9 +4,12 @@ import { Eye, EyeOff } from "lucide-react";
 import React, { ChangeEvent } from "react";
 import { useState } from "react";
 
+
 import { headerFont } from "@/app/localFonts";
 
 import styles from "./TextInput.module.css";
+
+import type { CSSProperties } from "react";
 
 interface TextInputProps {
     label: string;
@@ -20,7 +23,12 @@ interface TextInputProps {
     textAreaRows?: number;
     disabled?: boolean;
     className?: string;
+    focusLabelColor?: string;
 }
+
+type StyleWithFocusLabelVar = CSSProperties & {
+    "--focus-label-color"?: string;
+};
 
 export default function TextInput({
     label,
@@ -33,7 +41,8 @@ export default function TextInput({
     isInInputForm = false,
     textAreaRows = 4,
     disabled = false,
-    className = ""
+    className = "",
+    focusLabelColor
 }: TextInputProps) {
     const [showPassword, setShowPassword] = useState(false);
 
@@ -42,9 +51,12 @@ export default function TextInput({
     const inputClass =
         `${isInInputForm ? styles.inputFormInput : styles.textInput} ${isPassword ? styles.hasToggle : ""} ${className}`;
 
+    const focusStyle: StyleWithFocusLabelVar | undefined = focusLabelColor
+        ? { "--focus-label-color": focusLabelColor }
+        : undefined;
 
     return (
-        <div className={styles.inputDiv}>
+        <div className={styles.inputDiv} style={focusStyle}>
             <label className={`${styles.inputLabel} ${isInInputForm && styles.inputFormInputLabel} ${headerFont.className}`} htmlFor={name}>
                 {label}
                 {required && <span className={styles.required}> *</span>}

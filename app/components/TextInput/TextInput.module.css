@@ -7,7 +7,9 @@
   border-radius: var(--global-border-radius);
   width: 100%;
   font-size: 1rem;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
   font-family: inherit;
 }
 
@@ -15,7 +17,9 @@
   outline: none;
   border-color: var(--login-txt-1);
   background-color: var(--login-btn-bg);
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 .textInput::placeholder {
   color: var(--login-txt-3);
@@ -27,7 +31,9 @@
 .textInput:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0px 1000px var(--login-btn-bg) inset !important;
   -webkit-text-fill-color: var(--login-txt-1) !important;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .inputDiv {
@@ -69,7 +75,9 @@
 .inputFormInput:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0px 1000px var(--input-form-input) inset !important;
   -webkit-text-fill-color: var(--input-form-input-txt) !important;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 /* DATE PICKER */
@@ -80,7 +88,9 @@
   border-radius: var(--global-border-radius);
   font-size: 1rem;
   width: 100%;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .inputFormInput[type="date"]:focus {
@@ -108,7 +118,7 @@
 }
 
 .inputDiv:focus-within .inputLabel {
-  color: var(--login-txt-1); /* same color as focused border */
+  color: var(--focus-label-color, var(--login-txt-1));
 }
 
 .inputWrapper {
