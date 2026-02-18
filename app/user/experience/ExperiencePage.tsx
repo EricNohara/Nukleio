@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
+import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
 import { IExperience } from "@/app/interfaces/IExperience";
@@ -26,6 +27,8 @@ export default function ExperiencePage() {
         job_description: null,
     });
     const [experienceToEdit, setExperienceToEdit] = useState<IExperience | null>(null);
+    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
+
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
     const router = useRouter();
@@ -57,9 +60,18 @@ export default function ExperiencePage() {
 
             // update cached state
             dispatch({ type: "DELETE_EXPERIENCE", payload: experience });
+            setSnackbar({
+                message: "Success",
+                messageDescription: `Successfully deleted experience: ${experience.company}, ${experience.job_title}.`,
+                variant: "success",
+            });
         } catch (error) {
-            console.error(error);
-            alert(error);
+            const err = error as Error;
+            setSnackbar({
+                message: "Error",
+                messageDescription: err.message,
+                variant: "error",
+            });
         }
     }
 
@@ -119,6 +131,12 @@ export default function ExperiencePage() {
 
                 // update cached state
                 dispatch({ type: "UPDATE_EXPERIENCE", payload: { old: experienceToEdit, new: newExperience } });
+
+                setSnackbar({
+                    message: "Success",
+                    messageDescription: `Successfully updated your experience.`,
+                    variant: "success",
+                });
             } else {
                 // Add the experience
                 const res = await fetch("/api/internal/user/experience", {
@@ -131,12 +149,22 @@ export default function ExperiencePage() {
 
                 // update the cached user
                 dispatch({ type: "ADD_EXPERIENCE", payload: newExperience });
+
+                setSnackbar({
+                    message: "Success",
+                    messageDescription: `Successfully created your experience.`,
+                    variant: "success",
+                });
             }
 
         } catch (err) {
             console.error(err);
             const error = err as Error;
-            alert(error.message);
+            setSnackbar({
+                message: "Error",
+                messageDescription: error.message,
+                variant: "error",
+            });
         }
 
         // reset form
@@ -267,6 +295,17 @@ export default function ExperiencePage() {
                     onClose={formProps.onClose}
                 />
             }
+
+            {/* Status message */}
+            {snackbar && (
+                <Snackbar
+                    message={snackbar.message}
+                    messageDescription={snackbar.messageDescription}
+                    variant={snackbar.variant}
+                    duration={4000}
+                    onClose={() => setSnackbar(null)}
+                />
+            )}
         </PageContentWrapper>
     );
 }
