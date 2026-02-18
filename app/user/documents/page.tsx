@@ -7,6 +7,7 @@ import FileUploadBox from "@/app/components/FileUploadBox/FileUploadBox";
 import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
 import { IButton } from "@/app/components/PageContentHeader/PageContentHeader";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
+import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import { useUser } from "@/app/context/UserProvider";
 import { compressImage, compressPDF } from "@/utils/file-upload/compress";
 import { uploadFile } from "@/utils/file-upload/upload";
@@ -25,6 +26,7 @@ export default function DocumentsPage() {
     transcript: null
   })
   const { state, dispatch } = useUser();
+  const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
   const handleEdit = (url: string | undefined) => {
     switch (url) {
@@ -49,7 +51,11 @@ export default function DocumentsPage() {
       const res = await fetch(`/api/internal/storage?publicURL=${url}`, { method: "DELETE" });
 
       if (res.status === 204) {
-        alert("Successfully deleted document");
+        setSnackbar({
+          message: "Success",
+          messageDescription: "Successfully deleted your document.",
+          variant: "success",
+        });
       } else {
         const data = await res.json();
         throw new Error(data.message);
@@ -57,9 +63,13 @@ export default function DocumentsPage() {
 
       // update cached state
       dispatch({ type: "DELETE_DOCUMENT", payload: { docType: docType } });
-    } catch (err) {
-      console.error(err);
-      alert(err);
+    } catch (error) {
+      console.error(error);
+      setSnackbar({
+        message: "Error",
+        messageDescription: "Error deleting your document.",
+        variant: "error",
+      });
     }
   }
 
@@ -87,9 +97,18 @@ export default function DocumentsPage() {
         setIsEditing({ ...isEditing, transcript_url: false });
         setDocs({ ...docs, transcript: null });
       }
-    } catch (error) {
-      console.error(error);
-      alert(error);
+
+      setSnackbar({
+        message: "Success",
+        messageDescription: "Successfully uploaded your documents.",
+        variant: "success",
+      });
+    } catch {
+      setSnackbar({
+        message: "Error",
+        messageDescription: "An error occurred while uploading your documents.",
+        variant: "error",
+      });
     }
   }
 
@@ -131,7 +150,7 @@ export default function DocumentsPage() {
               alt={state.name || "Your Portrait Display"}
               uploadedItemName="Profile Picture"
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={() => handleDelete(state.portrait_url ?? "", "portrait_url")}
               docType="portrait_url"
             /> :
             isEditing.portrait_url ?
@@ -158,7 +177,7 @@ export default function DocumentsPage() {
               pdfUrl={state.resume_url}
               uploadedItemName="Resume"
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={() => handleDelete(state.resume_url ?? "", "resume_url")}
               docType="resume_url"
             /> :
             isEditing.resume_url ?
@@ -185,7 +204,7 @@ export default function DocumentsPage() {
               pdfUrl={state.transcript_url}
               uploadedItemName="Transcript"
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={() => handleDelete(state.transcript_url ?? "", "transcript_url")}
               docType="transcript_url"
             /> :
             isEditing.transcript_url ?
@@ -208,6 +227,15 @@ export default function DocumentsPage() {
         }
       </div>
 
+      {snackbar && (
+        <Snackbar
+          message={snackbar.message}
+          messageDescription={snackbar.messageDescription}
+          variant={snackbar.variant}
+          duration={4000}
+          onClose={() => setSnackbar(null)}
+        />
+      )}
     </PageContentWrapper>
   );
 }

@@ -19,6 +19,7 @@ interface ISearchBarProps {
 
 const DEFAULT_SUGGESTIONS: ISuggestion[] = [
     { label: "Home Page", path: "/user" },
+    { label: "User Info", path: "/user/userInfo" },
     { label: "Documents Page", path: "/user/documents" },
     { label: "Profile Picture", path: "/user/documents" },
     { label: "Resume", path: "/user/documents" },

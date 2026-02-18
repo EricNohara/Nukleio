@@ -1,6 +1,6 @@
 export async function uploadFile(
   file: File | null,
-  bucketName: string
+  bucketName: string,
 ): Promise<string | null> {
   if (!file || !bucketName || bucketName === "") return null;
 
@@ -16,7 +16,7 @@ export async function uploadFile(
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message.message);
+    if (!res.ok) throw new Error(data.message);
 
     publicURL = data.publicURL;
   } catch (err) {

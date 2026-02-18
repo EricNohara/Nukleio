@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne } from "@/app/components/Buttons/Buttons";
-import Snackbar from "@/app/components/Snackbar/Snackbar";
+import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import { useUser } from "@/app/context/UserProvider";
 import { headerFont } from "@/app/localFonts";
 import { createClient } from "@/utils/supabase/client";
@@ -18,11 +18,7 @@ export default function ResetPasswordForm() {
     const { state } = useUser();
 
     const [isLoading, setIsLoading] = useState(false);
-    const [snackbar, setSnackbar] = useState<{
-        message: string;
-        messageDescription: string;
-        variant: "success" | "error";
-    } | null>(null);
+    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
     const [cooldown, setCooldown] = useState<number>(0);
 
@@ -66,8 +62,7 @@ export default function ResetPasswordForm() {
                 variant: "success",
             });
             setCooldown(COOLDOWN_SECONDS);
-        } catch (err) {
-            console.error(err);
+        } catch {
             setSnackbar({
                 message: "Error sending email",
                 messageDescription: "Couldn't send the reset email. Please try again.",

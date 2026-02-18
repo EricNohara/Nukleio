@@ -5,18 +5,9 @@ import { useMemo, useState } from "react";
 import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
 import { IButton } from "@/app/components/PageContentHeader/PageContentHeader";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
-import Snackbar from "@/app/components/Snackbar/Snackbar";
+import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 
 import EditUserForm from "./EditUserForm";
-
-
-
-
-type SnackbarState = {
-    message: string;
-    messageDescription: string;
-    variant: "success" | "error";
-} | null;
 
 export default function UserInfoPage() {
     const [isEditing, setIsEditing] = useState<boolean>(false);

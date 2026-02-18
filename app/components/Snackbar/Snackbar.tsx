@@ -7,6 +7,12 @@ import styles from "./Snackbar.module.css";
 
 export type SnackbarVariant = "success" | "error" | "warning" | "info";
 
+export type SnackbarState = {
+    message: string;
+    messageDescription: string;
+    variant: "success" | "error";
+} | null;
+
 type SnackbarProps = {
     message: string;
     messageDescription?: string;
