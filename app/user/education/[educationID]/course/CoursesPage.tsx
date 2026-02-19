@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
+import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
 import { ICourseInput } from "@/app/interfaces/ICourse";
@@ -29,6 +30,8 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
     const [courseToEdit, setCourseToEdit] = useState<ICourseInput | null>(null);
     const [education, setEducation] = useState<IUserEducationInternal | null>(null);
     const [rows, setRows] = useState<Record<string, React.ReactNode>[]>([]);
+    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
+
     const router = useRouter();
     const educationIDNum = Number(educationID);
     const searchParams = useSearchParams();
@@ -80,9 +83,19 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
 
             // update cached state
             dispatch({ type: "DELETE_COURSE", payload: { educationID: educationIDNum, courseName: course.name } });
+
+            setSnackbar({
+                message: "Success",
+                messageDescription: `Successfully deleted course: ${course.name}`,
+                variant: "success",
+            });
         } catch (error) {
-            console.error(error);
-            alert(error);
+            const err = error as Error;
+            setSnackbar({
+                message: "Error",
+                messageDescription: err.message,
+                variant: "error",
+            });
         }
     }
 
@@ -99,7 +112,11 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
 
         // validate input
         if (!name) {
-            alert("Please fill out all required fields.");
+            setSnackbar({
+                message: "Error",
+                messageDescription: "Please fill out all required fields.",
+                variant: "error",
+            });
             return;
         }
 
@@ -127,6 +144,12 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
 
                 // update cached state
                 dispatch({ type: "UPDATE_COURSE", payload: { educationID: educationIDNum, courseName: courseToEdit.name, newCourse: newCourse } });
+
+                setSnackbar({
+                    message: "Success",
+                    messageDescription: `Successfully updated course: ${name}`,
+                    variant: "success",
+                });
             } else {
                 // Add the skill
                 const postPayload = {
@@ -143,12 +166,21 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
 
                 // update the cached user
                 dispatch({ type: "ADD_COURSE", payload: { educationID: educationIDNum, course: newCourse } });
+
+                setSnackbar({
+                    message: "Success",
+                    messageDescription: `Successfully created course: ${name}`,
+                    variant: "success",
+                });
             }
 
         } catch (err) {
-            console.error(err);
             const error = err as Error;
-            alert(error.message);
+            setSnackbar({
+                message: "Error",
+                messageDescription: `Failed to create or update course: ${error.message}`,
+                variant: "error",
+            });
         }
 
         // reset form
@@ -250,6 +282,17 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
                     onClose={formProps.onClose}
                 />
             }
+
+            {/* Status message */}
+            {snackbar && (
+                <Snackbar
+                    message={snackbar.message}
+                    messageDescription={snackbar.messageDescription}
+                    variant={snackbar.variant}
+                    duration={4000}
+                    onClose={() => setSnackbar(null)}
+                />
+            )}
         </PageContentWrapper>
     );
 }

@@ -90,18 +90,30 @@ export default function ExperiencePage() {
 
         // validate input
         if (!company || !job_title) {
-            alert("Please fill out all required fields.");
+            setSnackbar({
+                message: "Error",
+                messageDescription: "Please fill out all required fields.",
+                variant: "error",
+            });
             return;
         }
 
         // Validate dates
         if (date_end && !date_start) {
-            alert("Start date must be provided if end date exists.");
+            setSnackbar({
+                message: "Error",
+                messageDescription: "Start date must be provided if an end date is provided.",
+                variant: "error",
+            });
             return;
         }
 
         if (date_start && date_end && date_end < date_start) {
-            alert("End date cannot be before start date.");
+            setSnackbar({
+                message: "Error",
+                messageDescription: "End date cannot be before the start date.",
+                variant: "error",
+            });
             return;
         }
 

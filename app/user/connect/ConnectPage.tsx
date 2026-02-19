@@ -8,6 +8,7 @@ import ApiKeyDisplay from "@/app/components/ApiKeyDisplay/ApiKeyDisplay";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
+import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import Table from "@/app/components/Table/Table";
 import { useUser } from "@/app/context/UserProvider";
 import { IApiKeyInternal, IApiKeyInternalInput } from "@/app/interfaces/IApiKey";
@@ -27,6 +28,8 @@ export default function ConnectPage() {
         expires: null,
     });
     const [apiKeyToRefresh, setApiKeyToRefresh] = useState<IApiKeyInternalInput | null>(null);
+    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
+
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
     const router = useRouter();
@@ -63,9 +66,19 @@ export default function ConnectPage() {
 
             // update cached state
             dispatch({ type: "DELETE_API_KEY", payload: key });
+
+            setSnackbar({
+                message: "Success",
+                messageDescription: `Successfully deleted API key: ${key.description}.`,
+                variant: "success",
+            });
         } catch (error) {
-            console.error(error);
-            alert(error);
+            const err = error as Error;
+            setSnackbar({
+                message: "Error",
+                messageDescription: err.message,
+                variant: "error",
+            });
         }
     }
 
@@ -81,12 +94,20 @@ export default function ConnectPage() {
 
         // validate input
         if (!description) {
-            alert("Please fill out all required fields.");
+            setSnackbar({
+                message: "Error",
+                messageDescription: "Please fill out all required fields.",
+                variant: "error",
+            });
             return;
         }
 
         if (expires && expires < new Date()) {
-            alert("Expiration date cannot be in the past")
+            setSnackbar({
+                message: "Error",
+                messageDescription: "API key expiration date cannot be in the past.",
+                variant: "error",
+            });
             return;
         }
 
@@ -120,6 +141,12 @@ export default function ConnectPage() {
 
                 // update cached state
                 dispatch({ type: "UPDATE_API_KEY", payload: { old: oldKey, new: data.key } });
+
+                setSnackbar({
+                    message: "Success",
+                    messageDescription: `Successfully updated API key: ${description}.`,
+                    variant: "success",
+                });
             } else {
                 // Add the skill
                 const res = await fetch("/api/internal/user/key", {
@@ -132,13 +159,22 @@ export default function ConnectPage() {
 
                 // update the cached user
                 dispatch({ type: "ADD_API_KEY", payload: data.key });
+
+                setSnackbar({
+                    message: "Success",
+                    messageDescription: `Successfully created API key: ${description}.`,
+                    variant: "success",
+                });
             }
 
             success = true;
         } catch (err) {
-            console.error(err);
             const error = err as Error;
-            alert(error.message);
+            setSnackbar({
+                message: "Error",
+                messageDescription: `Failed to create or update API key: ${error.message}.`,
+                variant: "error",
+            });
         }
 
         // reset form and show generated key
@@ -245,6 +281,17 @@ export default function ConnectPage() {
                 keyToDisplay &&
                 <ApiKeyDisplay keyDescription={keyToDisplay} onClose={onApiKeyDisplayClose} />
             }
+
+            {/* Status message */}
+            {snackbar && (
+                <Snackbar
+                    message={snackbar.message}
+                    messageDescription={snackbar.messageDescription}
+                    variant={snackbar.variant}
+                    duration={4000}
+                    onClose={() => setSnackbar(null)}
+                />
+            )}
         </PageContentWrapper>
     );
 }

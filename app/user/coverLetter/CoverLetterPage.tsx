@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 
 import LoadingMessageSpinner from "@/app/components/LoadingMessageSpinner/LoadingMessageSpinner";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
+import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import TextInput from "@/app/components/TextInput/TextInput";
 import { cacheDraft, cleanupDraftCache, loadCachedDraft } from "@/utils/coverLetter/coverLetterCache";
 
@@ -22,6 +23,8 @@ export default function CoverLetterPage() {
     const [feedback, setFeedback] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [mode, setMode] = useState<"initial" | "revision">("initial");
+    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
+
     const router = useRouter();
 
     useEffect(() => {
@@ -31,8 +34,12 @@ export default function CoverLetterPage() {
                 if (!res.ok) throw new Error();
                 const data = await res.json();
                 setUserId(data.user.id);
-            } catch (error) {
-                console.error(error);
+            } catch {
+                setSnackbar({
+                    message: "Error",
+                    messageDescription: "Failed to fetch user ID. Please refresh the page and try again.",
+                    variant: "error",
+                });
             }
         }
         cleanupDraftCache();
@@ -72,8 +79,12 @@ export default function CoverLetterPage() {
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
-                } catch (err) {
-                    console.error(err);
+                } catch {
+                    setSnackbar({
+                        message: "Error",
+                        messageDescription: "Failed to revise cover letter. Please refresh the page and try again.",
+                        variant: "error",
+                    });
                 } finally {
                     setLoading(false);
                 }
@@ -130,8 +141,12 @@ export default function CoverLetterPage() {
                     setDraft(data.currentDraft);
                     setConversationId(data.conversationId);
                     cacheDraft(url, jobTitle, companyName, data.currentDraft, data.conversationId);
-                } catch (err) {
-                    console.error(err);
+                } catch {
+                    setSnackbar({
+                        message: "Error",
+                        messageDescription: "Failed to generate cover letter. Please refresh the page and try again.",
+                        variant: "error",
+                    });
                 } finally {
                     setLoading(false);
                 }
@@ -266,6 +281,17 @@ export default function CoverLetterPage() {
                     </div>
                 )}
             </div>
+
+            {/* Status message */}
+            {snackbar && (
+                <Snackbar
+                    message={snackbar.message}
+                    messageDescription={snackbar.messageDescription}
+                    variant={snackbar.variant}
+                    duration={4000}
+                    onClose={() => setSnackbar(null)}
+                />
+            )}
         </PageContentWrapper>
     );
 }
