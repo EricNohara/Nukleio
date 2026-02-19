@@ -7,7 +7,7 @@ import FileUploadBox from "@/app/components/FileUploadBox/FileUploadBox";
 import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
 import { IButton } from "@/app/components/PageContentHeader/PageContentHeader";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
-import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { compressImage, compressPDF } from "@/utils/file-upload/compress";
 import { uploadFile } from "@/utils/file-upload/upload";
@@ -26,7 +26,7 @@ export default function DocumentsPage() {
     transcript: null
   })
   const { state, dispatch } = useUser();
-  const [snackbar, setSnackbar] = useState<SnackbarState>(null);
+  const toast = useToast();
 
   const handleEdit = (url: string | undefined) => {
     switch (url) {
@@ -50,26 +50,16 @@ export default function DocumentsPage() {
 
       const res = await fetch(`/api/internal/storage?publicURL=${url}`, { method: "DELETE" });
 
-      if (res.status === 204) {
-        setSnackbar({
-          message: "Success",
-          messageDescription: "Successfully deleted your document.",
-          variant: "success",
-        });
-      } else {
+      if (res.status !== 204) {
         const data = await res.json();
         throw new Error(data.message);
       }
 
       // update cached state
       dispatch({ type: "DELETE_DOCUMENT", payload: { docType: docType } });
-    } catch (error) {
-      console.error(error);
-      setSnackbar({
-        message: "Error",
-        messageDescription: "Error deleting your document.",
-        variant: "error",
-      });
+      toast.success("Success", "Successfully deleted your document.");
+    } catch {
+      toast.error("Error", "Error deleting your document.");
     }
   }
 
@@ -98,17 +88,9 @@ export default function DocumentsPage() {
         setDocs({ ...docs, transcript: null });
       }
 
-      setSnackbar({
-        message: "Success",
-        messageDescription: "Successfully uploaded your documents.",
-        variant: "success",
-      });
+      toast.success("Success", "Successfully uploaded your documents.");
     } catch {
-      setSnackbar({
-        message: "Error",
-        messageDescription: "An error occurred while uploading your documents.",
-        variant: "error",
-      });
+      toast.error("Error", "Failed to upload your documents. Please try again.");
     }
   }
 
@@ -116,12 +98,15 @@ export default function DocumentsPage() {
     switch (docType) {
       case "portrait_url":
         setDocs({ ...docs, portrait: file });
+        toast.info("Info", "Click save documents button to save your portrait.");
         break;
       case "resume_url":
         setDocs({ ...docs, resume: file });
+        toast.info("Info", "Click save documents button to save your resume.");
         break;
       case "transcript_url":
         setDocs({ ...docs, transcript: file });
+        toast.info("Info", "Click save documents button to save your transcript.");
         break;
       default:
         break;
@@ -226,16 +211,6 @@ export default function DocumentsPage() {
               />
         }
       </div>
-
-      {snackbar && (
-        <Snackbar
-          message={snackbar.message}
-          messageDescription={snackbar.messageDescription}
-          variant={snackbar.variant}
-          duration={4000}
-          onClose={() => setSnackbar(null)}
-        />
-      )}
     </PageContentWrapper>
   );
 }

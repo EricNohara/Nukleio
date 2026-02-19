@@ -79,6 +79,12 @@ export default function CoverLetterPage() {
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
+
+                    setSnackbar({
+                        message: "Success",
+                        messageDescription: "Successfully completed cover letter draft revision.",
+                        variant: "success",
+                    });
                 } catch {
                     setSnackbar({
                         message: "Error",
@@ -141,6 +147,12 @@ export default function CoverLetterPage() {
                     setDraft(data.currentDraft);
                     setConversationId(data.conversationId);
                     cacheDraft(url, jobTitle, companyName, data.currentDraft, data.conversationId);
+
+                    setSnackbar({
+                        message: "Success",
+                        messageDescription: "Successfully generated first draft of your cover letter. You may now add your revisions or save the PDF.",
+                        variant: "success",
+                    });
                 } catch {
                     setSnackbar({
                         message: "Error",

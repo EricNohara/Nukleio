@@ -11,6 +11,7 @@ import SuccessFailureDonut from "../components/Chart/SuccessFailureDonut";
 import TopConnectionsDonut from "../components/Chart/TopConnectionsDonut";
 import PageContentHeader, { IButton } from "../components/PageContentHeader/PageContentHeader";
 import PageContentWrapper from "../components/PageContentWrapper/PageContentWrapper";
+import { useToast } from "../context/ToastProvider";
 
 type InfoKey = "recentActivity" | "recentLatency" | "topConnections" | "successFailure" | null;
 
@@ -39,6 +40,8 @@ export default function UserHomePage() {
   const [openInfo, setOpenInfo] = useState<InfoKey>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
 
+  const toast = useToast();
+
   useEffect(() => {
     const authenticator = async () => {
       try {
@@ -46,13 +49,14 @@ export default function UserHomePage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
       } catch (err) {
-        console.error(err);
+        const error = err as Error;
+        toast.error("Error", error.message);
         router.push("/");
       }
     };
 
     authenticator();
-  }, [router]);
+  }, [router, toast]);
 
   // Close popover on outside click
   useEffect(() => {

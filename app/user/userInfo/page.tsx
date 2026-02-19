@@ -5,14 +5,12 @@ import { useMemo, useState } from "react";
 import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
 import { IButton } from "@/app/components/PageContentHeader/PageContentHeader";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
-import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 
 import EditUserForm from "./EditUserForm";
 
 export default function UserInfoPage() {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
-    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
     const formId = "edit-user-form";
 
@@ -49,18 +47,7 @@ export default function UserInfoPage() {
                 isEditing={isEditing}
                 setIsEditing={setIsEditing}
                 setIsSaving={setIsSaving}
-                setSnackbar={setSnackbar}
             />
-
-            {snackbar && (
-                <Snackbar
-                    message={snackbar.message}
-                    messageDescription={snackbar.messageDescription}
-                    variant={snackbar.variant}
-                    duration={4000}
-                    onClose={() => setSnackbar(null)}
-                />
-            )}
         </PageContentWrapper>
     );
 }

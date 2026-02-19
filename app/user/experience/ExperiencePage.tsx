@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
-import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import Table from "@/app/components/Table/Table";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { IExperience } from "@/app/interfaces/IExperience";
 
@@ -27,11 +27,11 @@ export default function ExperiencePage() {
         job_description: null,
     });
     const [experienceToEdit, setExperienceToEdit] = useState<IExperience | null>(null);
-    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
     const router = useRouter();
+    const toast = useToast();
 
     // used to open given experience if inputted as search param
     useEffect(() => {
@@ -60,18 +60,10 @@ export default function ExperiencePage() {
 
             // update cached state
             dispatch({ type: "DELETE_EXPERIENCE", payload: experience });
-            setSnackbar({
-                message: "Success",
-                messageDescription: `Successfully deleted experience: ${experience.company}, ${experience.job_title}.`,
-                variant: "success",
-            });
+            toast.success("Success", `Successfully deleted experience: ${experience.company}, ${experience.job_title}.`);
         } catch (error) {
             const err = error as Error;
-            setSnackbar({
-                message: "Error",
-                messageDescription: err.message,
-                variant: "error",
-            });
+            toast.error("Error", err.message);
         }
     }
 
@@ -90,30 +82,18 @@ export default function ExperiencePage() {
 
         // validate input
         if (!company || !job_title) {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "Please fill out all required fields.",
-                variant: "error",
-            });
+            toast.warning("Warning", "Please fill out all required fields before submitting.");
             return;
         }
 
         // Validate dates
         if (date_end && !date_start) {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "Start date must be provided if an end date is provided.",
-                variant: "error",
-            });
+            toast.warning("Warning", "Please provide a start date if you provided an end date.");
             return;
         }
 
         if (date_start && date_end && date_end < date_start) {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "End date cannot be before the start date.",
-                variant: "error",
-            });
+            toast.warning("Warning", "Invalid end date. End date cannot be before the start date.");
             return;
         }
 
@@ -143,12 +123,6 @@ export default function ExperiencePage() {
 
                 // update cached state
                 dispatch({ type: "UPDATE_EXPERIENCE", payload: { old: experienceToEdit, new: newExperience } });
-
-                setSnackbar({
-                    message: "Success",
-                    messageDescription: `Successfully updated your experience.`,
-                    variant: "success",
-                });
             } else {
                 // Add the experience
                 const res = await fetch("/api/internal/user/experience", {
@@ -161,22 +135,11 @@ export default function ExperiencePage() {
 
                 // update the cached user
                 dispatch({ type: "ADD_EXPERIENCE", payload: newExperience });
-
-                setSnackbar({
-                    message: "Success",
-                    messageDescription: `Successfully created your experience.`,
-                    variant: "success",
-                });
             }
-
+            toast.success("Success", "Successfully saved your experience.");
         } catch (err) {
-            console.error(err);
             const error = err as Error;
-            setSnackbar({
-                message: "Error",
-                messageDescription: error.message,
-                variant: "error",
-            });
+            toast.error("Error", error.message);
         }
 
         // reset form
@@ -189,7 +152,6 @@ export default function ExperiencePage() {
         setIsFormOpen(false);
         setExperienceToEdit(null);
 
-        // remove the ?index param from url
         const current = new URLSearchParams(Array.from(searchParams.entries()));
         current.delete("index");
         const newQuery = current.toString();
@@ -307,17 +269,6 @@ export default function ExperiencePage() {
                     onClose={formProps.onClose}
                 />
             }
-
-            {/* Status message */}
-            {snackbar && (
-                <Snackbar
-                    message={snackbar.message}
-                    messageDescription={snackbar.messageDescription}
-                    variant={snackbar.variant}
-                    duration={4000}
-                    onClose={() => setSnackbar(null)}
-                />
-            )}
         </PageContentWrapper>
     );
 }

@@ -4,6 +4,7 @@ import { Phone, Link2, SquareUserRound, BriefcaseBusiness } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
 import TextInput from "@/app/components/TextInput/TextInput";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import IUser from "@/app/interfaces/IUser";
 
@@ -29,7 +30,6 @@ interface EditUserFormProps {
     isEditing: boolean;
     setIsEditing: (v: boolean) => void;
     setIsSaving: (v: boolean) => void;
-    setSnackbar: (v: { message: string; messageDescription: string; variant: "success" | "error" } | null) => void;
 }
 
 const EMPTY_USER: IBasicUserInfo = {
@@ -52,10 +52,10 @@ export default function EditUserForm({
     isEditing,
     setIsEditing,
     setIsSaving,
-    setSnackbar
 }: EditUserFormProps) {
     const [formData, setFormData] = useState<IBasicUserInfo>(EMPTY_USER);
     const { state, dispatch } = useUser();
+    const toast = useToast();
 
     useEffect(() => {
         if (isEditing) return;
@@ -95,13 +95,9 @@ export default function EditUserForm({
             transcript_url: state.transcript_url
         }
 
-        if (!userData.email) {
+        if (!userData.email.trim()) {
             setIsSaving(false);
-            setSnackbar({
-                message: "Email required",
-                messageDescription: "Please enter an email address before saving.",
-                variant: "error",
-            });
+            toast.warning("Warning", "Email is required. Please enter an email address before saving.");
             return;
         }
 
@@ -119,17 +115,9 @@ export default function EditUserForm({
             dispatch({ type: "SET_USER", payload: userData })
             setIsEditing(false);
 
-            setSnackbar({
-                message: "Success",
-                messageDescription: "Successfully updated user data",
-                variant: "success",
-            });
+            toast.success("Success", "Successfully udpated user data.");
         } catch {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "Failed to update user data",
-                variant: "error",
-            });
+            toast.error("Error", "Failed to udpate user data.");
         } finally {
             setIsSaving(false);
         }

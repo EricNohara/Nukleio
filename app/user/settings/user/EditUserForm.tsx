@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonFour } from "@/app/components/Buttons/Buttons";
+import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import TextInput from "@/app/components/TextInput/TextInput";
 import { useUser } from "@/app/context/UserProvider";
 import IUser from "@/app/interfaces/IUser";
@@ -55,6 +56,8 @@ export default function EditUserForm() {
     const [formData, setFormData] = useState<IBasicUserInfo>(EMPTY_USER);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
+
     const { state, dispatch } = useUser();
 
     useEffect(() => {
@@ -197,7 +200,14 @@ export default function EditUserForm() {
             transcript_url: state.transcript_url
         }
 
-        if (!userData.email) return;
+        if (!userData.email) {
+            setSnackbar({
+                message: "Error",
+                messageDescription: "Email field is required to submit.",
+                variant: "error",
+            });
+            return;
+        }
 
         try {
             const res = await fetch("/api/internal/user", {
@@ -212,9 +222,19 @@ export default function EditUserForm() {
             // update cached user
             dispatch({ type: "SET_USER", payload: userData })
             setIsEditing(false);
+
+            setSnackbar({
+                message: "Success",
+                messageDescription: "Successfully updated your user information.",
+                variant: "success",
+            });
         } catch (error) {
-            console.error(error);
-            alert("Error updating user data!");
+            const err = error as Error;
+            setSnackbar({
+                message: "Error",
+                messageDescription: `Failed to update your user information: ${err.message}`,
+                variant: "error",
+            });
         }
     }
 
@@ -293,6 +313,17 @@ export default function EditUserForm() {
                     )
                 ))}
             </div>
+
+            {/* Status message */}
+            {snackbar && (
+                <Snackbar
+                    message={snackbar.message}
+                    messageDescription={snackbar.messageDescription}
+                    variant={snackbar.variant}
+                    duration={4000}
+                    onClose={() => setSnackbar(null)}
+                />
+            )}
         </form >
     );
 }

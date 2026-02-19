@@ -8,7 +8,7 @@ import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/Input
 import OpenProjectOverlay from "@/app/components/OpenProjectOverlay/OpenProjectOverlay";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import ProjectCard from "@/app/components/ProjectCard/ProjectCard";
-import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { IProjectInput } from "@/app/interfaces/IProject";
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
@@ -36,12 +36,12 @@ export default function ProjectsPage() {
     const [projectToEdit, setProjectToEdit] = useState<IProjectInternal | null>(null);
     const [openProject, setOpenProject] = useState<number | null>(null);
     const [activeProjectIndex, setActiveProjectIndex] = useState<number | null>(null); // for single and double clicks
-    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
+    const toast = useToast();
 
     // used to open given project if inputted as search param
     useEffect(() => {
@@ -81,19 +81,10 @@ export default function ProjectsPage() {
 
             // update cached state
             dispatch({ type: "DELETE_PROJECT", payload: project });
-
-            setSnackbar({
-                message: "Success",
-                messageDescription: `Successfully deleted user project: ${project.name}.`,
-                variant: "success",
-            });
+            toast.success("Success", `Successfully deleted user project: ${project.name}.`);
         } catch (error) {
             const err = error as Error;
-            setSnackbar({
-                message: "Error",
-                messageDescription: err.message,
-                variant: "error",
-            });
+            toast.error("Error", err.message);
         }
     }
 
@@ -124,21 +115,13 @@ export default function ProjectsPage() {
 
         // validate input
         if (!name || !description || !date_start || !date_end) {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "Please fill out all required fields.",
-                variant: "error",
-            });
+            toast.warning("Warning", "Please fill out all required fields before submitting.");
             return;
         }
 
         // Validate dates
         if (date_end < date_start) {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "End date cannot be before start date.",
-                variant: "error",
-            });
+            toast.warning("Warning", "Invalid end date. End date cannot be before the start date.");
             return;
         }
 
@@ -177,12 +160,6 @@ export default function ProjectsPage() {
 
                 // update cached state
                 dispatch({ type: "UPDATE_PROJECT", payload: { old: projectToEdit, new: newProjectInternal } });
-
-                setSnackbar({
-                    message: "Success",
-                    messageDescription: `Successfully updated user project: ${name}.`,
-                    variant: "success",
-                });
             } else {
                 // Add the skill
                 const res = await fetch("/api/internal/user/projects", {
@@ -200,21 +177,11 @@ export default function ProjectsPage() {
 
                 // update the cached user
                 dispatch({ type: "ADD_PROJECT", payload: newProjectInternal });
-
-                setSnackbar({
-                    message: "Success",
-                    messageDescription: `Successfully created user project: ${name}.`,
-                    variant: "success",
-                });
             }
-
+            toast.success("Success", `Successfully saved user project: ${name}.`);
         } catch (err) {
             const error = err as Error;
-            setSnackbar({
-                message: "Error",
-                messageDescription: `Failed to create or update user project: ${error.message}.`,
-                variant: "error",
-            });
+            toast.error("Error", `Failed to save user project: ${error.message}.`);
         }
 
         // reset form
@@ -395,17 +362,6 @@ export default function ProjectsPage() {
                     onClose={() => setOpenProject(null)}
                 />
             }
-
-            {/* Status message */}
-            {snackbar && (
-                <Snackbar
-                    message={snackbar.message}
-                    messageDescription={snackbar.messageDescription}
-                    variant={snackbar.variant}
-                    duration={4000}
-                    onClose={() => setSnackbar(null)}
-                />
-            )}
         </PageContentWrapper>
     );
 }

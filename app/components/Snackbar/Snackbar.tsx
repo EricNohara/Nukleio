@@ -9,8 +9,8 @@ export type SnackbarVariant = "success" | "error" | "warning" | "info";
 
 export type SnackbarState = {
     message: string;
-    messageDescription: string;
-    variant: "success" | "error";
+    messageDescription?: string;
+    variant: SnackbarVariant;
 } | null;
 
 type SnackbarProps = {

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonFour } from "@/app/components/Buttons/Buttons";
+import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import Switch from "@/app/components/Switch/Switch";
 import { headerFont } from "@/app/localFonts";
 
@@ -38,6 +39,7 @@ export default function EditAppForm() {
     const [formData, setFormData] = useState<IAppSettings>(DEFAULT_APP_SETTINGS);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
     const handleToggle = (key: keyof IAppSettings) => {
         setFormData((prev) => ({
@@ -60,10 +62,18 @@ export default function EditAppForm() {
 
         try {
             // await updateAppSettings(formData)
+            setSnackbar({
+                message: "Success",
+                messageDescription: "To be implemented. No settings have been changed as none are implemented yet.",
+                variant: "success",
+            });
             setIsEditing(false);
-        } catch (error) {
-            console.error(error);
-            alert("Error updating app settings!");
+        } catch {
+            setSnackbar({
+                message: "Error",
+                messageDescription: "Error updating your app settings.",
+                variant: "error",
+            });
         } finally {
             setIsLoading(false);
         }
@@ -127,6 +137,16 @@ export default function EditAppForm() {
                     </select>
                 </div>
             </div>
+            {/* Status message */}
+            {snackbar && (
+                <Snackbar
+                    message={snackbar.message}
+                    messageDescription={snackbar.messageDescription}
+                    variant={snackbar.variant}
+                    duration={4000}
+                    onClose={() => setSnackbar(null)}
+                />
+            )}
         </form >
     );
 }

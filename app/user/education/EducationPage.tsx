@@ -8,8 +8,8 @@ import { ExternalLinkButton } from "@/app/components/Buttons/Buttons";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
-import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import Table from "@/app/components/Table/Table";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { IEducationInput, IEducationUserInput, } from "@/app/interfaces/IEducation";
 import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
@@ -35,10 +35,10 @@ export default function EducationPage() {
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
     const [formValues, setFormValues] = useState<IEducationUserInput>(EMPTY_EDUCATION);
     const [educationToEdit, setEducationToEdit] = useState<IUserEducationInternal | null>(null);
-    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
     const searchParams = useSearchParams();
     const router = useRouter();
+    const toast = useToast();
 
     const indexParam = searchParams.get("index");
 
@@ -82,18 +82,9 @@ export default function EducationPage() {
 
             // update cached state
             dispatch({ type: "DELETE_EDUCATION", payload: education });
-
-            setSnackbar({
-                message: "Success",
-                messageDescription: "Successfully deleted user education item.",
-                variant: "success",
-            });
+            toast.success("Success", "Successfully deleted user education.");
         } catch {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "Failed to delete user education item.",
-                variant: "error",
-            });
+            toast.error("Error", "Failed to delete user education.");
         }
     }
 
@@ -115,31 +106,19 @@ export default function EducationPage() {
 
         // validate input
         if (!institution || !degree) {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "Please fill out all required fields.",
-                variant: "error",
-            });
+            toast.warning("Warning", "Please fill out all required fields before submitting.");
             return;
         }
 
         // Validate dates
         if (year_start && year_end) {
             if (year_end < year_start) {
-                setSnackbar({
-                    message: "Error",
-                    messageDescription: "Year end cannot be before year start.",
-                    variant: "error",
-                });
+                toast.warning("Warning", "Invalid year end. Year end cannot be before year start.");
                 return;
             }
 
             if (year_start < 0 || year_end < 0) {
-                setSnackbar({
-                    message: "Error",
-                    messageDescription: "Years must be positive numbers.",
-                    variant: "error",
-                });
+                toast.warning("Warning", "Invalid years. Years must be positive numbers.");
                 return;
             }
         }
@@ -178,12 +157,6 @@ export default function EducationPage() {
 
                 // update cached state
                 dispatch({ type: "UPDATE_EDUCATION", payload: { old: educationToEdit, new: newUserEducation } });
-
-                setSnackbar({
-                    message: "Success",
-                    messageDescription: "Successfully updated user education item.",
-                    variant: "success",
-                });
             } else {
                 // Add the education
                 const res = await fetch("/api/internal/user/education", {
@@ -202,21 +175,11 @@ export default function EducationPage() {
 
                 // update the cached user
                 dispatch({ type: "ADD_EDUCATION", payload: newUserEducation });
-
-                setSnackbar({
-                    message: "Success",
-                    messageDescription: "Successfully created user education item.",
-                    variant: "success",
-                });
             }
-
+            toast.success("Success", "Successfully saved user education.");
         } catch (err) {
             const error = err as Error;
-            setSnackbar({
-                message: "Error",
-                messageDescription: `Failed to create or update user education item: ${error.message}.`,
-                variant: "error",
-            });
+            toast.error("Error", `Failed to save user education: ${error.message}.`);
         }
 
         // reset form
@@ -378,17 +341,6 @@ export default function EducationPage() {
                     onClose={formProps.onClose}
                 />
             }
-
-            {/* Status message */}
-            {snackbar && (
-                <Snackbar
-                    message={snackbar.message}
-                    messageDescription={snackbar.messageDescription}
-                    variant={snackbar.variant}
-                    duration={4000}
-                    onClose={() => setSnackbar(null)}
-                />
-            )}
         </PageContentWrapper>
     );
 }
