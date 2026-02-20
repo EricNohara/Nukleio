@@ -104,21 +104,17 @@ No known issues.
 
 ## Next Steps
 
-- Add a table in the DB for storing calls that users make to their public endpoints
-- UI/UX update (remove all alerts and redo the user interface)
+- UI/UX update
+  - Dark mode
   - Disable all buttons when loading
-  - Migrate from tailwind + MUI to using CSS modules
-- Add unit/integration testing
 - Support more languages through new libraries (Python, Java, C#, etc.)
 - Documentation page for API + code integrations
-- Rename application
 - Add ads to website
 - Test with live users
 - Monetize
 
 ## Eventual Work Items
 
-- Add search functionality to easily find fields to view/edit
 - Allow for other file upload types
 - Add AI feature for generating text for descriptions
 - Migrate backend to external application

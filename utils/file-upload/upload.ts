@@ -20,9 +20,7 @@ export async function uploadFile(
 
     publicURL = data.publicURL;
   } catch (err) {
-    const error = err as Error;
     console.error(err);
-    alert("Error uploading file: " + error.message);
   }
 
   return publicURL;

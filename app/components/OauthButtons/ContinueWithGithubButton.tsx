@@ -1,11 +1,13 @@
 import Image from "next/image";
 
+import { useToast } from "@/app/context/ToastProvider";
 import { createClient } from "@/utils/supabase/client";
 
 import styles from "./OauthButtons.module.css";
 
 export default function ContinueWithGithubButton() {
     const supabase = createClient();
+    const toast = useToast();
 
     const handleGithub = async () => {
         const base = process.env.NEXT_PUBLIC_SITE_URL;
@@ -16,7 +18,7 @@ export default function ContinueWithGithubButton() {
             options: { redirectTo },
         });
 
-        if (error) alert(error.message);
+        if (error) toast.error("Error logging in with GitHub")
     };
 
     return (

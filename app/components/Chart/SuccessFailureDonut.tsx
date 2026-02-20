@@ -5,6 +5,7 @@ import React, { useMemo } from "react";
 import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip } from "recharts";
 
 
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { createClient } from "@/utils/supabase/client";
 
@@ -38,6 +39,7 @@ export default function SuccessFailureDonut({ height = "100%" }: Props) {
     const [successCount, setSuccessCount] = React.useState(0);
     const [failedCount, setFailedCount] = React.useState(0);
     const [loading, setLoading] = React.useState(true);
+    const toast = useToast()
 
     React.useEffect(() => {
         let cancelled = false;
@@ -52,7 +54,7 @@ export default function SuccessFailureDonut({ height = "100%" }: Props) {
             if (cancelled) return;
 
             if (error) {
-                console.error("Failed to load success/failure counts", error);
+                toast.error("Failed to load success and failure counts")
                 setSuccessCount(0);
                 setFailedCount(0);
                 setLoading(false);
@@ -70,7 +72,7 @@ export default function SuccessFailureDonut({ height = "100%" }: Props) {
         return () => {
             cancelled = true;
         };
-    }, [supabase]);
+    }, [supabase, toast]);
 
     const success = clamp(successCount);
     const failed = clamp(failedCount);

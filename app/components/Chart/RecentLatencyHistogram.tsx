@@ -12,6 +12,7 @@ import {
     YAxis,
 } from "recharts";
 
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { createClient } from "@/utils/supabase/client";
 
@@ -68,6 +69,7 @@ export default function RecentLatencyHistogram({
     const { state } = useUser();
     const [rows, setRows] = React.useState<HistRow[]>([]);
     const [loading, setLoading] = React.useState(true);
+    const toast = useToast();
 
     React.useEffect(() => {
         let cancelled = false;
@@ -79,7 +81,7 @@ export default function RecentLatencyHistogram({
             if (cancelled) return;
 
             if (error) {
-                console.error("Failed to load latency samples", error);
+                toast.error("Failed to load latency samples")
                 setRows([]);
                 setLoading(false);
                 return;
@@ -97,7 +99,7 @@ export default function RecentLatencyHistogram({
         return () => {
             cancelled = true;
         };
-    }, [supabase, binSizeMs, maxMs]);
+    }, [supabase, binSizeMs, maxMs, toast]);
 
     const containerStyle: React.CSSProperties = {
         width: "100%",

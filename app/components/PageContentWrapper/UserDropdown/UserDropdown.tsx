@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 
 import { useAuth } from "@/app/context/AuthProvider";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { headerFont } from "@/app/localFonts";
 
@@ -21,6 +22,7 @@ export default function UserDropdown() {
     const containerRef = useRef<HTMLDivElement>(null);
     const { setIsLoggedIn } = useAuth();
     const router = useRouter();
+    const toast = useToast();
 
     // Close the popup if clicked outside
     useEffect(() => {
@@ -40,15 +42,12 @@ export default function UserDropdown() {
     const handleSignOut = async () => {
         try {
             const res = await fetch("/api/internal/auth/signout", { method: "POST" });
+            if (!res.ok) throw new Error()
 
-            if (res.ok) {
-                setIsLoggedIn(false);
-                router.push("/");
-            } else {
-                alert("Failed to sign out");
-            }
-        } catch (err) {
-            console.error(err);
+            setIsLoggedIn(false);
+            router.push("/");
+        } catch {
+            toast.error("An error occurred while signing out")
         }
     };
 

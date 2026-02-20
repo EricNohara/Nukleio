@@ -6,6 +6,7 @@ import { useState } from "react";
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
 import TextInput from "@/app/components/TextInput/TextInput";
+import { useToast } from "@/app/context/ToastProvider";
 import { headerFont } from "@/app/localFonts";
 import { createClient } from "@/utils/supabase/client";
 
@@ -16,6 +17,7 @@ export default function ForgotPasswordForm() {
     const supabase = createClient();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [email, setEmail] = useState<string>("");
+    const toast = useToast();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -29,10 +31,9 @@ export default function ForgotPasswordForm() {
             const { error } = await supabase.auth
                 .resetPasswordForEmail(email, { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/passwordReset` });
             if (error) throw new Error(error.message);
-            alert("Password reset email sent. Check your inbox.");
-        } catch (error) {
-            console.error(error);
-            alert(error);
+            toast.info("Password reset email sent. Check your inbox.")
+        } catch {
+            toast.error("Failed to send password reset email")
         }
     };
 

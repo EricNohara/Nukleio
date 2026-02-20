@@ -11,6 +11,7 @@ import ContinueWithGitlabButton from "@/app/components/OauthButtons/ContinueWith
 import ContinueWithGoogleButton from "@/app/components/OauthButtons/ContinueWithGoogleButton";
 import ContinueWithLinkedinButton from "@/app/components/OauthButtons/ContinueWithLinkedinButton";
 import TextInput from "@/app/components/TextInput/TextInput";
+import { useToast } from "@/app/context/ToastProvider";
 import { headerFont } from "@/app/localFonts";
 
 import styles from "../login/LoginPage.module.css";
@@ -22,6 +23,7 @@ interface IInputData {
 
 export default function SignUpForm() {
   const router = useRouter();
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<IInputData>({
     email: "",
@@ -60,10 +62,11 @@ export default function SignUpForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      alert("Successfully Created User!");
       router.push("/user");
+      toast.success("Successfully created user")
     } catch (error) {
-      alert(error);
+      const err = error as Error
+      toast.error("Error", err.message)
     }
   };
 

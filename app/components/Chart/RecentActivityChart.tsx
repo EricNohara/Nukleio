@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { createClient } from "@/utils/supabase/client";
 
@@ -55,6 +56,7 @@ export default function RecentActivityChart({ height = "100%" }: { height?: numb
     const { state } = useUser();
     const [chartData, setChartData] = useState<ApiLogChartRow[]>([]);
     const [loading, setLoading] = useState(true);
+    const toast = useToast();
 
     useEffect(() => {
         const loadChartData = async () => {
@@ -65,7 +67,7 @@ export default function RecentActivityChart({ height = "100%" }: { height?: numb
             );
 
             if (error) {
-                console.error("Failed to load API log chart data", error);
+                toast.error("Failed to load API log chart data")
                 setLoading(false);
                 return;
             }
@@ -75,7 +77,7 @@ export default function RecentActivityChart({ height = "100%" }: { height?: numb
         };
 
         loadChartData();
-    }, [supabase]);
+    }, [supabase, toast]);
 
     const containerStyle: React.CSSProperties = {
         width: "100%",
