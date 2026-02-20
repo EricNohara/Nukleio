@@ -1,7 +1,6 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-import { UserCog, SlidersHorizontal, LogOut } from "lucide-react";
+import { BookText, ChevronDown, CircleQuestionMark, Crown, Power, Settings, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
@@ -52,23 +51,30 @@ export default function UserDropdown() {
     };
 
     const buttons: IButtonProp[] = [
-        { name: "User Settings", icon: UserCog, route: "/user/settings/user" },
-        { name: "App Settings", icon: SlidersHorizontal, route: "/user/settings/app" },
-        { name: "Log Out", icon: LogOut, action: handleSignOut },
+        { name: "Account", icon: User, route: "/user/settings/user" },
+        { name: "Settings", icon: Settings, route: "/user/settings/app" },
+        { name: "Documentation", icon: BookText, route: "/documentation/doc" },
+        { name: "Help", icon: CircleQuestionMark, route: "/documentation/contact" },
+        { name: "Upgrade Account", icon: Crown, route: "/user/settings/billing" },
+        { name: "Log Out", icon: Power, action: handleSignOut },
     ];
 
     return (
         <div className={styles.relativeContainer} ref={containerRef}>
             <button className={`${styles.container} ${isOpen ? styles.openContainer : ""}`} onClick={handleClick}>
-                <Image
-                    src={state?.portrait_url ? state?.portrait_url : "/images/default-avatar.svg"}
-                    height={35}
-                    width={35}
-                    alt="User profile picture"
-                    className={styles.avatar}
-                />
-                <p className={`${styles.name} ${headerFont.className}`}>{state?.name ? state?.name : "Default User"}</p>
-                <ChevronDown />
+                <div className={styles.left}>
+                    <Image
+                        src={state?.portrait_url ? state?.portrait_url : "/images/default-avatar.svg"}
+                        height={45}
+                        width={45}
+                        alt="User profile picture"
+                        className={styles.avatar}
+                    />
+                    <p className={`${styles.name} ${headerFont.className}`}>
+                        {state?.name ? state?.name : "Default User"}
+                    </p>
+                </div>
+                <ChevronDown className={styles.chevron} />
             </button>
             {isOpen && (
                 <div className={styles.popupContainer}>

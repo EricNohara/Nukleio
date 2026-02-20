@@ -41,7 +41,7 @@ export default function ButtonListPopup({ buttons }: IButtonListPopupProps) {
                     className={styles.button}
                     onClick={() => handleClick(button)}
                 >
-                    <button.icon strokeWidth={1} />
+                    <button.icon />
                     <p className={`${styles.buttonName} ${headerFont.className}`}>{button.name}</p>
                 </button>
             ))}

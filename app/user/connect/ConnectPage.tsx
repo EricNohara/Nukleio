@@ -223,7 +223,7 @@ export default function ConnectPage() {
 
     return (
         <PageContentWrapper>
-            <PageContentHeader title="Connect" buttonOne={buttonOne} buttonFour={buttonFour} />
+            <PageContentHeader title="API Keys" buttonOne={buttonOne} buttonFour={buttonFour} />
             <Table
                 columns={columns}
                 rows={rows}

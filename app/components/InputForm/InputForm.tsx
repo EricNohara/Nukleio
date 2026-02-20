@@ -72,6 +72,7 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                                 isInInputForm={true}
                                 textAreaRows={row.inputOne.textAreaRows}
                                 disabled={row.inputOne.disabled}
+                                focusLabelColor="var(--btn-1)"
                             />
                             {
                                 row.inputTwo &&
@@ -86,6 +87,7 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                                     isInInputForm={true}
                                     textAreaRows={row.inputTwo.textAreaRows}
                                     disabled={row.inputOne.disabled}
+                                    focusLabelColor="var(--btn-1)"
                                 />
                             }
                         </div>

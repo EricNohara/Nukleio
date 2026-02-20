@@ -1,6 +1,6 @@
 "use client";
 
-import { House, File, Briefcase, GraduationCap, Rocket, Brain, Cable, Settings, Mail, User } from "lucide-react";
+import { House, File, Briefcase, GraduationCap, Rocket, Brain, Settings, Mail, User, KeyRound } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 import { headerFont } from "@/app/localFonts";
@@ -25,7 +25,7 @@ const navItems: INavItem[] = [
     { label: "Education", path: "/user/education", icon: GraduationCap, regExpPath: /^\/user\/education\/\d+\/course$/ },
     { label: "Projects", path: "/user/projects", icon: Rocket },
     { label: "Skills", path: "/user/skills", icon: Brain },
-    { label: "Connect", path: "/user/connect", icon: Cable },
+    { label: "API Keys", path: "/user/connect", icon: KeyRound },
     { label: "Cover Letter", path: "/user/coverLetter", icon: Mail }
 ];
 
