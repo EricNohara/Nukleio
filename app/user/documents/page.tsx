@@ -19,30 +19,30 @@ export default function DocumentsPage() {
     portrait_url: false,
     resume_url: false,
     transcript_url: false
-  })
+  });
   const [docs, setDocs] = useState<{ portrait: File | null, resume: File | null, transcript: File | null }>({
     portrait: null,
     resume: null,
     transcript: null
-  })
+  });
   const { state, dispatch } = useUser();
   const toast = useToast();
 
   const handleEdit = (url: string | undefined) => {
     switch (url) {
       case "portrait_url":
-        setIsEditing({ ...isEditing, portrait_url: true })
+        setIsEditing({ ...isEditing, portrait_url: true });
         break;
       case "resume_url":
-        setIsEditing({ ...isEditing, resume_url: true })
+        setIsEditing({ ...isEditing, resume_url: true });
         break;
       case "transcript_url":
-        setIsEditing({ ...isEditing, transcript_url: true })
+        setIsEditing({ ...isEditing, transcript_url: true });
         break;
       default:
         break;
     }
-  }
+  };
 
   const handleDelete = async (url: string | undefined, docType: string | undefined) => {
     try {
@@ -61,7 +61,7 @@ export default function DocumentsPage() {
     } catch {
       toast.error("Error", "Error deleting your document.");
     }
-  }
+  };
 
   const handleUpload = async () => {
     try {
@@ -92,7 +92,7 @@ export default function DocumentsPage() {
     } catch {
       toast.error("Error", "Failed to upload your documents. Please try again.");
     }
-  }
+  };
 
   const handleFileSelect = (file: File, docType: string) => {
     switch (docType) {
@@ -111,18 +111,18 @@ export default function DocumentsPage() {
       default:
         break;
     }
-  }
+  };
 
   const buttonOne: IButton = {
     name: "Save Documents",
     onClick: handleUpload,
     isAsync: true
-  }
+  };
 
   // only render save button if needed
   const shouldRenderButton = () => {
     return !state.portrait_url || !state.resume_url || !state.transcript_url || isEditing.portrait_url || isEditing.resume_url || isEditing.transcript_url;
-  }
+  };
 
   return (
     <PageContentWrapper>
@@ -144,7 +144,7 @@ export default function DocumentsPage() {
                 accepts="image/*"
                 uploadInstructions="Upload image files of up to 50 MB and click save documents"
                 isEditView={isEditing.portrait_url}
-                onExitEditView={() => { setIsEditing({ ...isEditing, portrait_url: false }); setDocs({ ...docs, portrait: null }) }}
+                onExitEditView={() => { setIsEditing({ ...isEditing, portrait_url: false }); setDocs({ ...docs, portrait: null }); }}
                 onFileSelect={handleFileSelect}
                 docType="portrait_url"
               /> :
@@ -171,7 +171,7 @@ export default function DocumentsPage() {
                 accepts=".pdf"
                 uploadInstructions="Upload PDF files of up to 50 MB and click save documents"
                 isEditView={isEditing.resume_url}
-                onExitEditView={() => { setIsEditing({ ...isEditing, resume_url: false }); setDocs({ ...docs, resume: null }) }}
+                onExitEditView={() => { setIsEditing({ ...isEditing, resume_url: false }); setDocs({ ...docs, resume: null }); }}
                 onFileSelect={handleFileSelect}
                 docType="resume_url"
               /> :
@@ -198,7 +198,7 @@ export default function DocumentsPage() {
                 accepts=".pdf"
                 uploadInstructions="Upload PDF files of up to 50 MB and click save documents"
                 isEditView={isEditing.transcript_url}
-                onExitEditView={() => { setIsEditing({ ...isEditing, transcript_url: false }); setDocs({ ...docs, transcript: null }) }}
+                onExitEditView={() => { setIsEditing({ ...isEditing, transcript_url: false }); setDocs({ ...docs, transcript: null }); }}
                 onFileSelect={handleFileSelect}
                 docType="transcript_url"
               /> :

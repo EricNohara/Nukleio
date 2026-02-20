@@ -35,7 +35,7 @@ export default function AppNav() {
 
     const handleClick = (item: INavItem) => {
         router.push(item.path);
-    }
+    };
 
     return (
         <nav className={styles.navContainer}>

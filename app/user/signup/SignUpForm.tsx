@@ -68,8 +68,8 @@ export default function SignUpForm() {
   };
 
   const handleLogin = () => {
-    router.push("/user/login")
-  }
+    router.push("/user/login");
+  };
 
   return (
     <>

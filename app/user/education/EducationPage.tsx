@@ -28,7 +28,7 @@ const EMPTY_EDUCATION: IEducationUserInput = {
     majors: "",
     minors: "",
     awards: "",
-}
+};
 
 export default function EducationPage() {
     const { state, dispatch } = useUser();
@@ -86,11 +86,11 @@ export default function EducationPage() {
         } catch {
             toast.error("Error", "Failed to delete user education.");
         }
-    }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormValues(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    }
+    };
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -132,7 +132,7 @@ export default function EducationPage() {
             majors: majors ? majors.trim().split(",").map(s => s.trim()) : [],
             minors: minors ? minors.trim().split(",").map(s => s.trim()) : [],
             awards: awards ? awards.trim().split(",").map(s => s.trim()) : []
-        }
+        };
 
         try {
             if (educationToEdit) {
@@ -140,7 +140,7 @@ export default function EducationPage() {
                 const editPayload = {
                     id: educationToEdit.id,
                     updatedEducation: newEducation
-                }
+                };
                 const res = await fetch("/api/internal/user/education", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -153,7 +153,7 @@ export default function EducationPage() {
                     ...newEducation,
                     id: educationToEdit.id,
                     courses: educationToEdit.courses
-                }
+                };
 
                 // update cached state
                 dispatch({ type: "UPDATE_EDUCATION", payload: { old: educationToEdit, new: newUserEducation } });
@@ -171,7 +171,7 @@ export default function EducationPage() {
                     ...newEducation,
                     id: data.id,
                     courses: []
-                }
+                };
 
                 // update the cached user
                 dispatch({ type: "ADD_EDUCATION", payload: newUserEducation });
@@ -186,7 +186,7 @@ export default function EducationPage() {
         setFormValues(EMPTY_EDUCATION);
         setIsFormOpen(false);
         setEducationToEdit(null);
-    }
+    };
 
     const onClose = () => {
         setIsFormOpen(false);
@@ -199,7 +199,7 @@ export default function EducationPage() {
         const newUrl = newQuery ? `?${newQuery}` : "";
 
         router.replace(`/user/education${newUrl}`, { scroll: false });
-    }
+    };
 
     const buttonOne: IButton = {
         name: "Add Education",
@@ -208,7 +208,7 @@ export default function EducationPage() {
             setEducationToEdit(null);
             setIsFormOpen(true);
         },
-    }
+    };
 
     const inputRows: IInputFormRow[] = [
         {
@@ -318,7 +318,7 @@ export default function EducationPage() {
         onSubmit: onSubmit,
         inputRows: inputRows,
         onClose: onClose
-    }
+    };
 
     return (
         <PageContentWrapper>

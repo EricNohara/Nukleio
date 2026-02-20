@@ -42,7 +42,7 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
         e.preventDefault();
         setIsLoading(true);
         onSubmit(e);
-    }
+    };
 
     return (
         <Overlay onClose={onClose}>

@@ -32,7 +32,7 @@ const DEFAULT_SUGGESTIONS: ISuggestion[] = [
     { label: "User Settings", path: "/user/settings/user" },
     { label: "App Settings", path: "/user/settings/app" },
     { label: "Cover Letter", path: "/user/coverLetter" }
-]
+];
 
 export default function SearchBar({ onFocusChange }: ISearchBarProps) {
     const [query, setQuery] = useState<string>("");
@@ -110,14 +110,14 @@ export default function SearchBar({ onFocusChange }: ISearchBarProps) {
 
     const filtered = suggestions.filter((item) =>
         item.label.toLowerCase().includes(query.toLowerCase())
-    )
+    );
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setQuery(value);
         setActiveIndex(-1);
-        setShowDropdown(value.length > 0)
-    }
+        setShowDropdown(value.length > 0);
+    };
 
     const handleSelect = (path: string) => {
         setQuery("");
@@ -251,7 +251,7 @@ export default function SearchBar({ onFocusChange }: ISearchBarProps) {
                     {filtered.map((item, index) => (
                         <li
                             key={index}
-                            ref={(el) => { itemRefs.current[index] = el }}
+                            ref={(el) => { itemRefs.current[index] = el; }}
                             className={`${styles.dropdownItem} ${index === activeIndex ? styles.activeItem : ""}`}
                             onClick={() => handleSelect(item.path)}
                         >

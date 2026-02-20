@@ -27,7 +27,7 @@ const EMPTY_PROJECT_INPUT: IProjectInput = {
     github_url: null,
     demo_url: null,
     thumbnail_url: null,
-}
+};
 
 export default function ProjectsPage() {
     const { state, dispatch } = useUser();
@@ -53,7 +53,7 @@ export default function ProjectsPage() {
                 setIsFormOpen(true);
             }
         }
-    }, [indexParam, state])
+    }, [indexParam, state]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -86,7 +86,7 @@ export default function ProjectsPage() {
             const err = error as Error;
             toast.error("Error", err.message);
         }
-    }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -136,7 +136,7 @@ export default function ProjectsPage() {
             github_url: github_url,
             demo_url: demo_url,
             thumbnail_url: thumbnail_url
-        }
+        };
 
         try {
             if (projectToEdit) {
@@ -144,7 +144,7 @@ export default function ProjectsPage() {
                 const editPayload = {
                     prevProjectID: projectToEdit.id,
                     updatedProject: newProject
-                }
+                };
                 const res = await fetch("/api/internal/user/projects", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -156,7 +156,7 @@ export default function ProjectsPage() {
                 const newProjectInternal: IProjectInternal = {
                     id: projectToEdit.id,
                     ...newProject
-                }
+                };
 
                 // update cached state
                 dispatch({ type: "UPDATE_PROJECT", payload: { old: projectToEdit, new: newProjectInternal } });
@@ -173,7 +173,7 @@ export default function ProjectsPage() {
                 const newProjectInternal: IProjectInternal = {
                     id: data.id,
                     ...newProject
-                }
+                };
 
                 // update the cached user
                 dispatch({ type: "ADD_PROJECT", payload: newProjectInternal });
@@ -188,7 +188,7 @@ export default function ProjectsPage() {
         setFormValues(EMPTY_PROJECT_INPUT);
         setIsFormOpen(false);
         setProjectToEdit(null);
-    }
+    };
 
     const onClose = () => {
         setIsFormOpen(false);
@@ -201,15 +201,15 @@ export default function ProjectsPage() {
         const newUrl = newQuery ? `?${newQuery}` : "";
 
         router.replace(`/user/projects${newUrl}`, { scroll: false });
-    }
+    };
 
     const handleOpenProject = (rowIndex: number) => {
         setOpenProject(rowIndex);
-    }
+    };
 
     const handleSingleClick = (rowIndex: number) => {
         setActiveProjectIndex(rowIndex);
-    }
+    };
 
     const buttonOne: IButton = {
         name: "Add Project",
@@ -218,7 +218,7 @@ export default function ProjectsPage() {
             setProjectToEdit(null);
             setIsFormOpen(true);
         },
-    }
+    };
 
     const inputRows: IInputFormRow[] = [
         {
@@ -322,7 +322,7 @@ export default function ProjectsPage() {
         onSubmit: onSubmit,
         inputRows: inputRows,
         onClose: onClose
-    }
+    };
 
     return (
         <PageContentWrapper>
@@ -357,8 +357,8 @@ export default function ProjectsPage() {
                 <OpenProjectOverlay
                     project={state.projects[openProject]}
                     index={openProject}
-                    onEdit={(n: number) => { handleEdit(n); setOpenProject(null) }}
-                    onDelete={async (n: number) => { await handleDelete(n); setOpenProject(null) }}
+                    onEdit={(n: number) => { handleEdit(n); setOpenProject(null); }}
+                    onDelete={async (n: number) => { await handleDelete(n); setOpenProject(null); }}
                     onClose={() => setOpenProject(null)}
                 />
             }

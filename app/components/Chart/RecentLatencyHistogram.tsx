@@ -108,7 +108,7 @@ export default function RecentLatencyHistogram({
 
     // no data states
     if (loading || !state) {
-        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
+        return <LoadingMessageSpinner messages={["Loading metrics..."]} />;
     }
 
     const apiKeys = state?.api_keys ?? [];
@@ -125,7 +125,7 @@ export default function RecentLatencyHistogram({
                 }}
             >
                 <p>No connections found</p>
-                <ButtonOne onClick={() => { router.push("/user/connect") }}>Connect Now</ButtonOne>
+                <ButtonOne onClick={() => { router.push("/user/connect"); }}>Connect Now</ButtonOne>
             </div>
         );
     } else if (!rows.length) {

@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonFour } from "@/app/components/Buttons/Buttons";
-import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import TextInput from "@/app/components/TextInput/TextInput";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import IUser from "@/app/interfaces/IUser";
 import { headerFont } from "@/app/localFonts";
@@ -50,13 +50,13 @@ const EMPTY_USER: IBasicUserInfo = {
     facebook_url: null,
     instagram_url: null,
     x_url: null,
-}
+};
 
 export default function EditUserForm() {
     const [formData, setFormData] = useState<IBasicUserInfo>(EMPTY_USER);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
+    const toast = useToast();
 
     const { state, dispatch } = useUser();
 
@@ -187,7 +187,7 @@ export default function EditUserForm() {
             ...prev,
             [name]: value,
         }));
-    }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -198,14 +198,10 @@ export default function EditUserForm() {
             portrait_url: state.portrait_url,
             resume_url: state.resume_url,
             transcript_url: state.transcript_url
-        }
+        };
 
         if (!userData.email) {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "Email field is required to submit.",
-                variant: "error",
-            });
+            toast.warning("Warning", "Invalid email input. Email field is required to submit.");
             return;
         }
 
@@ -220,23 +216,15 @@ export default function EditUserForm() {
             if (!res.ok) throw new Error(data.message);
 
             // update cached user
-            dispatch({ type: "SET_USER", payload: userData })
+            dispatch({ type: "SET_USER", payload: userData });
             setIsEditing(false);
 
-            setSnackbar({
-                message: "Success",
-                messageDescription: "Successfully updated your user information.",
-                variant: "success",
-            });
+            toast.success("Success", "Successfully updated your user information.");
         } catch (error) {
             const err = error as Error;
-            setSnackbar({
-                message: "Error",
-                messageDescription: `Failed to update your user information: ${err.message}`,
-                variant: "error",
-            });
+            toast.error("Error", `Failed to update your user information: ${err.message}`);
         }
-    }
+    };
 
 
     return (
@@ -273,7 +261,7 @@ export default function EditUserForm() {
                                 <LoadableButtonContent isLoading={isLoading} buttonLabel="Save" />
                             </ButtonOne>
                         </>
-                        : <ButtonOne onClick={() => { setIsEditing(true); setIsLoading(false) }}>Edit</ButtonOne>
+                        : <ButtonOne onClick={() => { setIsEditing(true); setIsLoading(false); }}>Edit</ButtonOne>
                     }
 
                 </div>
@@ -313,17 +301,6 @@ export default function EditUserForm() {
                     )
                 ))}
             </div>
-
-            {/* Status message */}
-            {snackbar && (
-                <Snackbar
-                    message={snackbar.message}
-                    messageDescription={snackbar.messageDescription}
-                    variant={snackbar.variant}
-                    duration={4000}
-                    onClose={() => setSnackbar(null)}
-                />
-            )}
         </form >
     );
 }

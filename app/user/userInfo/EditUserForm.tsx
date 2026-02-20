@@ -45,7 +45,7 @@ const EMPTY_USER: IBasicUserInfo = {
     facebook_url: null,
     instagram_url: null,
     x_url: null,
-}
+};
 
 export default function EditUserForm({
     formId,
@@ -82,7 +82,7 @@ export default function EditUserForm({
             ...prev,
             [name]: value,
         }));
-    }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -93,7 +93,7 @@ export default function EditUserForm({
             portrait_url: state.portrait_url,
             resume_url: state.resume_url,
             transcript_url: state.transcript_url
-        }
+        };
 
         if (!userData.email.trim()) {
             setIsSaving(false);
@@ -112,7 +112,7 @@ export default function EditUserForm({
             if (!res.ok) throw new Error(data.message);
 
             // update cached user
-            dispatch({ type: "SET_USER", payload: userData })
+            dispatch({ type: "SET_USER", payload: userData });
             setIsEditing(false);
 
             toast.success("Success", "Successfully udpated user data.");
@@ -121,7 +121,7 @@ export default function EditUserForm({
         } finally {
             setIsSaving(false);
         }
-    }
+    };
 
 
     return (

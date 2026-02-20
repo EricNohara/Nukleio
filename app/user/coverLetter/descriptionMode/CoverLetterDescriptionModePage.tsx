@@ -5,10 +5,12 @@ import { useState, useEffect } from "react";
 
 import LoadingMessageSpinner from "@/app/components/LoadingMessageSpinner/LoadingMessageSpinner";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
-import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import TextInput from "@/app/components/TextInput/TextInput";
+import { useToast } from "@/app/context/ToastProvider";
 
-import PageContentHeader, { IButton } from "../../../components/PageContentHeader/PageContentHeader";
+import PageContentHeader, {
+    IButton,
+} from "../../../components/PageContentHeader/PageContentHeader";
 import styles from "../CoverLetterPage.module.css";
 
 export default function CoverLetterDescriptionModePage() {
@@ -25,7 +27,7 @@ export default function CoverLetterDescriptionModePage() {
     const [feedback, setFeedback] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [mode, setMode] = useState<"initial" | "revision">("initial");
-    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
+    const toast = useToast();
 
     useEffect(() => {
         const fetcher = async () => {
@@ -35,22 +37,21 @@ export default function CoverLetterDescriptionModePage() {
                 const data = await res.json();
                 setUserId(data.user.id);
             } catch {
-                setSnackbar({
-                    message: "Error",
-                    messageDescription: "Failed to fetch user ID. Please refresh the page and try again.",
-                    variant: "error",
-                });
+                toast.error(
+                    "Error",
+                    "Failed to fetch user ID. Please refresh the page and try again.",
+                );
             }
-        }
+        };
         fetcher();
-    }, []);
+    }, [toast]);
 
     const handleGenerate = async () => {
         if (!userId || !jobDescriptionDump) return;
 
         setTimeout(async () => {
             if (draft.length > 0) {
-                setMode("revision")
+                setMode("revision");
                 setLoading(true);
 
                 // REVISION MODE
@@ -58,14 +59,17 @@ export default function CoverLetterDescriptionModePage() {
                     const payload = {
                         conversationId,
                         feedback,
-                        ...(feedback.trim() === "" ? { finalLetter: draft } : {})
+                        ...(feedback.trim() === "" ? { finalLetter: draft } : {}),
                     };
 
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_COVER_LETTER_AGENT_BASE_URL}/revise`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
+                    const res = await fetch(
+                        `${process.env.NEXT_PUBLIC_COVER_LETTER_AGENT_BASE_URL}/revise`,
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                        },
+                    );
 
                     if (!res.ok) throw new Error("PDF generation failed");
 
@@ -79,22 +83,20 @@ export default function CoverLetterDescriptionModePage() {
                     a.click();
                     a.remove();
 
-                    setSnackbar({
-                        message: "Success",
-                        messageDescription: "Successfully completed cover letter draft revision.",
-                        variant: "success",
-                    });
+                    toast.success(
+                        "Success",
+                        "Successfully completed cover letter draft revision.",
+                    );
                 } catch {
-                    setSnackbar({
-                        message: "Error",
-                        messageDescription: "Failed to revise cover letter. Please refresh the page and try again.",
-                        variant: "error",
-                    });
+                    toast.error(
+                        "Error",
+                        "Failed to revise cover letter. Please refresh the page and try again.",
+                    );
                 } finally {
                     setLoading(false);
                 }
             } else {
-                setMode("initial")
+                setMode("initial");
                 setLoading(true);
 
                 // FIRST GENERATION MODE
@@ -102,14 +104,17 @@ export default function CoverLetterDescriptionModePage() {
                     const payload = {
                         userId,
                         jobDescriptionDump,
-                        writingSample
+                        writingSample,
                     };
 
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_COVER_LETTER_AGENT_BASE_URL}/generateFromDescription`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
+                    const res = await fetch(
+                        `${process.env.NEXT_PUBLIC_COVER_LETTER_AGENT_BASE_URL}/generateFromDescription`,
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                        },
+                    );
 
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.error);
@@ -117,17 +122,15 @@ export default function CoverLetterDescriptionModePage() {
                     setDraft(data.currentDraft);
                     setConversationId(data.conversationId);
 
-                    setSnackbar({
-                        message: "Success",
-                        messageDescription: "Successfully generated first draft of your cover letter. You may now add your revisions or save the PDF.",
-                        variant: "success",
-                    });
+                    toast.success(
+                        "Success",
+                        "Successfully generated first draft of your cover letter. You may now add your revisions or save the PDF.",
+                    );
                 } catch {
-                    setSnackbar({
-                        message: "Error",
-                        messageDescription: "Failed to generate cover letter. Please refresh the page and try again.",
-                        variant: "error",
-                    });
+                    toast.error(
+                        "Error",
+                        "Failed to generate cover letter. Please refresh the page and try again.",
+                    );
                 } finally {
                     setLoading(false);
                 }
@@ -138,22 +141,25 @@ export default function CoverLetterDescriptionModePage() {
     const buttonOne: IButton = {
         name: draft.length > 0 ? "Complete Revision" : "Generate",
         onClick: handleGenerate,
-        isAsync: true
+        isAsync: true,
     };
 
     const backButton: IButton = {
         name: "Back",
         onClick: () => {
-            router.push("/user/coverLetter")
-        }
-    }
+            router.push("/user/coverLetter");
+        },
+    };
 
     return (
         <PageContentWrapper>
-            <PageContentHeader title={`${companyName} Cover Letter Generation`} buttonOne={buttonOne} buttonFour={backButton} />
+            <PageContentHeader
+                title={`${companyName} Cover Letter Generation`}
+                buttonOne={buttonOne}
+                buttonFour={backButton}
+            />
 
             <div className={styles.coverLetterPageContainer}>
-
                 {/* ------------------- LOADING UI ------------------- */}
                 {loading && (
                     <LoadingMessageSpinner
@@ -168,14 +174,14 @@ export default function CoverLetterDescriptionModePage() {
                                     "Evaluating draft...",
                                     "Revising content...",
                                     "Executing feedback loop...",
-                                    "Formatting output..."
+                                    "Formatting output...",
                                 ]
                                 : [
                                     "Analyzing your feedback...",
                                     "Revising draft...",
                                     "Evaluating improvements...",
                                     "Generating PDF...",
-                                    "Finalizing output..."
+                                    "Finalizing output...",
                                 ]
                         }
                         interval={mode === "initial" ? 3000 : 1000}
@@ -240,16 +246,6 @@ export default function CoverLetterDescriptionModePage() {
                     </div>
                 )}
             </div>
-            {/* Status message */}
-            {snackbar && (
-                <Snackbar
-                    message={snackbar.message}
-                    messageDescription={snackbar.messageDescription}
-                    variant={snackbar.variant}
-                    duration={4000}
-                    onClose={() => setSnackbar(null)}
-                />
-            )}
         </PageContentWrapper>
     );
 }

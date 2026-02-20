@@ -43,7 +43,7 @@ export default function ExperiencePage() {
                 setIsFormOpen(true);
             }
         }
-    }, [indexParam, state])
+    }, [indexParam, state]);
 
     const handleEdit = (rowIndex: number) => {
         const experience = state.experiences[rowIndex];
@@ -65,11 +65,11 @@ export default function ExperiencePage() {
             const err = error as Error;
             toast.error("Error", err.message);
         }
-    }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormValues(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    }
+    };
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -103,7 +103,7 @@ export default function ExperiencePage() {
             job_description: job_description ? job_description : null,
             date_start: date_start ? date_start.toISOString().split("T")[0] : null,
             date_end: date_end ? date_end.toISOString().split("T")[0] : null
-        }
+        };
 
         try {
             if (experienceToEdit) {
@@ -112,7 +112,7 @@ export default function ExperiencePage() {
                     prevCompany: experienceToEdit.company,
                     prevJob: experienceToEdit.job_title,
                     updatedExperience: newExperience
-                }
+                };
                 const res = await fetch("/api/internal/user/experience", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -146,7 +146,7 @@ export default function ExperiencePage() {
         setFormValues({ company: "", job_title: "", job_description: null, date_start: "", date_end: "" });
         setIsFormOpen(false);
         setExperienceToEdit(null);
-    }
+    };
 
     const onClose = () => {
         setIsFormOpen(false);
@@ -158,7 +158,7 @@ export default function ExperiencePage() {
         const newUrl = newQuery ? `?${newQuery}` : "";
 
         router.replace(`/user/experience${newUrl}`, { scroll: false });
-    }
+    };
 
     const buttonOne: IButton = {
         name: "Add Experience",
@@ -173,7 +173,7 @@ export default function ExperiencePage() {
             setExperienceToEdit(null);
             setIsFormOpen(true);
         },
-    }
+    };
 
     const inputRows: IInputFormRow[] = [
         {
@@ -246,7 +246,7 @@ export default function ExperiencePage() {
         onSubmit: onSubmit,
         inputRows: inputRows,
         onClose: onClose
-    }
+    };
 
     return (
         <PageContentWrapper>

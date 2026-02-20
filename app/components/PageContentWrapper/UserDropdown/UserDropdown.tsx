@@ -35,7 +35,7 @@ export default function UserDropdown() {
 
     const handleClick = () => {
         setIsOpen(!isOpen);
-    }
+    };
 
     const handleSignOut = async () => {
         try {

@@ -157,7 +157,7 @@ export default function TopConnectionsDonut({
                 }}
             >
                 <p>No connections found</p>
-                <ButtonOne onClick={() => { router.push("/user/connect") }}>Connect Now</ButtonOne>
+                <ButtonOne onClick={() => { router.push("/user/connect"); }}>Connect Now</ButtonOne>
             </div>
         );
     } else if (!chartData.length) {

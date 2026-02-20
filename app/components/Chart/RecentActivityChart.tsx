@@ -88,7 +88,7 @@ export default function RecentActivityChart({ height = "100%" }: { height?: numb
     const apiKeys = state?.api_keys ?? [];
 
     if (loading || !state) {
-        return <LoadingMessageSpinner messages={["Loading metrics..."]} />
+        return <LoadingMessageSpinner messages={["Loading metrics..."]} />;
     }
 
     if (apiKeys.length === 0) {
@@ -104,7 +104,7 @@ export default function RecentActivityChart({ height = "100%" }: { height?: numb
                 }}
             >
                 <p>No connections found</p>
-                <ButtonOne onClick={() => { router.push("/user/connect") }}>Connect Now</ButtonOne>
+                <ButtonOne onClick={() => { router.push("/user/connect"); }}>Connect Now</ButtonOne>
             </div>
         );
     }

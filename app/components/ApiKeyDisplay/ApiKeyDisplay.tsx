@@ -31,7 +31,7 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
                 console.error(error);
                 alert(error);
             }
-        }
+        };
 
         fetchKeyValue();
     }, [keyDescription]);
@@ -46,7 +46,7 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
             // setCopyStatus("Failed to copy!");
             console.error(error);
         }
-    }
+    };
 
     const handleDownload = () => {
         if (key === "Loading key...") return;
@@ -66,11 +66,11 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
 
         // Clean up
         URL.revokeObjectURL(url);
-    }
+    };
 
     const handleVisibleClick = () => {
         setIsKeyVisible(!isKeyVisible);
-    }
+    };
 
     const formatHidden = (s: string) => {
         return s.replace(/./g, '*');

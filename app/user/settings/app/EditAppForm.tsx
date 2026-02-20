@@ -4,8 +4,8 @@ import React, { useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonFour } from "@/app/components/Buttons/Buttons";
-import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import Switch from "@/app/components/Switch/Switch";
+import { useToast } from "@/app/context/ToastProvider";
 import { headerFont } from "@/app/localFonts";
 
 import styles from "./EditAppForm.module.css";
@@ -25,7 +25,7 @@ const DEFAULT_APP_SETTINGS: IAppSettings = {
     isDarkMode: false,
     isHighContrastMode: false,
     language: "English"
-}
+};
 
 const LANGUAGES: ILanguage[] = [
     { value: "English", label: "English" },
@@ -39,7 +39,7 @@ export default function EditAppForm() {
     const [formData, setFormData] = useState<IAppSettings>(DEFAULT_APP_SETTINGS);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
+    const toast = useToast();
 
     const handleToggle = (key: keyof IAppSettings) => {
         setFormData((prev) => ({
@@ -62,18 +62,10 @@ export default function EditAppForm() {
 
         try {
             // await updateAppSettings(formData)
-            setSnackbar({
-                message: "Success",
-                messageDescription: "To be implemented. No settings have been changed as none are implemented yet.",
-                variant: "success",
-            });
+            toast.success("Success", "To be implemented. No settings have been changed as none are implemented yet.");
             setIsEditing(false);
         } catch {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "Error updating your app settings.",
-                variant: "error",
-            });
+            toast.error("Error", "Error updating your app settings.");
         } finally {
             setIsLoading(false);
         }
@@ -100,7 +92,7 @@ export default function EditAppForm() {
                                 <LoadableButtonContent isLoading={isLoading} buttonLabel="Save" />
                             </ButtonOne>
                         </>
-                        : <ButtonOne onClick={() => { setIsEditing(true); setIsLoading(false) }}>Edit</ButtonOne>
+                        : <ButtonOne onClick={() => { setIsEditing(true); setIsLoading(false); }}>Edit</ButtonOne>
                     }
 
                 </div>
@@ -137,16 +129,6 @@ export default function EditAppForm() {
                     </select>
                 </div>
             </div>
-            {/* Status message */}
-            {snackbar && (
-                <Snackbar
-                    message={snackbar.message}
-                    messageDescription={snackbar.messageDescription}
-                    variant={snackbar.variant}
-                    duration={4000}
-                    onClose={() => setSnackbar(null)}
-                />
-            )}
         </form >
     );
 }

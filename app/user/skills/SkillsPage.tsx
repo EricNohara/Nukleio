@@ -6,8 +6,8 @@ import { useState, useEffect } from "react";
 import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
-import Snackbar, { SnackbarState } from "@/app/components/Snackbar/Snackbar";
 import Table from "@/app/components/Table/Table";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { ISkillsInput } from "@/app/interfaces/ISkills";
 
@@ -25,11 +25,11 @@ export default function SkillsPage() {
         years_of_experience: null
     });
     const [skillToEdit, setSkillToEdit] = useState<ISkillsInput | null>(null);
-    const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
     const router = useRouter();
+    const toast = useToast();
 
     // used to open given skill if inputted as search param
     useEffect(() => {
@@ -41,7 +41,7 @@ export default function SkillsPage() {
                 setIsFormOpen(true);
             }
         }
-    }, [indexParam, state])
+    }, [indexParam, state]);
 
     const handleEdit = (rowIndex: number) => {
         const skill = state.skills[rowIndex];
@@ -58,25 +58,16 @@ export default function SkillsPage() {
 
             // update cached state
             dispatch({ type: "DELETE_SKILL", payload: skill });
-
-            setSnackbar({
-                message: "Success",
-                messageDescription: `Successfully deleted skill: ${skill.name}.`,
-                variant: "success",
-            });
+            toast.success("Success", `Successfully deleted skill: ${skill.name}.`);
         } catch (error) {
             const err = error as Error;
-            setSnackbar({
-                message: "Error",
-                messageDescription: err.message,
-                variant: "error",
-            });
+            toast.error("Error", err.message);
         }
-    }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormValues(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    }
+    };
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -87,29 +78,17 @@ export default function SkillsPage() {
 
         // validate input
         if (!name) {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "Please fill out all required fields.",
-                variant: "error",
-            });
+            toast.warning("Warning", "Please fill out all required fields before submitting.");
             return;
         }
 
         if (proficiency && (proficiency < 1 || proficiency > 10)) {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "Proficiency must be a number between 1 and 10.",
-                variant: "error",
-            });
+            toast.warning("Warning", "Invalid proficiency input. Proficiency must be a number between 1 and 10.");
             return;
         }
 
         if (years_of_experience && years_of_experience < 0) {
-            setSnackbar({
-                message: "Error",
-                messageDescription: "Years of experience cannot be less than 0.",
-                variant: "error",
-            });
+            toast.warning("Warning", "Invalid years of experience input. Years of experience cannot be less than 0.");
             return;
         }
 
@@ -117,7 +96,7 @@ export default function SkillsPage() {
             name: name,
             proficiency: proficiency ? proficiency : null,
             years_of_experience: years_of_experience ? years_of_experience : null
-        }
+        };
 
         try {
             if (skillToEdit) {
@@ -125,7 +104,7 @@ export default function SkillsPage() {
                 const editPayload = {
                     skillName: skillToEdit.name,
                     updatedSkill: newSkill
-                }
+                };
                 const res = await fetch("/api/internal/user/skills", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -136,12 +115,6 @@ export default function SkillsPage() {
 
                 // update cached state
                 dispatch({ type: "UPDATE_SKILL", payload: { old: skillToEdit, new: newSkill } });
-
-                setSnackbar({
-                    message: "Success",
-                    messageDescription: `Successfully updated skill: ${name}.`,
-                    variant: "success",
-                });
             } else {
                 // Add the skill
                 const res = await fetch("/api/internal/user/skills", {
@@ -154,28 +127,18 @@ export default function SkillsPage() {
 
                 // update the cached user
                 dispatch({ type: "ADD_SKILL", payload: newSkill });
-
-                setSnackbar({
-                    message: "Success",
-                    messageDescription: `Successfully created skill: ${name}.`,
-                    variant: "success",
-                });
             }
-
+            toast.success("Success", `Successfully saved skill: ${name}`);
         } catch (err) {
             const error = err as Error;
-            setSnackbar({
-                message: "Error",
-                messageDescription: `Error creating or updating skill: ${error.message}.`,
-                variant: "error",
-            });
+            toast.error("Error", `Error creating or updating skill: ${error.message}.`);
         }
 
         // reset form
         setFormValues({ name: "", proficiency: null, years_of_experience: null });
         setIsFormOpen(false);
         setSkillToEdit(null);
-    }
+    };
 
     const onClose = () => {
         setIsFormOpen(false);
@@ -188,7 +151,7 @@ export default function SkillsPage() {
         const newUrl = newQuery ? `?${newQuery}` : "";
 
         router.replace(`/user/skills${newUrl}`, { scroll: false });
-    }
+    };
 
     const buttonOne: IButton = {
         name: "Add Skill",
@@ -201,7 +164,7 @@ export default function SkillsPage() {
             setSkillToEdit(null);
             setIsFormOpen(true);
         }
-    }
+    };
 
     const rows = state.skills.map((skill) => ({
         "Name": skill.name,
@@ -240,7 +203,7 @@ export default function SkillsPage() {
                 value: formValues.years_of_experience ? `${formValues.years_of_experience}` : ""
             }
         }
-    ]
+    ];
 
     const formProps: IInputFormProps = {
         title: skillToEdit ? "Edit Skill Information" : "Add Skill Information",
@@ -248,7 +211,7 @@ export default function SkillsPage() {
         onSubmit: onSubmit,
         inputRows: inputRows,
         onClose: onClose
-    }
+    };
 
     return (
         <PageContentWrapper>
@@ -271,17 +234,6 @@ export default function SkillsPage() {
                     onClose={formProps.onClose}
                 />
             }
-
-            {/* Status message */}
-            {snackbar && (
-                <Snackbar
-                    message={snackbar.message}
-                    messageDescription={snackbar.messageDescription}
-                    variant={snackbar.variant}
-                    duration={4000}
-                    onClose={() => setSnackbar(null)}
-                />
-            )}
         </PageContentWrapper>
     );
 }

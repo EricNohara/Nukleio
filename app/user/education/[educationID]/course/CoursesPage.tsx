@@ -21,7 +21,7 @@ const EMPTY_COURSE: ICourseInput = {
     name: "",
     grade: "",
     description: "",
-}
+};
 
 export default function CoursesPage({ educationID }: { educationID: string }) {
     const { state, dispatch } = useUser();
@@ -40,7 +40,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
     useEffect(() => {
         const education = state.education.find((edu) => edu.id === educationIDNum);
         setEducation(education ? education : null);
-    }, [state, educationIDNum])
+    }, [state, educationIDNum]);
 
     useEffect(() => {
         const rows = education === null ? [] : education.courses.map((course) => ({
@@ -50,7 +50,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
         }), [education]);
 
         setRows(rows);
-    }, [education])
+    }, [education]);
 
     // open course from index param once education is loaded
     useEffect(() => {
@@ -88,11 +88,11 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
             const err = error as Error;
             toast.error("Error", err.message);
         }
-    }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormValues(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    }
+    };
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -111,7 +111,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
             name: name,
             grade: grade ? grade : null,
             description: description ? description : null
-        }
+        };
 
         try {
             if (courseToEdit) {
@@ -120,7 +120,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
                     educationID: educationIDNum,
                     courseName: courseToEdit.name,
                     course: newCourse
-                }
+                };
                 const res = await fetch("/api/internal/user/education/course", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -136,7 +136,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
                 const postPayload = {
                     educationID: educationIDNum,
                     course: newCourse
-                }
+                };
                 const res = await fetch("/api/internal/user/education/course", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -158,7 +158,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
         setFormValues(EMPTY_COURSE);
         setIsFormOpen(false);
         setCourseToEdit(null);
-    }
+    };
 
     const onClose = () => {
         setIsFormOpen(false);
@@ -171,7 +171,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
         const newUrl = newQuery ? `?${newQuery}` : "";
 
         router.replace(`/user/education/${educationID}/course${newUrl}`, { scroll: false });
-    }
+    };
 
     const buttonOne: IButton = {
         name: "Add Course",
@@ -180,12 +180,12 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
             setCourseToEdit(null);
             setIsFormOpen(true);
         },
-    }
+    };
 
     const buttonFour: IButton = {
         name: "Return",
-        onClick: () => { router.push("/user/education") }
-    }
+        onClick: () => { router.push("/user/education"); }
+    };
 
     const inputRows: IInputFormRow[] = [
         {
@@ -230,7 +230,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
         onSubmit: onSubmit,
         inputRows: inputRows,
         onClose: onClose
-    }
+    };
 
     return (
         <PageContentWrapper>

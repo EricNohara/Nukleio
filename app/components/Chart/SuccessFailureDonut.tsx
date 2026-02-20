@@ -119,7 +119,7 @@ export default function SuccessFailureDonut({ height = "100%" }: Props) {
                 }}
             >
                 <p>No connections found</p>
-                <ButtonOne onClick={() => { router.push("/user/connect") }}>Connect Now</ButtonOne>
+                <ButtonOne onClick={() => { router.push("/user/connect"); }}>Connect Now</ButtonOne>
             </div>
         );
     } else if (!chartData.length || total === 0) {

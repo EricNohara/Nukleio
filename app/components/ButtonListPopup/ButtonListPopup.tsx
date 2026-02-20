@@ -31,7 +31,7 @@ export default function ButtonListPopup({ buttons }: IButtonListPopupProps) {
     const handleClick = (button: IButtonProp) => {
         if ("route" in button) router.push(button.route as string);
         else if ("action" in button) button.action?.();
-    }
+    };
 
     return (
         <div className={styles.container}>

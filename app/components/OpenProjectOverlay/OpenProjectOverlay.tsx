@@ -27,11 +27,11 @@ export default function OpenProjectOverlay({ project, index, onEdit, onDelete, o
         } else {
             return project.date_end ? formatDate(project.date_end) : "";
         }
-    }
+    };
 
     const formatList = (list: string[] | null, fallback: string) => {
         return list && list.length > 0 ? list.join(", ") : fallback;
-    }
+    };
 
     return (
         <Overlay onClose={onClose}>

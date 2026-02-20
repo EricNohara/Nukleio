@@ -41,7 +41,7 @@ export default function ProjectCard({ project, onEdit, onDelete, onOpen, index, 
         } else {
             return project.date_end ? formatDate(project.date_end, true) : "";
         }
-    }
+    };
 
     return (
         <div
