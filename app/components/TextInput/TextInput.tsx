@@ -23,6 +23,7 @@ interface TextInputProps {
     textAreaRows?: number;
     disabled?: boolean;
     className?: string;
+    outerClassname?: string;
     focusLabelColor?: string;
 }
 
@@ -42,6 +43,7 @@ export default function TextInput({
     textAreaRows = 4,
     disabled = false,
     className = "",
+    outerClassname = "",
     focusLabelColor
 }: TextInputProps) {
     const [showPassword, setShowPassword] = useState(false);
@@ -56,7 +58,7 @@ export default function TextInput({
         : undefined;
 
     return (
-        <div className={styles.inputDiv} style={focusStyle}>
+        <div className={`${styles.inputDiv} ${outerClassname ? outerClassname : ""}`} style={focusStyle}>
             <label className={`${styles.inputLabel} ${isInInputForm && styles.inputFormInputLabel} ${headerFont.className}`} htmlFor={name}>
                 {label}
                 {required && <span className={styles.required}> *</span>}

@@ -14,9 +14,11 @@ interface IFileUploadBoxProps {
     onExitEditView?: () => void;
     onFileSelect: (file: File, docType: string) => void;
     docType: string;
+    className?: string;
+    isMini?: boolean;
 }
 
-export default function FileUploadBox({ label, accepts, uploadInstructions, isEditView, onExitEditView, onFileSelect, docType }: IFileUploadBoxProps) {
+export default function FileUploadBox({ label, accepts, uploadInstructions, isEditView, onExitEditView, onFileSelect, docType, className, isMini = false }: IFileUploadBoxProps) {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [dragging, setDragging] = useState(false);
     const [fileName, setFileName] = useState("");
@@ -46,7 +48,7 @@ export default function FileUploadBox({ label, accepts, uploadInstructions, isEd
 
     return (
         <div
-            className={`${styles.uploadBox} ${dragging ? styles.dragging : ""}`}
+            className={`${styles.uploadBox} ${dragging && styles.dragging} ${className && className} ${isMini && styles.miniUploadBox}`}
             onDragOver={(e) => {
                 e.preventDefault();
                 setDragging(true);
@@ -71,10 +73,10 @@ export default function FileUploadBox({ label, accepts, uploadInstructions, isEd
             }
 
             <div className={styles.labelContainer}>
-                {label && <h1 className={styles.label}>{label}</h1>}
-                <h2 className={styles.subLabel}>{fileName || "Drag and drop or select a file"}</h2>
+                {label && <h1 className={`${styles.label} ${isMini && styles.miniLabel}`}>{label}</h1>}
+                <h2 className={`${styles.subLabel} ${isMini && styles.miniSubLabel}`}>{fileName || "Drag and drop or select a file"}</h2>
             </div>
-            <ButtonOne onClick={() => inputRef.current?.click()}>
+            <ButtonOne type="button" onClick={() => inputRef.current?.click()}>
                 Browse Files
             </ButtonOne>
             {uploadInstructions &&

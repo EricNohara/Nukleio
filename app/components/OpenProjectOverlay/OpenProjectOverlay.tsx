@@ -1,4 +1,4 @@
-import { GitBranch, Link2 } from "lucide-react";
+import { Github, Link2 } from "lucide-react";
 import Image from "next/image";
 
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
@@ -79,7 +79,7 @@ export default function OpenProjectOverlay({ project, index, onEdit, onDelete, o
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
-                                            <GitBranch />
+                                            <Github />
                                         </a>
                                     }
                                     {project.demo_url &&

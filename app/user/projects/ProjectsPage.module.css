@@ -10,3 +10,75 @@
   border-radius: var(--global-border-radius);
   background-color: var(--project-list-container);
 }
+
+/* project form modal */
+.modal {
+  width: 75%;
+  background-color: var(--input-form);
+  border-radius: var(--global-border-radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  gap: 1rem;
+}
+
+.buttonContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem 0 2rem 0;
+}
+
+.buttonContainer > button {
+  padding: 1rem 4rem;
+  font-size: 1rem;
+}
+
+.inputGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-areas:
+    "name name start end"
+    "github github demo demo"
+    "langs langs frameworks frameworks"
+    "desc desc tech tech"
+    "desc desc upload upload"
+    "desc desc upload upload";
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.name {
+  grid-area: name;
+}
+.start {
+  grid-area: start;
+}
+.end {
+  grid-area: end;
+}
+.desc {
+  grid-area: desc;
+}
+.github {
+  grid-area: github;
+}
+.demo {
+  grid-area: demo;
+}
+.langs {
+  grid-area: langs;
+}
+.frameworks {
+  grid-area: frameworks;
+}
+.tech {
+  grid-area: tech;
+}
+.upload {
+  grid-area: upload;
+}

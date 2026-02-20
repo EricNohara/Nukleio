@@ -20,6 +20,10 @@
   background-size: 100% 100%;
 }
 
+.miniUploadBox {
+  gap: 1rem;
+}
+
 .uploadBox:hover {
   border-color: var(--file-upload-border-hover);
 }
@@ -40,6 +44,10 @@
   margin-bottom: 0.25rem;
 }
 
+.miniLabel {
+  font-size: 1.15rem;
+}
+
 .subLabel {
   font-size: 1rem;
   font-weight: normal;
@@ -51,6 +59,10 @@
   text-overflow: ellipsis;
 
   width: 300px;
+}
+
+.miniSubLabel {
+  font-size: 0.8rem;
 }
 
 .uploadInstructions {

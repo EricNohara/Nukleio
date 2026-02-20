@@ -3,8 +3,6 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 
-import InputForm from "@/app/components/InputForm/InputForm";
-import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import OpenProjectOverlay from "@/app/components/OpenProjectOverlay/OpenProjectOverlay";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import ProjectCard from "@/app/components/ProjectCard/ProjectCard";
@@ -12,7 +10,10 @@ import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { IProjectInput } from "@/app/interfaces/IProject";
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
+import { compressImage } from "@/utils/file-upload/compress";
+import { uploadFile } from "@/utils/file-upload/upload";
 
+import ProjectFormModal from "./ProjectFormModal";
 import styles from "./ProjectsPage.module.css";
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
@@ -33,6 +34,7 @@ export default function ProjectsPage() {
     const { state, dispatch } = useUser();
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
     const [formValues, setFormValues] = useState<IProjectInput>(EMPTY_PROJECT_INPUT);
+    const [thumbnailDoc, setThumbnailDoc] = useState<File | null>(null);
     const [projectToEdit, setProjectToEdit] = useState<IProjectInternal | null>(null);
     const [openProject, setOpenProject] = useState<number | null>(null);
     const [activeProjectIndex, setActiveProjectIndex] = useState<number | null>(null); // for single and double clicks
@@ -76,6 +78,11 @@ export default function ProjectsPage() {
     const handleDelete = async (rowIndex: number) => {
         const project = state.projects[rowIndex];
         try {
+            // delete the project thumbnail if one exists
+            if (project.thumbnail_url) {
+                await handleFileDelete(project.thumbnail_url)
+            }
+
             const res = await fetch(`/api/internal/user/projects?projectID=${project.id}`, { method: "DELETE" });
             if (!res.ok) throw new Error(`Error deleting project: ${project.name}.`);
 
@@ -96,6 +103,35 @@ export default function ProjectsPage() {
             setFormValues(prev => ({ ...prev, [name]: value.split(",").map(v => v.trim()) }));
         } else {
             setFormValues(prev => ({ ...prev, [name]: value }));
+        }
+    };
+
+    const handleUpload = async (): Promise<string | undefined> => {
+        try {
+            const compressed = await compressImage(thumbnailDoc);
+            const publicProjectThumbnailUrl = await uploadFile(compressed, "project_thumbnails");
+            if (!publicProjectThumbnailUrl) throw new Error();
+            setThumbnailDoc(null);
+            return publicProjectThumbnailUrl;
+        } catch {
+            toast.error("Error", "Failed to upload your project thumbnail. Please try again.");
+        }
+    };
+
+    const handleFileDelete = async (url: string | undefined) => {
+        try {
+            if (!url) throw new Error("Invalid url");
+            const res = await fetch(`/api/internal/storage?publicURL=${url}`, { method: "DELETE" });
+
+            if (res.status !== 204) {
+                const data = await res.json();
+                throw new Error(data.message);
+            }
+
+            // update state
+            setFormValues({ ...formValues, thumbnail_url: null })
+        } catch {
+            toast.error("Error", "Error deleting your document.");
         }
     };
 
@@ -139,6 +175,13 @@ export default function ProjectsPage() {
         };
 
         try {
+            // upload the new project thumbnail if one was uploaded
+            if (thumbnailDoc !== null) {
+                const publicThumbnailUrl = await handleUpload();
+                if (!publicThumbnailUrl) throw new Error()
+                newProject.thumbnail_url = publicThumbnailUrl
+            }
+
             if (projectToEdit) {
                 // update the project
                 const editPayload = {
@@ -158,10 +201,15 @@ export default function ProjectsPage() {
                     ...newProject
                 };
 
+                // delete the old thumbnail if one exists
+                if (formValues.thumbnail_url) {
+                    await handleFileDelete(formValues.thumbnail_url)
+                }
+
                 // update cached state
                 dispatch({ type: "UPDATE_PROJECT", payload: { old: projectToEdit, new: newProjectInternal } });
             } else {
-                // Add the skill
+                // Add the project
                 const res = await fetch("/api/internal/user/projects", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -220,110 +268,6 @@ export default function ProjectsPage() {
         },
     };
 
-    const inputRows: IInputFormRow[] = [
-        {
-            inputOne: {
-                label: "Project Name",
-                name: "name",
-                type: "text",
-                placeholder: "Enter project name",
-                required: true,
-                onChange: handleChange,
-                value: formValues.name
-            }
-        },
-        {
-            inputOne: {
-                label: "Date Start",
-                name: "date_start",
-                type: "date",
-                placeholder: "Enter start date",
-                required: true,
-                onChange: handleChange,
-                value: formValues.date_start
-            },
-            inputTwo: {
-                label: "Date End",
-                name: "date_end",
-                type: "date",
-                placeholder: "Enter end date",
-                required: true,
-                onChange: handleChange,
-                value: formValues.date_end
-            }
-        },
-        {
-            inputOne: {
-                label: "GitHub URL",
-                name: "github_url",
-                type: "text",
-                placeholder: "Enter GitHub url",
-                required: false,
-                onChange: handleChange,
-                value: formValues.github_url ? formValues.github_url : ""
-            },
-            inputTwo: {
-                label: "Demo URL",
-                name: "demo_url",
-                type: "text",
-                placeholder: "Enter demo url",
-                required: false,
-                onChange: handleChange,
-                value: formValues.demo_url ? formValues.demo_url : ""
-            }
-        },
-        {
-            inputOne: {
-                label: "Programming Languages Used",
-                name: "languages_used",
-                type: "text",
-                placeholder: "Enter programming languages separated by commas",
-                required: false,
-                onChange: handleChange,
-                value: formValues.languages_used ? formValues.languages_used.join(", ") : ""
-            }
-        },
-        {
-            inputOne: {
-                label: "Frameworks Used",
-                name: "frameworks_used",
-                type: "text",
-                placeholder: "Enter frameworks separated by commas",
-                required: false,
-                onChange: handleChange,
-                value: formValues.frameworks_used ? formValues.frameworks_used.join(", ") : ""
-            },
-            inputTwo: {
-                label: "Technologies Used",
-                name: "technologies_used",
-                type: "text",
-                placeholder: "Enter technologies separated by commas",
-                required: false,
-                onChange: handleChange,
-                value: formValues.technologies_used ? formValues.technologies_used.join(", ") : ""
-            }
-        },
-        {
-            inputOne: {
-                label: "Description",
-                name: "description",
-                type: "text",
-                placeholder: "Enter project description",
-                required: true,
-                onChange: handleChange,
-                value: formValues.description,
-            }
-        },
-    ];
-
-    const formProps: IInputFormProps = {
-        title: projectToEdit ? "Edit Project Information" : "Add Project Information",
-        buttonLabel: projectToEdit ? "Save Changes" : "Add Project",
-        onSubmit: onSubmit,
-        inputRows: inputRows,
-        onClose: onClose
-    };
-
     return (
         <PageContentWrapper>
             <PageContentHeader title="Projects" buttonOne={buttonOne} />
@@ -343,12 +287,14 @@ export default function ProjectsPage() {
 
             {
                 isFormOpen &&
-                <InputForm
-                    title={formProps.title}
-                    buttonLabel={formProps.buttonLabel}
-                    onSubmit={formProps.onSubmit}
-                    inputRows={formProps.inputRows}
-                    onClose={formProps.onClose}
+                <ProjectFormModal
+                    title={projectToEdit ? "Edit Project Information" : "Add Project"}
+                    submitLabel={projectToEdit ? "Save Changes" : "Add Project"}
+                    value={formValues}
+                    onChange={handleChange}
+                    onSubmit={onSubmit}
+                    onClose={onClose}
+                    setThumbnailDoc={setThumbnailDoc}
                 />
             }
 

@@ -107,14 +107,15 @@ No known issues.
 - UI/UX update
   - Dark mode
   - Disable all buttons when loading
-- Support more languages through new libraries (Python, Java, C#, etc.)
 - Documentation page for API + code integrations
+- Support more languages through new libraries (Python, Java, C#, etc.)
 - Add ads to website
 - Test with live users
-- Monetize
+- Add payment method and memberships
 
 ## Eventual Work Items
 
+- Add a community store for purchasing templates
 - Allow for other file upload types
 - Add AI feature for generating text for descriptions
 - Migrate backend to external application
