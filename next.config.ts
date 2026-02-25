@@ -71,7 +71,7 @@ const nextConfig: NextConfig = {
   default-src 'self';
   script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""} https://vercel.analytics.edge.com https://cdn.vercel-insights.com https://vercel.live https://va.vercel-scripts.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  img-src 'self' data: https:;
+  img-src 'self' data: https: blob:;
   connect-src 
     'self'
     https://vercel.analytics.edge.com
@@ -92,6 +92,7 @@ const nextConfig: NextConfig = {
 
   frame-src
     'self'
+    blob:
     https://vercel.live
     https://jfsetifsqcpkwdtcrhdt.supabase.co
     https://accounts.google.com

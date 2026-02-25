@@ -1,27 +1,27 @@
 export async function uploadFile(
   file: File | null,
   bucketName: string,
-): Promise<string | null> {
-  if (!file || !bucketName || bucketName === "") return null;
+): Promise<string> {
+  if (!file || !bucketName) {
+    throw new Error("Missing file or bucket name");
+  }
 
-  let publicURL = "";
   const formData = new FormData();
   formData.append("file", file);
   formData.append("bucketName", bucketName);
 
-  try {
-    const res = await fetch("/api/internal/storage", {
-      method: "POST",
-      body: formData,
-    });
+  const res = await fetch("/api/internal/storage", {
+    method: "POST",
+    body: formData,
+  });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message);
+  const data = await res.json();
 
-    publicURL = data.publicURL;
-  } catch (err) {
-    console.error(err);
+  console.log(data);
+
+  if (!res.ok) {
+    throw new Error(data?.message ?? "File upload failed");
   }
 
-  return publicURL;
+  return data.publicURL;
 }

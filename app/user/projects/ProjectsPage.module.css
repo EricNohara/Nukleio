@@ -21,7 +21,6 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  gap: 1rem;
 }
 
 .buttonContainer {
@@ -45,7 +44,7 @@
     "name name start end"
     "github github demo demo"
     "langs langs frameworks frameworks"
-    "desc desc tech tech"
+    "tech tech upload upload"
     "desc desc upload upload"
     "desc desc upload upload";
   gap: 1rem;

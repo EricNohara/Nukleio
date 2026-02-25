@@ -89,8 +89,9 @@ export default function DocumentsPage() {
       }
 
       toast.success("Success", "Successfully uploaded your documents.");
-    } catch {
-      toast.error("Error", "Failed to upload your documents. Please try again.");
+    } catch (err) {
+      const error = err as Error;
+      toast.error("Error", error.message ?? "Failed to upload your documents. Please try again.");
     }
   };
 

@@ -138,10 +138,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
 
@@ -202,9 +199,6 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

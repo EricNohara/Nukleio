@@ -105,3 +105,14 @@
 .external:hover {
   background-color: var(--btn-2-hover);
 }
+
+.one:disabled,
+.two:disabled,
+.three:disabled,
+.four:disabled,
+.edit:disabled,
+.delete:disabled,
+.exit:disabled,
+.external:disabled {
+  cursor: not-allowed;
+}
