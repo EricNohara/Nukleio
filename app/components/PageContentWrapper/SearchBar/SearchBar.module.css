@@ -16,6 +16,7 @@
 
 .searchBarInput {
   background-color: inherit;
+  color: var(--search-txt);
   border: none;
   width: 100%;
   font-size: 1rem;
@@ -41,6 +42,7 @@
   max-height: 300px;
   overflow: scroll;
   overflow-x: hidden;
+  color: var(--search-txt);
 }
 
 .dropdownItem {

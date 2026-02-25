@@ -4,11 +4,10 @@
   justify-content: space-between;
   gap: 0.75rem;
   width: 250px;
-  color: var(--page-txt-2);
+  color: var(--page-txt-1);
   border: none;
   border-radius: var(--global-border-radius);
   background-color: inherit;
-  transition: 0.2s ease;
   padding: 0;
 }
 
@@ -25,11 +24,10 @@
 }
 
 .openContainer {
-  background-color: var(--popup-bg);
+  background-color: var(--page-bg);
   border: 1px solid var(--page-box-border);
   border-bottom-style: none;
   transition: 0.2s ease;
-  color: var(--page-txt);
   border-radius: var(--global-border-radius) var(--global-border-radius) 0 0;
 }
 
@@ -66,4 +64,5 @@
 .chevron {
   flex-shrink: 0;
   margin-right: 0.5rem;
+  color: var(--page-txt-1);
 }

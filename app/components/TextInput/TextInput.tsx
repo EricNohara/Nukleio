@@ -1,9 +1,7 @@
 "use client";
 
-import { Eye, EyeOff } from "lucide-react";
-import React, { ChangeEvent } from "react";
-import { useState } from "react";
-
+import { Eye, EyeOff, Calendar } from "lucide-react";
+import React, { ChangeEvent, useRef, useState } from "react";
 
 import { headerFont } from "@/app/localFonts";
 
@@ -44,26 +42,52 @@ export default function TextInput({
     disabled = false,
     className = "",
     outerClassname = "",
-    focusLabelColor
+    focusLabelColor,
 }: TextInputProps) {
     const [showPassword, setShowPassword] = useState(false);
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     const isPassword = type === "password";
+    const isDate = type === "date";
+
     const actualType = isPassword && showPassword ? "text" : type;
-    const inputClass =
-        `${isInInputForm ? styles.inputFormInput : styles.textInput} ${isPassword ? styles.hasToggle : ""} ${className}`;
+
+    const inputClass = `${isInInputForm ? styles.inputFormInput : styles.textInput} ${isPassword || isDate ? styles.hasToggle : ""
+        } ${className}`;
 
     const focusStyle: StyleWithFocusLabelVar | undefined = focusLabelColor
         ? { "--focus-label-color": focusLabelColor }
         : undefined;
 
+    const openDatePicker = () => {
+        if (!inputRef.current) return;
+
+        // always focus
+        inputRef.current.focus();
+
+        // Chromium supports showPicker()
+        // eslint-disable-next-line
+        const anyInput = inputRef.current as any;
+        if (typeof anyInput.showPicker === "function") {
+            anyInput.showPicker();
+            return;
+        }
+
+        // fallback: click the input (works in many browsers)
+        inputRef.current.click();
+    };
+
     return (
         <div className={`${styles.inputDiv} ${outerClassname ? outerClassname : ""}`} style={focusStyle}>
-            <label className={`${styles.inputLabel} ${isInInputForm && styles.inputFormInputLabel} ${headerFont.className}`} htmlFor={name}>
+            <label
+                className={`${styles.inputLabel} ${isInInputForm && styles.inputFormInputLabel} ${headerFont.className}`}
+                htmlFor={name}
+            >
                 {label}
                 {required && <span className={styles.required}> *</span>}
             </label>
-            {type === "textarea" ?
+
+            {type === "textarea" ? (
                 <textarea
                     className={inputClass}
                     id={name}
@@ -75,9 +99,10 @@ export default function TextInput({
                     rows={textAreaRows}
                     disabled={disabled}
                 />
-                :
+            ) : (
                 <div className={styles.inputWrapper}>
                     <input
+                        ref={type === "date" ? inputRef : undefined}
                         className={inputClass}
                         id={name}
                         name={name}
@@ -100,8 +125,21 @@ export default function TextInput({
                             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                         </button>
                     )}
+
+                    {isDate && (
+                        <button
+                            type="button"
+                            className={styles.passwordToggle}
+                            onClick={openDatePicker}
+                            tabIndex={-1}
+                            aria-label="Open date picker"
+                            disabled={disabled}
+                        >
+                            <Calendar className={styles.calendarIcon} size={20} />
+                        </button>
+                    )}
                 </div>
-            }
+            )}
         </div>
     );
 }

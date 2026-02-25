@@ -14,7 +14,7 @@
 /* project form modal */
 .modal {
   width: 75%;
-  background-color: var(--input-form);
+  background-color: var(--page-box-bg);
   border-radius: var(--global-border-radius);
   display: flex;
   flex-direction: column;

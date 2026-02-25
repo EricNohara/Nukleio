@@ -37,7 +37,7 @@
   grid-template-columns: 95% 5%;
   align-items: center;
   justify-content: center;
-  background-color: var(--input-form-input);
+  background-color: var(--page-box-bg);
   overflow: hidden;
   border-radius: var(--global-border-radius);
 }

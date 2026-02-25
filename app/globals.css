@@ -14,6 +14,23 @@ body {
 
 /* color variables */
 :root {
+  /* ----- INVARIANT COLORS ----- */
+  --btn-1: #378afb;
+  --btn-1-hover: #2c6fcb;
+  --btn-2: #1f254a;
+  --btn-2-hover: #28305f;
+  --btn-3: #334673;
+  --btn-3-hover: #3e558a;
+  --exit-btn: #f44336;
+  --exit-btn-hover: #cf382d;
+  --nav-bg: #131624;
+  --search-overlay: rgba(0, 0, 0, 0.4);
+  --settings-input-bg: #666666;
+  --input-form-gradient-1: #378afb;
+  --input-form-gradient-2: #0b1c34;
+  --input-form-title-txt: white;
+  --input-form-input-placeholder-txt: #909090;
+
   /* home page */
   --home-bg-grad-1: #131624;
   --home-bg-grad-2: #142132;
@@ -29,28 +46,25 @@ body {
   --login-txt-3: #909090;
   --login-btn-bg: #333333;
 
-  /* general colors */
-  /* buttons */
-  --btn-1: #378afb;
-  --btn-1-hover: #2c6fcb;
-  --btn-2: #1f254a;
-  --btn-2-hover: #28305f;
-  --btn-3: #334673;
-  --btn-3-hover: #3e558a;
-  --btn-4: #d1d1d1;
-  --btn-4-txt: #5f5f5f;
-  --btn-4-hover: #d1d1d1;
-  --exit-btn: #f44336;
-  --exit-btn-hover: #cf382d;
+  /* sizes */
+  --global-border-radius: 10px;
+  --title-font-size: 2rem;
 
-  --nav-bg: #131624;
+  /* charts */
+  --success-color: #82ca9d;
+  --fail-color: #f87777;
+
+  /* ----- THEME DEPENDENT COLORS ----- */
   --page-bg: #f5f5f5;
   --page-box-bg: white;
   --page-box-border: #d1d1d1;
 
+  --btn-4: #d1d1d1;
+  --btn-4-txt: #5f5f5f;
+  --btn-4-hover: #d1d1d1;
+
   --search-bg: #e3e3e3;
-  --search-txt: #696969;
-  --search-overlay: rgba(0, 0, 0, 0.4);
+  --search-txt: #333333;
 
   --page-txt-1: black;
   --page-txt-2: #5f5f5f;
@@ -58,22 +72,10 @@ body {
   --popup-bg: white;
   --popup-hover: #d6e2f2;
 
-  --user-dropdown-bg: rgb(220, 220, 220);
-
-  --table-head-txt: #626262;
-
-  --input-form: white;
-  --input-form-gradient-1: #378afb;
-  --input-form-gradient-2: #0b1c34;
-
-  --input-form-title-txt: white;
   --input-form-overlay: rgba(0, 0, 0, 0.8);
-  --input-form-input: #f5f5f5;
-  --input-form-input-txt: #2f2f2f;
-  --input-form-input-placeholder-txt: #909090;
-  --input-form-input-focus: #2f2f2f;
-  --input-form-input-label-txt: #0f0e0e;
+
   /* add more later */
+  --table-head-txt: #626262;
 
   /* projects page */
   --project-list-container: white;
@@ -94,19 +96,28 @@ body {
   --file-uploaded: #6a9681;
 
   /* settings */
-  --settings-border: #d1d1d1;
   --settings-switch-bg: #dbdbdb;
-  --settings-input-bg: #666666;
-
-  /* sizes */
-  --global-border-radius: 10px;
-  --title-font-size: 2rem;
-
-  /* charts */
-  --success-color: #82ca9d;
-  --fail-color: #f87777;
 }
 
 /* Dark mode overrides */
 .dark-theme {
+  --page-bg: #2a2a2a;
+  --page-box-bg: #383838;
+  --page-box-border: #6e6e6e;
+  --page-txt-1: white;
+  --page-txt-2: #c2c2c2;
+
+  --search-bg: #383838;
+  --search-txt: white;
+  --popup-hover: #d6e2f24a;
+
+  --btn-4: #5f5f5f;
+  --btn-4-txt: #d1d1d1;
+  --btn-4-hover: #5f5f5f;
+
+  --settings-switch-bg: #383838;
+
+  --input-form-overlay: rgba(0, 0, 0, 0.6);
+
+  --table-head-txt: white;
 }
