@@ -32,12 +32,13 @@
 
 - **Frontend**:
   - [Next.js](https://nextjs.org/) - Fullstack framework used for building a fast, responsive, user-friendly interface
-  - [MUI](https://mui.com/) - Used for simple and easy components
-  - [Tailwind](https://tailwindcss.com/) - Used for efficient styling
+  - [CSS Modules](https://www.gatsbyjs.com/docs/how-to/styling/css-modules/) - Used for CSS styling without increasing runtime
 - **Backend**:
   - [Supabase](https://supabase.com/) - Open-source alternative to Firebase for authentication, hosted database management, and file storage
-  - [Next.js](https://nextjs.org)
+  - [Next.js](https://nextjs.org) - Used app router for api calls and DB operations
   - [Python](https://www.python.org/) - Used for AWS Lambda Function which periodically calls the API to keep the Supabase project active
+  - [Stripe](https://stripe.com/) - Used for handling payment operations
+  - [OpenAI API](https://openai.com/api/) - Used for AI feature implementation
 - **Hosting**:
   - [Vercel](https://vercel.com/) - Optimized to be hosted on vercel for cheap and easy deployment
   - [AWS Lambda Function](https://aws.amazon.com/lambda/) - Simple and cheap way to schedule periodic API calls to keep the Supabase project active
@@ -104,21 +105,16 @@ No known issues.
 
 ## Next Steps
 
-- UI/UX update
-  - Dark mode
-  - Disable all buttons when loading
-- Documentation page for API + code integrations
+- Add payment method and memberships
 - Support more languages through new libraries (Python, Java, C#, etc.)
+- Documentation page for API + code integrations
 - Add ads to website
 - Test with live users
-- Add payment method and memberships
 
 ## Eventual Work Items
 
-- Add a community store for purchasing templates
-- Allow for other file upload types
 - Add AI feature for generating text for descriptions
-- Migrate backend to external application
-  - Reintegrate the web app with this external backend
-  - Create CLI
-  - Create desktop app
+- Add resume AI generation feature
+- Allow for other file upload types (e.g. video for premium users)
+- Add a community store for purchasing templates
+- Migrate public API backend to external application
