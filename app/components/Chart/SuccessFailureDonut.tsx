@@ -240,6 +240,7 @@ export default function SuccessFailureDonut({ height = "100%" }: Props) {
                                             wordBreak: "break-word",
                                             maxWidth: 320,
                                             background: "var(--page-box-bg)",
+                                            color: "var(--page-txt-1)",
                                             border: "1px solid var(--page-box-border)",
                                             borderRadius: "var(--global-border-radius)",
                                             boxShadow: "0 8px 24px rgba(0,0,0,0.08)",

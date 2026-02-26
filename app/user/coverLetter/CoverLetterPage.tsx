@@ -202,7 +202,7 @@ export default function CoverLetterPage() {
                 {/* ------------------- INITIAL FORM ------------------- */}
                 {!loading && !draft && !conversationId && (
                     <>
-                        <p>Generate a polished cover letter tailored using your personal data.</p>
+                        <p className={styles.subtitle}>Generate a cover letter tailored to your personal data.</p>
 
                         <div className={styles.inputsContainer}>
                             <TextInput

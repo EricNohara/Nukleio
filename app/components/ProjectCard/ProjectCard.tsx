@@ -62,7 +62,7 @@ export default function ProjectCard({ project, onEdit, onDelete, onOpen, index, 
                             setIsExpanded(!isExpanded);
                         }}
                     >
-                        <EllipsisVertical />
+                        <EllipsisVertical className={styles.ellipsis} />
                     </button>
                     {isExpanded && (
                         <div className={styles.dropdownMenu}>

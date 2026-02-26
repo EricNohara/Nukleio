@@ -191,7 +191,9 @@ export default function CoverLetterDescriptionModePage() {
                 {/* ------------------- INITIAL FORM ------------------- */}
                 {!loading && !draft && !conversationId && (
                     <>
-                        <p>{`No data found for the inputted job ${jobTitle} at company ${companyName}. Please input a dump of the job posting description to continue.`}</p>
+                        <p className={styles.subtitle}>
+                            {`No data found for the inputted job ${jobTitle} at company ${companyName}. Please input a dump of the job posting description to continue.`}
+                        </p>
 
                         <div className={styles.inputsContainer}>
                             <TextInput

@@ -1,12 +1,11 @@
 .container {
   position: relative;
-  border: 2px solid var(--file-upload);
+  border: 1px solid var(--page-box-border);
   border-radius: var(--global-border-radius);
   padding: 2rem;
   text-align: center;
   transition: 0.2s ease;
-  background: var(--file-display);
-  color: var(--file-upload-border);
+  background-color: var(--page-box-bg);
 
   display: flex;
   flex-direction: column;
@@ -25,7 +24,7 @@
 
 .badge {
   padding: 0.5rem 1rem;
-  background-color: var(--file-uploaded);
+  background-color: var(--success-color);
   border-radius: var(--global-border-radius);
   color: white;
   font-weight: bold;
@@ -44,7 +43,7 @@
 
 .title {
   font-size: 1.5rem;
-  color: var(--file-upload-label);
+  color: var(--page-txt-1);
   margin: 0;
   margin-bottom: 0.25rem;
 }
@@ -53,6 +52,7 @@
   font-size: 1rem;
   font-weight: normal;
   margin: 0;
+  color: var(--page-txt-2);
 }
 
 .buttonsContainer {

@@ -283,6 +283,7 @@ export default function TopConnectionsDonut({
                                             whiteSpace: "normal",
                                             wordBreak: "break-word",
                                             maxWidth: 320,
+                                            color: "var(--page-txt-1)",
                                             background: "var(--page-box-bg)",
                                             border: "1px solid var(--page-box-border)",
                                             borderRadius: "var(--global-border-radius)",

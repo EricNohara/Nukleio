@@ -38,6 +38,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--page-txt-1);
 }
 
 .expandBtn {
@@ -47,7 +48,6 @@
   background-color: inherit;
   border: none;
   border-radius: var(--global-border-radius);
-  color: var(--project-card-date-txt);
   padding: 0.25rem 0;
   transition: 0.2s;
 }
@@ -63,8 +63,12 @@
 
 .date {
   margin: 0;
-  color: var(--project-card-date-txt);
+  color: var(--page-txt-2);
   font-size: 0.8rem;
+}
+
+.ellipsis {
+  color: var(--page-txt-1);
 }
 
 .thumbnailContainer {
@@ -111,6 +115,7 @@
   gap: 1rem;
   font-size: 1rem;
   font-weight: bold;
+  color: var(--page-txt-1);
 }
 
 .dropdownButton:hover {

@@ -8,7 +8,7 @@
   height: 100%;
   padding: 1rem;
   border-radius: var(--global-border-radius);
-  background-color: var(--project-list-container);
+  background-color: var(--page-box-bg);
 }
 
 /* project form modal */
