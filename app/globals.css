@@ -7,9 +7,39 @@ body {
   font-size: 1rem;
   margin: 0;
   padding: 0;
-  width: 100vw;
-  height: 100vh;
+  min-height: 100%;
   box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+}
+
+/* scrollbar */
+/* Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--page-box-border) var(--page-bg);
+}
+
+/* Chrome / Edge / Safari */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--page-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--page-box-border);
+  border-radius: var(--global-border-radius);
+  border: 2px solid var(--page-bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--page-txt-2);
 }
 
 /* color variables */
@@ -23,7 +53,6 @@ body {
   --btn-3-hover: #3e558a;
   --exit-btn: #f44336;
   --exit-btn-hover: #cf382d;
-  --nav-bg: #131624;
   --search-overlay: rgba(0, 0, 0, 0.4);
   --settings-input-bg: #666666;
   --input-form-gradient-1: #378afb;
@@ -75,6 +104,7 @@ body {
   --popup-hover: #d6e2f2;
 
   --input-form-overlay: rgba(0, 0, 0, 0.8);
+  --nav-bg: #131624;
 
   /* add more later */
   --table-head-txt: #626262;
@@ -112,4 +142,6 @@ body {
   --project-card-hover: #1c1c1c;
   --project-card-btn-hover: rgba(187, 187, 187, 0.25);
   --project-card-active: rgba(187, 187, 187, 0.25);
+
+  --nav-bg: rgb(9, 11, 21);
 }

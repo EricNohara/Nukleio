@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import BodyWrapper from "./components/BodyWrapper/BodyWrapper";
+import ThemeInit from "./components/ThemeInit";
 import { AuthProvider } from "./context/AuthProvider";
 import LocalizationProviderWrapper from "./context/LocalizationProviderWrapper";
 import { ToastProvider } from "./context/ToastProvider";
@@ -32,6 +33,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#FFFFFF"></meta>
       </head>
       <body>
+        <ThemeInit />
         <AuthProvider>
           <UserProvider>
             <LocalizationProviderWrapper>

@@ -20,12 +20,14 @@
   font-size: 36px;
   line-height: 1.15;
   margin: 0 0 10px;
+  color: var(--page-txt-1);
 }
 
 .updated {
   margin: 0;
   opacity: 0.75;
   font-size: 14px;
+  color: var(--page-txt-2);
 }
 
 .section {
@@ -35,17 +37,20 @@
 .h2 {
   font-size: 20px;
   margin: 0 0 10px;
+  color: var(--page-txt-1);
 }
 
 .p {
   margin: 0;
   line-height: 1.7;
+  color: var(--page-txt-2);
 }
 
 .ul {
   margin: 0;
   padding-left: 18px;
   line-height: 1.7;
+  color: var(--page-txt-2);
 }
 
 .ul li {
@@ -55,4 +60,5 @@
 .link {
   text-decoration: underline;
   text-underline-offset: 3px;
+  color: var(--btn-1);
 }
