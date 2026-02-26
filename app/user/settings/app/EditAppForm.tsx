@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonFour } from "@/app/components/Buttons/Buttons";
 import Switch from "@/app/components/Switch/Switch";
+import { useToast } from "@/app/context/ToastProvider";
 import { headerFont } from "@/app/localFonts";
+import { applyTheme, getStoredTheme, Theme, setStoredTheme } from "@/utils/general/theme";
 
 import styles from "./EditAppForm.module.css";
 
@@ -16,15 +18,15 @@ interface IAppSettings {
 }
 
 interface ILanguage {
-    value: string,
-    label: string
+    value: string;
+    label: string;
 }
 
 const DEFAULT_APP_SETTINGS: IAppSettings = {
     isDarkMode: false,
     isHighContrastMode: false,
-    language: "English"
-}
+    language: "English",
+};
 
 const LANGUAGES: ILanguage[] = [
     { value: "English", label: "English" },
@@ -38,12 +40,34 @@ export default function EditAppForm() {
     const [formData, setFormData] = useState<IAppSettings>(DEFAULT_APP_SETTINGS);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const toast = useToast();
 
-    const handleToggle = (key: keyof IAppSettings) => {
+    // Initialize from localStorage (or current DOM class)
+    useEffect(() => {
+        const stored = getStoredTheme();
+        const domIsDark = document.documentElement.classList.contains("dark-theme");
+
+        const isDark = stored ? stored === "dark" : domIsDark;
+
         setFormData((prev) => ({
             ...prev,
-            [key]: !prev[key],
+            isDarkMode: isDark,
         }));
+    }, []);
+
+    const handleToggle = (key: keyof IAppSettings) => {
+        setFormData((prev) => {
+            const next = { ...prev, [key]: !prev[key] };
+
+            // If user toggles dark mode, apply immediately + persist
+            if (key === "isDarkMode") {
+                const theme: Theme = next.isDarkMode ? "dark" : "light";
+                applyTheme(theme);
+                setStoredTheme(theme);
+            }
+
+            return next;
+        });
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -60,10 +84,13 @@ export default function EditAppForm() {
 
         try {
             // await updateAppSettings(formData)
+            toast.success(
+                "Success",
+                "To be implemented. No settings have been changed as none are implemented yet."
+            );
             setIsEditing(false);
-        } catch (error) {
-            console.error(error);
-            alert("Error updating app settings!");
+        } catch {
+            toast.error("Error", "Error updating your app settings.");
         } finally {
             setIsLoading(false);
         }
@@ -74,27 +101,35 @@ export default function EditAppForm() {
             <div className={styles.formHeader}>
                 <div className={styles.headerText}>
                     <h1 className={`${headerFont.className} ${styles.formTitle}`}>App Settings</h1>
-                    <h3 className={`${styles.formSubtitle} ${headerFont.className}`}>Personalize your app appearance</h3>
+                    <h3 className={`${styles.formSubtitle} ${headerFont.className}`}>
+                        Personalize your app appearance
+                    </h3>
                 </div>
                 <div className={styles.buttons}>
-                    {isEditing ?
+                    {isEditing ? (
                         <>
                             <ButtonFour
                                 onClick={() => {
                                     setFormData(DEFAULT_APP_SETTINGS);
                                     setIsEditing(false);
-                                }}>
+
+                                    // Optional: if cancel resets, also reset theme
+                                    applyTheme("light");
+                                    setStoredTheme("light");
+                                }}
+                            >
                                 Cancel
                             </ButtonFour>
                             <ButtonOne type="submit" disabled={isLoading}>
                                 <LoadableButtonContent isLoading={isLoading} buttonLabel="Save" />
                             </ButtonOne>
                         </>
-                        : <ButtonOne onClick={() => { setIsEditing(true); setIsLoading(false) }}>Edit</ButtonOne>
-                    }
-
+                    ) : (
+                        <ButtonOne onClick={() => { setIsEditing(true); setIsLoading(false); }}>Edit</ButtonOne>
+                    )}
                 </div>
             </div>
+
             <div className={styles.inputList}>
                 <Switch
                     label="Dark Mode"
@@ -111,9 +146,7 @@ export default function EditAppForm() {
                 />
 
                 <div className={styles.settingItem}>
-                    <label className={`${styles.label} ${headerFont.className}`}>
-                        Language
-                    </label>
+                    <label className={`${styles.label} ${headerFont.className}`}>Language</label>
                     <select
                         name="language"
                         value={formData.language}
@@ -121,12 +154,14 @@ export default function EditAppForm() {
                         disabled={!isEditing}
                         className={headerFont.className}
                     >
-                        {
-                            LANGUAGES.map((lang, idx) => <option value={lang.value} key={idx}>{lang.label}</option>)
-                        }
+                        {LANGUAGES.map((lang, idx) => (
+                            <option value={lang.value} key={idx}>
+                                {lang.label}
+                            </option>
+                        ))}
                     </select>
                 </div>
             </div>
-        </form >
+        </form>
     );
 }

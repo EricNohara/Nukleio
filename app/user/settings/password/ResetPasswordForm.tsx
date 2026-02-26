@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne } from "@/app/components/Buttons/Buttons";
-import Snackbar from "@/app/components/Snackbar/Snackbar";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { headerFont } from "@/app/localFonts";
 import { createClient } from "@/utils/supabase/client";
@@ -18,15 +18,12 @@ export default function ResetPasswordForm() {
     const { state } = useUser();
 
     const [isLoading, setIsLoading] = useState(false);
-    const [snackbar, setSnackbar] = useState<{
-        message: string;
-        messageDescription: string;
-        variant: "success" | "error";
-    } | null>(null);
 
     const [cooldown, setCooldown] = useState<number>(0);
 
     const email = state?.email ?? "";
+
+    const toast = useToast();
 
     // countdown timer
     useEffect(() => {
@@ -40,14 +37,13 @@ export default function ResetPasswordForm() {
     }, [cooldown]);
 
     const onPasswordReset = async () => {
-        setSnackbar(null);
+        toast.clear();
 
         if (!email) {
-            setSnackbar({
-                message: "Error sending email",
-                messageDescription: "You need to be signed in to send a reset link.",
-                variant: "error",
-            });
+            toast.error(
+                "Error",
+                "Error sending email. You need to be signed in to send a reset link."
+            );
             return;
         }
 
@@ -60,19 +56,16 @@ export default function ResetPasswordForm() {
 
             if (error) throw error;
 
-            setSnackbar({
-                message: "Successfully sent email",
-                messageDescription: "If an account exists for this email, a reset link has been sent.",
-                variant: "success",
-            });
+            toast.success(
+                "Success",
+                "Successfully sent email. If an account exists for this email, a reset link has been sent."
+            );
             setCooldown(COOLDOWN_SECONDS);
-        } catch (err) {
-            console.error(err);
-            setSnackbar({
-                message: "Error sending email",
-                messageDescription: "Couldn't send the reset email. Please try again.",
-                variant: "error",
-            });
+        } catch {
+            toast.error(
+                "Error",
+                "Error sending email. Couldn't send the reset email. Please try again."
+            );
         } finally {
             setIsLoading(false);
         }
@@ -123,17 +116,6 @@ export default function ResetPasswordForm() {
 
                 <h3>Email: <span>{email || ""}</span></h3>
             </div>
-
-            {/* Status message */}
-            {snackbar && (
-                <Snackbar
-                    message={snackbar.message}
-                    messageDescription={snackbar.messageDescription}
-                    variant={snackbar.variant}
-                    duration={4000}
-                    onClose={() => setSnackbar(null)}
-                />
-            )}
         </div>
     );
 }

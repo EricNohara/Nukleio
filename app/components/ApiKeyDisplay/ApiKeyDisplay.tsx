@@ -1,6 +1,8 @@
 import { TriangleAlert, Copy, Eye, EyeClosed } from "lucide-react";
 import { useState, useEffect } from "react";
 
+import { useToast } from "@/app/context/ToastProvider";
+
 import styles from "./ApiKeyDisplay.module.css";
 import { ButtonOne } from "../Buttons/Buttons";
 import inputFormStyles from "../InputForm/InputForm.module.css";
@@ -16,7 +18,7 @@ export interface IApiKeyDisplayProps {
 export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDisplayProps) {
     const [key, setKey] = useState<string>("Loading key...");
     const [isKeyVisible, setIsKeyVisible] = useState<boolean>(false);
-    // const [copyStatus, setCopyStatus] = useState<string>("");
+    const toast = useToast();
 
     useEffect(() => {
         const fetchKeyValue = async () => {
@@ -27,26 +29,24 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
                 if (!data) throw new Error("Missing data");
 
                 setKey(data.encryptedKey);
-            } catch (error) {
-                console.error(error);
-                alert(error);
+            } catch (err) {
+                const error = err as Error;
+                toast.error("Error", `Error displaying API key: ${error.message}.`)
             }
-        }
+        };
 
         fetchKeyValue();
-    }, [keyDescription]);
+    }, [keyDescription, toast]);
 
     const handleCopy = async () => {
         if (key === "Loading key...") return;
         try {
             await navigator.clipboard.writeText(key);
-            // setCopyStatus('Copied to clipboard!');
-            // setTimeout(() => setCopyStatus(""), 2000);
-        } catch (error) {
-            // setCopyStatus("Failed to copy!");
-            console.error(error);
+            toast.info("Copied to clipboard")
+        } catch {
+            toast.error("Failed to copy")
         }
-    }
+    };
 
     const handleDownload = () => {
         if (key === "Loading key...") return;
@@ -66,11 +66,13 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
 
         // Clean up
         URL.revokeObjectURL(url);
-    }
+
+        toast.info("Download initialized")
+    };
 
     const handleVisibleClick = () => {
         setIsKeyVisible(!isKeyVisible);
-    }
+    };
 
     const formatHidden = (s: string) => {
         return s.replace(/./g, '*');
@@ -96,7 +98,7 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
                     <div className={styles.disclaimer}>
                         <TriangleAlert size={52} color="var(--btn-1)" />
                         <p className={styles.disclaimerText}>
-                            This is the only time the newly generated key will ever be displayed so make sure to copy or download it for later! You may regenerate a new API key at any time if this key is lost or compromised.
+                            This key is shown only once. Save it now — you can regenerate a new key anytime.
                         </p>
                     </div>
                 </div>

@@ -38,11 +38,17 @@ export interface IInputFormProps {
 export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onClose }: IInputFormProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (isLoading) return;
         setIsLoading(true);
-        onSubmit(e);
-    }
+
+        try {
+            await onSubmit(e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <Overlay onClose={onClose}>
@@ -72,6 +78,7 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                                 isInInputForm={true}
                                 textAreaRows={row.inputOne.textAreaRows}
                                 disabled={row.inputOne.disabled}
+                                focusLabelColor="var(--btn-1)"
                             />
                             {
                                 row.inputTwo &&
@@ -86,6 +93,7 @@ export default function InputForm({ inputRows, title, buttonLabel, onSubmit, onC
                                     isInInputForm={true}
                                     textAreaRows={row.inputTwo.textAreaRows}
                                     disabled={row.inputOne.disabled}
+                                    focusLabelColor="var(--btn-1)"
                                 />
                             }
                         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react"
+import { ReactNode } from "react";
 import { useState } from "react";
 
 import styles from "./PageContentWrapper.module.css";

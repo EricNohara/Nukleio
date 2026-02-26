@@ -7,9 +7,11 @@ import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableB
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
 import ContinueWithAzureButton from "@/app/components/OauthButtons/ContinueWithAzureButton";
 import ContinueWithGithubButton from "@/app/components/OauthButtons/ContinueWithGithubButton";
+import ContinueWithGitlabButton from "@/app/components/OauthButtons/ContinueWithGitlabButton";
 import ContinueWithGoogleButton from "@/app/components/OauthButtons/ContinueWithGoogleButton";
 import ContinueWithLinkedinButton from "@/app/components/OauthButtons/ContinueWithLinkedinButton";
 import TextInput from "@/app/components/TextInput/TextInput";
+import { useToast } from "@/app/context/ToastProvider";
 import { headerFont } from "@/app/localFonts";
 
 import styles from "../login/LoginPage.module.css";
@@ -21,6 +23,7 @@ interface IInputData {
 
 export default function SignUpForm() {
   const router = useRouter();
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<IInputData>({
     email: "",
@@ -59,16 +62,17 @@ export default function SignUpForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      alert("Successfully Created User!");
       router.push("/user");
+      toast.success("Successfully created user")
     } catch (error) {
-      alert(error);
+      const err = error as Error
+      toast.error("Error", err.message)
     }
   };
 
   const handleLogin = () => {
-    router.push("/user/login")
-  }
+    router.push("/user/login");
+  };
 
   return (
     <>
@@ -100,12 +104,13 @@ export default function SignUpForm() {
       <div className={styles.formFooterContainer}>
         <div className={styles.dividerContainer}>
           <div className={styles.divider} />
-          <p className={`${styles.inputLabel} ${headerFont.className}`}>Other</p>
+          <p className={`${styles.inputLabel} ${headerFont.className}`}>more</p>
           <div className={styles.divider} />
         </div>
 
         <div className={styles.oauthButtonsContainer}>
           <ContinueWithGithubButton />
+          <ContinueWithGitlabButton />
           <ContinueWithLinkedinButton />
           <ContinueWithGoogleButton />
           <ContinueWithAzureButton />

@@ -4,7 +4,7 @@
   height: 250px;
   overflow: hidden;
   border-radius: var(--global-border-radius);
-  border: 2px solid var(--project-card-hover);
+  border: 1px solid var(--page-box-border);
 }
 
 .thumbnail {
@@ -19,7 +19,7 @@
   justify-content: center;
   padding: 1rem 2rem;
   gap: 2rem;
-  color: var(--project-txt);
+  color: var(--page-txt-1);
   width: 100%;
 }
 
@@ -34,7 +34,7 @@
   grid-column: span 2;
   padding: 1rem;
   border-radius: var(--global-border-radius);
-  border: 2px solid var(--project-card-hover);
+  border: 1px solid var(--page-box-border);
   height: 250px;
   overflow-y: auto;
   overflow-wrap: anywhere;
@@ -57,7 +57,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem;
-  border: 2px solid var(--project-card-hover);
+  border: 1px solid var(--page-box-border);
   border-radius: var(--global-border-radius);
   height: 250px;
   overflow-y: auto;
@@ -84,7 +84,7 @@
 
 .csvNone {
   font-style: italic;
-  color: var(--project-txt-secondary);
+  color: var(--page-txt-2);
 }
 
 .deleteBtn {

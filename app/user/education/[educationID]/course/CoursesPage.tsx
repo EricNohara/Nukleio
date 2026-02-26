@@ -7,6 +7,7 @@ import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import Table from "@/app/components/Table/Table";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { ICourseInput } from "@/app/interfaces/ICourse";
 import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
@@ -20,7 +21,7 @@ const EMPTY_COURSE: ICourseInput = {
     name: "",
     grade: "",
     description: "",
-}
+};
 
 export default function CoursesPage({ educationID }: { educationID: string }) {
     const { state, dispatch } = useUser();
@@ -29,15 +30,17 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
     const [courseToEdit, setCourseToEdit] = useState<ICourseInput | null>(null);
     const [education, setEducation] = useState<IUserEducationInternal | null>(null);
     const [rows, setRows] = useState<Record<string, React.ReactNode>[]>([]);
+
     const router = useRouter();
     const educationIDNum = Number(educationID);
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
+    const toast = useToast();
 
     useEffect(() => {
         const education = state.education.find((edu) => edu.id === educationIDNum);
         setEducation(education ? education : null);
-    }, [state, educationIDNum])
+    }, [state, educationIDNum]);
 
     useEffect(() => {
         const rows = education === null ? [] : education.courses.map((course) => ({
@@ -47,7 +50,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
         }), [education]);
 
         setRows(rows);
-    }, [education])
+    }, [education]);
 
     // open course from index param once education is loaded
     useEffect(() => {
@@ -80,15 +83,16 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
 
             // update cached state
             dispatch({ type: "DELETE_COURSE", payload: { educationID: educationIDNum, courseName: course.name } });
+            toast.success("Success", `Successfully deleted course: ${course.name}`);
         } catch (error) {
-            console.error(error);
-            alert(error);
+            const err = error as Error;
+            toast.error("Error", err.message);
         }
-    }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormValues(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    }
+    };
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -99,7 +103,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
 
         // validate input
         if (!name) {
-            alert("Please fill out all required fields.");
+            toast.warning("Warning", "Please fill out all required fields before submitting.");
             return;
         }
 
@@ -107,7 +111,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
             name: name,
             grade: grade ? grade : null,
             description: description ? description : null
-        }
+        };
 
         try {
             if (courseToEdit) {
@@ -116,7 +120,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
                     educationID: educationIDNum,
                     courseName: courseToEdit.name,
                     course: newCourse
-                }
+                };
                 const res = await fetch("/api/internal/user/education/course", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -132,7 +136,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
                 const postPayload = {
                     educationID: educationIDNum,
                     course: newCourse
-                }
+                };
                 const res = await fetch("/api/internal/user/education/course", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -144,18 +148,17 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
                 // update the cached user
                 dispatch({ type: "ADD_COURSE", payload: { educationID: educationIDNum, course: newCourse } });
             }
-
+            toast.success("Success", `Successfully saved course: ${name}.`);
         } catch (err) {
-            console.error(err);
             const error = err as Error;
-            alert(error.message);
+            toast.error("Error", `Failed to create or update course: ${error.message}`);
         }
 
         // reset form
         setFormValues(EMPTY_COURSE);
         setIsFormOpen(false);
         setCourseToEdit(null);
-    }
+    };
 
     const onClose = () => {
         setIsFormOpen(false);
@@ -168,7 +171,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
         const newUrl = newQuery ? `?${newQuery}` : "";
 
         router.replace(`/user/education/${educationID}/course${newUrl}`, { scroll: false });
-    }
+    };
 
     const buttonOne: IButton = {
         name: "Add Course",
@@ -177,12 +180,12 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
             setCourseToEdit(null);
             setIsFormOpen(true);
         },
-    }
+    };
 
     const buttonFour: IButton = {
         name: "Return",
-        onClick: () => { router.push("/user/education") }
-    }
+        onClick: () => { router.push("/user/education"); }
+    };
 
     const inputRows: IInputFormRow[] = [
         {
@@ -227,7 +230,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
         onSubmit: onSubmit,
         inputRows: inputRows,
         onClose: onClose
-    }
+    };
 
     return (
         <PageContentWrapper>

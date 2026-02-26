@@ -31,7 +31,7 @@ export default function ButtonListPopup({ buttons }: IButtonListPopupProps) {
     const handleClick = (button: IButtonProp) => {
         if ("route" in button) router.push(button.route as string);
         else if ("action" in button) button.action?.();
-    }
+    };
 
     return (
         <div className={styles.container}>
@@ -41,7 +41,7 @@ export default function ButtonListPopup({ buttons }: IButtonListPopupProps) {
                     className={styles.button}
                     onClick={() => handleClick(button)}
                 >
-                    <button.icon strokeWidth={1} />
+                    <button.icon />
                     <p className={`${styles.buttonName} ${headerFont.className}`}>{button.name}</p>
                 </button>
             ))}

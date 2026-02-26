@@ -22,7 +22,8 @@
   background-color: var(--btn-1);
 }
 
-.one:hover {
+.one:hover,
+.one:disabled {
   background-color: var(--btn-1-hover);
 }
 
@@ -30,7 +31,8 @@
   background-color: var(--btn-2);
 }
 
-.two:hover {
+.two:hover,
+.two:disabled {
   background-color: var(--btn-2-hover);
 }
 
@@ -38,7 +40,8 @@
   background-color: var(--btn-3);
 }
 
-.three:hover {
+.three:hover,
+.three:disabled {
   background-color: var(--btn-3-hover);
 }
 
@@ -48,7 +51,8 @@
   color: var(--btn-4-txt);
 }
 
-.four:hover {
+.four:hover,
+.four:disabled {
   background-color: var(--btn-4-hover);
 }
 
@@ -77,7 +81,8 @@
   background-color: var(--btn-1);
 }
 
-.edit:hover {
+.edit:hover,
+.edit:disabled {
   background-color: var(--btn-1-hover);
 }
 
@@ -87,7 +92,9 @@
 }
 
 .delete:hover,
-.exit:hover {
+.exit:hover,
+.delete:disabled,
+.exit:disabled {
   background-color: var(--exit-btn-hover);
 }
 
@@ -97,4 +104,15 @@
 
 .external:hover {
   background-color: var(--btn-2-hover);
+}
+
+.one:disabled,
+.two:disabled,
+.three:disabled,
+.four:disabled,
+.edit:disabled,
+.delete:disabled,
+.exit:disabled,
+.external:disabled {
+  cursor: not-allowed;
 }

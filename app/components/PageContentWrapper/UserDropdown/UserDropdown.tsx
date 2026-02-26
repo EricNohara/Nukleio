@@ -1,12 +1,13 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-import { UserCog, SlidersHorizontal, LogOut } from "lucide-react";
+import { BookText, ChevronDown, CircleQuestionMark, Crown, Power, Settings, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 
 import { useAuth } from "@/app/context/AuthProvider";
+import { useToast } from "@/app/context/ToastProvider";
+import { useUser } from "@/app/context/UserProvider";
 import { headerFont } from "@/app/localFonts";
 
 
@@ -14,33 +15,13 @@ import styles from "./UserDropdown.module.css";
 import { IButtonProp } from "../../ButtonListPopup/ButtonListPopup";
 import ButtonListPopup from "../../ButtonListPopup/ButtonListPopup";
 
-
-interface IUserDropdownInfo {
-    portrait_url: string | null;
-    name: string | null;
-}
-
 export default function UserDropdown() {
-    const [userDropdownInfo, setUserDropdownInfo] = useState<IUserDropdownInfo>({ portrait_url: null, name: null });
+    const { state } = useUser();
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const { setIsLoggedIn } = useAuth();
     const router = useRouter();
-
-    useEffect(() => {
-        const fetcher = async () => {
-            try {
-                const res = await fetch("/api/internal/user", { method: "GET" });
-                const data = await res.json();
-                if (!res.ok) throw new Error("Failed to retrieve experience data");
-                setUserDropdownInfo(data.userData);
-            } catch (err) {
-                alert(err);
-            }
-        };
-
-        fetcher();
-    }, []);
+    const toast = useToast();
 
     // Close the popup if clicked outside
     useEffect(() => {
@@ -55,41 +36,45 @@ export default function UserDropdown() {
 
     const handleClick = () => {
         setIsOpen(!isOpen);
-    }
+    };
 
     const handleSignOut = async () => {
         try {
             const res = await fetch("/api/internal/auth/signout", { method: "POST" });
+            if (!res.ok) throw new Error()
 
-            if (res.ok) {
-                setIsLoggedIn(false);
-                router.push("/");
-            } else {
-                alert("Failed to sign out");
-            }
-        } catch (err) {
-            console.error(err);
+            setIsLoggedIn(false);
+            router.push("/");
+        } catch {
+            toast.error("An error occurred while signing out")
         }
     };
 
     const buttons: IButtonProp[] = [
-        { name: "User Settings", icon: UserCog, route: "/user/settings/user" },
-        { name: "App Settings", icon: SlidersHorizontal, route: "/user/settings/app" },
-        { name: "Log Out", icon: LogOut, action: handleSignOut },
+        { name: "Account", icon: User, route: "/user/settings/user" },
+        { name: "Settings", icon: Settings, route: "/user/settings/app" },
+        { name: "Documentation", icon: BookText, route: "/documentation/doc" },
+        { name: "Help", icon: CircleQuestionMark, route: "/documentation/contact" },
+        { name: "Upgrade Account", icon: Crown, route: "/user/settings/billing" },
+        { name: "Log Out", icon: Power, action: handleSignOut },
     ];
 
     return (
         <div className={styles.relativeContainer} ref={containerRef}>
             <button className={`${styles.container} ${isOpen ? styles.openContainer : ""}`} onClick={handleClick}>
-                <Image
-                    src={userDropdownInfo.portrait_url ? userDropdownInfo.portrait_url : "/images/default-avatar.svg"}
-                    height={35}
-                    width={35}
-                    alt="User profile picture"
-                    className={styles.avatar}
-                />
-                <p className={`${styles.name} ${headerFont.className}`}>{userDropdownInfo.name ? userDropdownInfo.name : "Default User"}</p>
-                <ChevronDown />
+                <div className={styles.left}>
+                    <Image
+                        src={state?.portrait_url ? state?.portrait_url : "/images/default-avatar.svg"}
+                        height={45}
+                        width={45}
+                        alt="User profile picture"
+                        className={styles.avatar}
+                    />
+                    <p className={`${styles.name} ${headerFont.className}`}>
+                        {state?.name ? state?.name : "Default User"}
+                    </p>
+                </div>
+                <ChevronDown className={styles.chevron} />
             </button>
             {isOpen && (
                 <div className={styles.popupContainer}>

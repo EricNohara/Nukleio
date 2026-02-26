@@ -24,8 +24,8 @@ export default function LandingPage() {
   }, [isLoggedIn, router]);
 
   const handleSignUp = () => {
-    router.push("/user/signup")
-  }
+    router.push("/user/signup");
+  };
 
   return (
     <>

@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 
 // The client you created from the Server-Side Auth instructions
+import { handleOauthSignup } from "@/utils/oauth/handleOauthSignup";
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const providerParam = searchParams.get("provider");
   // if "next" is in param, use it as the redirect URL
   let next = searchParams.get("next") ?? "/";
   if (!next.startsWith("/")) {
@@ -21,23 +23,15 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (user) {
+      const identity = providerParam
+        ? user?.identities?.find((i) => i.provider === providerParam)
+        : user?.identities?.[0];
+
+      if (user && identity && providerParam) {
         // TODO: autofill information for the user table
-        const providerParam = searchParams.get("provider");
+        // console.log(providerParam, identity);
 
-        const identity = providerParam
-          ? user.identities?.find((i) => i.provider === providerParam)
-          : user.identities?.[0];
-
-        console.log(providerParam, identity);
-
-        if (providerParam === "github") {
-          // autofill username, avatar, and projects (use github API to get repos and autofill one project per repo)
-        } else if (providerParam === "linkedin_oidc") {
-          // autofill username, avatar, resume, etc. (maybe use linkedin API)
-        } else if (providerParam === "google") {
-        } else if (providerParam === "azure") {
-        }
+        handleOauthSignup(providerParam, supabase, user, identity);
       }
 
       // redirect back to the app from oauth flow

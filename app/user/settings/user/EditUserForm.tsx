@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonFour } from "@/app/components/Buttons/Buttons";
 import TextInput from "@/app/components/TextInput/TextInput";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import IUser from "@/app/interfaces/IUser";
 import { headerFont } from "@/app/localFonts";
@@ -49,12 +50,14 @@ const EMPTY_USER: IBasicUserInfo = {
     facebook_url: null,
     instagram_url: null,
     x_url: null,
-}
+};
 
 export default function EditUserForm() {
     const [formData, setFormData] = useState<IBasicUserInfo>(EMPTY_USER);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const toast = useToast();
+
     const { state, dispatch } = useUser();
 
     useEffect(() => {
@@ -83,16 +86,16 @@ export default function EditUserForm() {
                 label: "Email",
                 value: formData.email,
                 required: true,
-                placeholder: "Enter email",
-                placeholderViewOnly: "No email"
+                placeholder: "you@example.com",
+                placeholderViewOnly: "No email provided"
             },
             {
                 name: "phone_number",
                 label: "Phone Number",
                 value: formData.phone_number ? formData.phone_number : "",
                 required: false,
-                placeholder: "Enter phone number",
-                placeholderViewOnly: "No phone number"
+                placeholder: "(555) 123-4567",
+                placeholderViewOnly: "No phone number provided"
             },
         ],
         [{
@@ -100,80 +103,80 @@ export default function EditUserForm() {
             label: "Full Name",
             value: formData.name ? formData.name : "",
             required: false,
-            placeholder: "Enter name",
-            placeholderViewOnly: "No name"
+            placeholder: "John Doe",
+            placeholderViewOnly: "No name provided"
         },
         {
             name: "current_address",
             label: "Address",
             value: formData.current_address ? formData.current_address : "",
             required: false,
-            placeholder: "Enter current address",
-            placeholderViewOnly: "No current address"
+            placeholder: "Boston, MA",
+            placeholderViewOnly: "No current address provided"
         }],
         [{
             name: "current_company",
             label: "Current Company",
             value: formData.current_company ? formData.current_company : "",
             required: false,
-            placeholder: "Enter current company",
-            placeholderViewOnly: "No current company"
+            placeholder: "Nukleio",
+            placeholderViewOnly: "No current company provided"
         },
         {
             name: "current_position",
             label: "Current Position",
             value: formData.current_position ? formData.current_position : "",
             required: false,
-            placeholder: "Enter current position",
-            placeholderViewOnly: "No current position"
+            placeholder: "Software Engineer",
+            placeholderViewOnly: "No current position provided"
         }],
         [{
             name: "github_url",
             label: "GitHub",
             value: formData.github_url ? formData.github_url : "",
             required: false,
-            placeholder: "Enter GitHub url",
-            placeholderViewOnly: "No GitHub url"
+            placeholder: "https://github.com/...",
+            placeholderViewOnly: "No GitHub url provided"
         },
         {
             name: "linkedin_url",
             label: "LinkedIn",
             value: formData.linkedin_url ? formData.linkedin_url : "",
             required: false,
-            placeholder: "Enter LinkedIn url",
-            placeholderViewOnly: "No LinkedIn url"
+            placeholder: "https://linkedin.com/in/...",
+            placeholderViewOnly: "No LinkedIn url provided"
         }],
         [{
             name: "bio",
             label: "Bio",
             value: formData.bio ? formData.bio : "",
             required: false,
-            placeholder: "Enter bio",
-            placeholderViewOnly: "No bio"
+            placeholder: "Enter your bio here...",
+            placeholderViewOnly: "No bio provided"
         },
         {
             name: "x_url",
             label: "X",
             value: formData.x_url ? formData.x_url : "",
             required: false,
-            placeholder: "Enter X url",
-            placeholderViewOnly: "No X url"
+            placeholder: "https://x.com/...",
+            placeholderViewOnly: "No X url provided"
         }],
         [{
             name: "facebook_url",
             label: "Facebook",
             value: formData.facebook_url ? formData.facebook_url : "",
             required: false,
-            placeholder: "Enter Facebook url",
-            placeholderViewOnly: "No Facebook url"
+            placeholder: "https://facebook.com/...",
+            placeholderViewOnly: "No Facebook url provided"
         },
         {
             name: "instagram_url",
             label: "Instagram",
             value: formData.instagram_url ? formData.instagram_url : "",
             required: false,
-            placeholder: "Enter Instagram url",
-            placeholderViewOnly: "No Instagram url"
+            placeholder: "https://instagram.com/...",
+            placeholderViewOnly: "No Instagram url provided"
         }
         ],
     ];
@@ -184,7 +187,7 @@ export default function EditUserForm() {
             ...prev,
             [name]: value,
         }));
-    }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -195,9 +198,12 @@ export default function EditUserForm() {
             portrait_url: state.portrait_url,
             resume_url: state.resume_url,
             transcript_url: state.transcript_url
-        }
+        };
 
-        if (!userData.email) return;
+        if (!userData.email) {
+            toast.warning("Warning", "Invalid email input. Email field is required to submit.");
+            return;
+        }
 
         try {
             const res = await fetch("/api/internal/user", {
@@ -210,13 +216,15 @@ export default function EditUserForm() {
             if (!res.ok) throw new Error(data.message);
 
             // update cached user
-            dispatch({ type: "SET_USER", payload: userData })
+            dispatch({ type: "SET_USER", payload: userData });
             setIsEditing(false);
+
+            toast.success("Success", "Successfully updated your user information.");
         } catch (error) {
-            console.error(error);
-            alert("Error updating user data!");
+            const err = error as Error;
+            toast.error("Error", `Failed to update your user information: ${err.message}`);
         }
-    }
+    };
 
 
     return (
@@ -253,7 +261,7 @@ export default function EditUserForm() {
                                 <LoadableButtonContent isLoading={isLoading} buttonLabel="Save" />
                             </ButtonOne>
                         </>
-                        : <ButtonOne onClick={() => { setIsEditing(true); setIsLoading(false) }}>Edit</ButtonOne>
+                        : <ButtonOne onClick={() => { setIsEditing(true); setIsLoading(false); }}>Edit</ButtonOne>
                     }
 
                 </div>

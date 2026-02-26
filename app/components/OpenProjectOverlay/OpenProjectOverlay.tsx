@@ -1,4 +1,4 @@
-import { GitBranch, Link2 } from "lucide-react";
+import { Github, Link2 } from "lucide-react";
 import Image from "next/image";
 
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
@@ -27,11 +27,11 @@ export default function OpenProjectOverlay({ project, index, onEdit, onDelete, o
         } else {
             return project.date_end ? formatDate(project.date_end) : "";
         }
-    }
+    };
 
     const formatList = (list: string[] | null, fallback: string) => {
         return list && list.length > 0 ? list.join(", ") : fallback;
-    }
+    };
 
     return (
         <Overlay onClose={onClose}>
@@ -79,7 +79,7 @@ export default function OpenProjectOverlay({ project, index, onEdit, onDelete, o
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
-                                            <GitBranch />
+                                            <Github />
                                         </a>
                                     }
                                     {project.demo_url &&

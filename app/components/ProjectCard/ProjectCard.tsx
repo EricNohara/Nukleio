@@ -41,7 +41,7 @@ export default function ProjectCard({ project, onEdit, onDelete, onOpen, index, 
         } else {
             return project.date_end ? formatDate(project.date_end, true) : "";
         }
-    }
+    };
 
     return (
         <div
@@ -62,21 +62,21 @@ export default function ProjectCard({ project, onEdit, onDelete, onOpen, index, 
                             setIsExpanded(!isExpanded);
                         }}
                     >
-                        <EllipsisVertical />
+                        <EllipsisVertical className={styles.ellipsis} />
                     </button>
                     {isExpanded && (
                         <div className={styles.dropdownMenu}>
                             <button className={`${styles.dropdownButton} ${headerFont.className}`} onClick={() => onOpen(index)}>
+                                <Maximize />
                                 Open
-                                <Maximize strokeWidth={1.5} />
                             </button>
                             <button className={`${styles.dropdownButton} ${headerFont.className}`} onClick={() => onEdit(index)}>
+                                <Pencil />
                                 Edit
-                                <Pencil strokeWidth={1.5} />
                             </button>
                             <button className={`${styles.dropdownButton} ${headerFont.className}`} onClick={async () => await onDelete(index)}>
+                                <Trash />
                                 Delete
-                                <Trash strokeWidth={1.5} />
                             </button>
                         </div>
                     )}

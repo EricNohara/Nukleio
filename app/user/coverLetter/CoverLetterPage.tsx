@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import LoadingMessageSpinner from "@/app/components/LoadingMessageSpinner/LoadingMessageSpinner";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import TextInput from "@/app/components/TextInput/TextInput";
+import { useToast } from "@/app/context/ToastProvider";
 import { cacheDraft, cleanupDraftCache, loadCachedDraft } from "@/utils/coverLetter/coverLetterCache";
 
 import styles from "./CoverLetterPage.module.css";
@@ -22,7 +23,9 @@ export default function CoverLetterPage() {
     const [feedback, setFeedback] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [mode, setMode] = useState<"initial" | "revision">("initial");
+
     const router = useRouter();
+    const toast = useToast();
 
     useEffect(() => {
         const fetcher = async () => {
@@ -31,20 +34,20 @@ export default function CoverLetterPage() {
                 if (!res.ok) throw new Error();
                 const data = await res.json();
                 setUserId(data.user.id);
-            } catch (error) {
-                console.error(error);
+            } catch {
+                toast.error("Error", "Failed to fetch user ID. Please refresh the page and try again.");
             }
-        }
+        };
         cleanupDraftCache();
         fetcher();
-    }, []);
+    }, [toast]);
 
     const handleGenerate = async () => {
         if (!userId || !url || !jobTitle || !companyName) return;
 
         setTimeout(async () => {
             if (draft.length > 0) {
-                setMode("revision")
+                setMode("revision");
                 setLoading(true);
 
                 // REVISION MODE
@@ -72,13 +75,15 @@ export default function CoverLetterPage() {
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
-                } catch (err) {
-                    console.error(err);
+
+                    toast.success("Success", "Successfully generated cover leter draft with your revision.");
+                } catch {
+                    toast.error("Error", "Failed to revise cover letter. Please refresh the page and try again.");
                 } finally {
                     setLoading(false);
                 }
             } else {
-                setMode("initial")
+                setMode("initial");
                 setLoading(true);
 
                 const cached = loadCachedDraft(url, jobTitle, companyName);
@@ -130,8 +135,10 @@ export default function CoverLetterPage() {
                     setDraft(data.currentDraft);
                     setConversationId(data.conversationId);
                     cacheDraft(url, jobTitle, companyName, data.currentDraft, data.conversationId);
-                } catch (err) {
-                    console.error(err);
+
+                    toast.success("Success", "Successfully generated first draft of your cover letter. You may now add your revisions or save the PDF.");
+                } catch {
+                    toast.error("Error", "Failed to generate cover letter. Please refresh the page and try again.");
                 } finally {
                     setLoading(false);
                 }
@@ -156,7 +163,7 @@ export default function CoverLetterPage() {
             setFeedback("");
             setConversationId("");
         }
-    }
+    };
 
     return (
         <PageContentWrapper>
@@ -195,7 +202,7 @@ export default function CoverLetterPage() {
                 {/* ------------------- INITIAL FORM ------------------- */}
                 {!loading && !draft && !conversationId && (
                     <>
-                        <p>Generate a polished cover letter tailored using your personal data.</p>
+                        <p className={styles.subtitle}>Generate a cover letter tailored to your personal data.</p>
 
                         <div className={styles.inputsContainer}>
                             <TextInput

@@ -11,9 +11,9 @@ export default function TitleLogo() {
     const { isLoggedIn } = useAuth();
 
     const handleClick = () => {
-        if (!isLoggedIn) router.push("/")
-        else router.push("/user")
-    }
+        if (!isLoggedIn) router.push("/");
+        else router.push("/user");
+    };
 
     return (
         <div className={`${styles.container} ${titleFont.className}`} onClick={handleClick}>

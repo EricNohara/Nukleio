@@ -7,15 +7,18 @@ import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableB
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
 import ContinueWithAzureButton from "@/app/components/OauthButtons/ContinueWithAzureButton";
 import ContinueWithGithubButton from "@/app/components/OauthButtons/ContinueWithGithubButton";
+import ContinueWithGitlabButton from "@/app/components/OauthButtons/ContinueWithGitlabButton";
 import ContinueWithGoogleButton from "@/app/components/OauthButtons/ContinueWithGoogleButton";
 import ContinueWithLinkedinButton from "@/app/components/OauthButtons/ContinueWithLinkedinButton";
 import TextInput from "@/app/components/TextInput/TextInput";
+import { useToast } from "@/app/context/ToastProvider";
 import { headerFont } from "@/app/localFonts";
 
 import styles from "./LoginPage.module.css";
 
 export default function LoginForm() {
   const router = useRouter();
+  const toast = useToast();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [credentials, setCredentials] = useState({
@@ -51,15 +54,16 @@ export default function LoginForm() {
 
       router.push("/user");
     } catch (err) {
-      alert(err);
+      const error = err as Error;
+      toast.error(error.message)
       setCredentials({ email: "", password: "" });
       setIsLoading(false);
     }
   };
 
   const handleSignUp = () => {
-    router.push("/user/signup")
-  }
+    router.push("/user/signup");
+  };
 
   return (
     <>
@@ -97,6 +101,7 @@ export default function LoginForm() {
         {/* testing OAUTH */}
         <div className={styles.oauthButtonsContainer}>
           <ContinueWithGithubButton />
+          <ContinueWithGitlabButton />
           <ContinueWithLinkedinButton />
           <ContinueWithGoogleButton />
           <ContinueWithAzureButton />

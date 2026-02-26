@@ -11,12 +11,13 @@
   width: 100%;
   justify-content: space-between;
   padding: 2rem 0 1rem 0;
-  border-bottom: 2px solid var(--settings-border);
+  border-bottom: 2px solid var(--page-box-border);
 }
 
 .formTitle {
   margin: 0;
   font-size: 1.5rem;
+  color: var(--page-txt-1);
 }
 
 .formSubtitle {
@@ -24,7 +25,7 @@
   margin-top: 0.25rem;
   font-size: 0.9rem;
   font-weight: normal;
-  color: var(--search-txt);
+  color: var(--page-txt-2);
 }
 
 .buttons {
@@ -53,7 +54,7 @@
 .label {
   font-size: 1rem;
   font-weight: bold;
-  color: var(--text-color);
+  color: var(--page-txt-1);
 }
 
 .settingItem select {

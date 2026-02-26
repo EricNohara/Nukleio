@@ -5,6 +5,7 @@ import React, { useMemo } from "react";
 import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip } from "recharts";
 
 
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import type { IApiKeyInternal } from "@/app/interfaces/IApiKey";
 import { generateShades } from "@/utils/general/colors";
@@ -42,6 +43,7 @@ export default function TopConnectionsDonut({
 
     const [rows, setRows] = React.useState<RpcRow[]>([]);
     const [loading, setLoading] = React.useState(true);
+    const toast = useToast()
 
     // 1) Fetch from your RPC
     React.useEffect(() => {
@@ -58,7 +60,7 @@ export default function TopConnectionsDonut({
             if (cancelled) return;
 
             if (error) {
-                console.error("Failed to load top connections", error);
+                toast.error("Failed to load top connections")
                 setRows([]);
                 setLoading(false);
                 return;
@@ -80,7 +82,7 @@ export default function TopConnectionsDonut({
         return () => {
             cancelled = true;
         };
-    }, [supabase]);
+    }, [supabase, toast]);
 
     // 2) Shape the chart data (topN + other)
     const chartData = React.useMemo(() => {
@@ -157,7 +159,7 @@ export default function TopConnectionsDonut({
                 }}
             >
                 <p>No connections found</p>
-                <ButtonOne onClick={() => { router.push("/user/connect") }}>Connect Now</ButtonOne>
+                <ButtonOne onClick={() => { router.push("/user/connect"); }}>Connect Now</ButtonOne>
             </div>
         );
     } else if (!chartData.length) {
@@ -281,6 +283,7 @@ export default function TopConnectionsDonut({
                                             whiteSpace: "normal",
                                             wordBreak: "break-word",
                                             maxWidth: 320,
+                                            color: "var(--page-txt-1)",
                                             background: "var(--page-box-bg)",
                                             border: "1px solid var(--page-box-border)",
                                             borderRadius: "var(--global-border-radius)",

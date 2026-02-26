@@ -12,12 +12,12 @@ export default function LandingNav() {
     const router = useRouter();
 
     const handleSignIn = () => {
-        router.push("/user/login")
-    }
+        router.push("/user/login");
+    };
 
     const handleSignUp = () => {
-        router.push("/user/signup")
-    }
+        router.push("/user/signup");
+    };
 
     return (
         <nav className={styles.horizontalNav} >

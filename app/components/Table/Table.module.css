@@ -35,6 +35,7 @@
 .td {
   padding-top: 1rem;
   padding-bottom: 1rem;
+  color: var(--page-txt-1);
 
   white-space: nowrap;
   overflow: hidden;

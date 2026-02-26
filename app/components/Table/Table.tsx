@@ -26,6 +26,16 @@ export default function Table({
     editButtonOverride,
     deleteButtonOverride
 }: ITableProps) {
+    const renderCell = (value: React.ReactNode) => {
+        // null/undefined
+        if (value === null || value === undefined) return "-";
+
+        // empty string (or whitespace-only)
+        if (typeof value === "string" && value.trim() === "") return "-";
+
+        return value;
+    };
+
     return (
         <div className={styles.tableContainer}>
             <table className={styles.table}>
@@ -56,7 +66,7 @@ export default function Table({
                                             className={styles.td}
                                             style={columnWidths ? { width: `${columnWidths[j]}%` } : undefined}
                                         >
-                                            {row[col]}
+                                            {renderCell(row[col])}
                                         </td>
                                     ))}
                                     <td className={styles.actions}>

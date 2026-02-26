@@ -1,11 +1,13 @@
 import Image from "next/image";
 
+import { useToast } from "@/app/context/ToastProvider";
 import { createClient } from "@/utils/supabase/client";
 
 import styles from "./OauthButtons.module.css";
 
 export default function ContinueWithAzureButton() {
     const supabase = createClient();
+    const toast = useToast();
 
     const handleAzure = async () => {
         const base = process.env.NEXT_PUBLIC_SITE_URL;
@@ -16,11 +18,11 @@ export default function ContinueWithAzureButton() {
             options: { redirectTo, scopes: "email" },
         });
 
-        if (error) alert(error.message);
+        if (error) toast.error("Error logging in with Azure");
     };
 
     return (
-        <button onClick={handleAzure} className={`${styles.button} ${styles.azure}`}>
+        <button onClick={handleAzure} className={`${styles.button}`}>
             <Image
                 src="/images/microsoft-icon.svg"
                 alt="Azure icon"

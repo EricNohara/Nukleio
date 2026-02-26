@@ -7,6 +7,7 @@ import FileUploadBox from "@/app/components/FileUploadBox/FileUploadBox";
 import PageContentHeader from "@/app/components/PageContentHeader/PageContentHeader";
 import { IButton } from "@/app/components/PageContentHeader/PageContentHeader";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { compressImage, compressPDF } from "@/utils/file-upload/compress";
 import { uploadFile } from "@/utils/file-upload/upload";
@@ -18,29 +19,30 @@ export default function DocumentsPage() {
     portrait_url: false,
     resume_url: false,
     transcript_url: false
-  })
+  });
   const [docs, setDocs] = useState<{ portrait: File | null, resume: File | null, transcript: File | null }>({
     portrait: null,
     resume: null,
     transcript: null
-  })
+  });
   const { state, dispatch } = useUser();
+  const toast = useToast();
 
   const handleEdit = (url: string | undefined) => {
     switch (url) {
       case "portrait_url":
-        setIsEditing({ ...isEditing, portrait_url: true })
+        setIsEditing({ ...isEditing, portrait_url: true });
         break;
       case "resume_url":
-        setIsEditing({ ...isEditing, resume_url: true })
+        setIsEditing({ ...isEditing, resume_url: true });
         break;
       case "transcript_url":
-        setIsEditing({ ...isEditing, transcript_url: true })
+        setIsEditing({ ...isEditing, transcript_url: true });
         break;
       default:
         break;
     }
-  }
+  };
 
   const handleDelete = async (url: string | undefined, docType: string | undefined) => {
     try {
@@ -48,20 +50,18 @@ export default function DocumentsPage() {
 
       const res = await fetch(`/api/internal/storage?publicURL=${url}`, { method: "DELETE" });
 
-      if (res.status === 204) {
-        alert("Successfully deleted document");
-      } else {
+      if (res.status !== 204) {
         const data = await res.json();
         throw new Error(data.message);
       }
 
       // update cached state
       dispatch({ type: "DELETE_DOCUMENT", payload: { docType: docType } });
-    } catch (err) {
-      console.error(err);
-      alert(err);
+      toast.success("Success", "Successfully deleted your document.");
+    } catch {
+      toast.error("Error", "Error deleting your document.");
     }
-  }
+  };
 
   const handleUpload = async () => {
     try {
@@ -87,38 +87,43 @@ export default function DocumentsPage() {
         setIsEditing({ ...isEditing, transcript_url: false });
         setDocs({ ...docs, transcript: null });
       }
-    } catch (error) {
-      console.error(error);
-      alert(error);
+
+      toast.success("Success", "Successfully uploaded your documents.");
+    } catch (err) {
+      const error = err as Error;
+      toast.error("Error", error.message ?? "Failed to upload your documents. Please try again.");
     }
-  }
+  };
 
   const handleFileSelect = (file: File, docType: string) => {
     switch (docType) {
       case "portrait_url":
         setDocs({ ...docs, portrait: file });
+        toast.info("Info", "Click save documents button to save your portrait.");
         break;
       case "resume_url":
         setDocs({ ...docs, resume: file });
+        toast.info("Info", "Click save documents button to save your resume.");
         break;
       case "transcript_url":
         setDocs({ ...docs, transcript: file });
+        toast.info("Info", "Click save documents button to save your transcript.");
         break;
       default:
         break;
     }
-  }
+  };
 
   const buttonOne: IButton = {
     name: "Save Documents",
     onClick: handleUpload,
     isAsync: true
-  }
+  };
 
   // only render save button if needed
   const shouldRenderButton = () => {
     return !state.portrait_url || !state.resume_url || !state.transcript_url || isEditing.portrait_url || isEditing.resume_url || isEditing.transcript_url;
-  }
+  };
 
   return (
     <PageContentWrapper>
@@ -131,7 +136,7 @@ export default function DocumentsPage() {
               alt={state.name || "Your Portrait Display"}
               uploadedItemName="Profile Picture"
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={() => handleDelete(state.portrait_url ?? "", "portrait_url")}
               docType="portrait_url"
             /> :
             isEditing.portrait_url ?
@@ -140,7 +145,7 @@ export default function DocumentsPage() {
                 accepts="image/*"
                 uploadInstructions="Upload image files of up to 50 MB and click save documents"
                 isEditView={isEditing.portrait_url}
-                onExitEditView={() => { setIsEditing({ ...isEditing, portrait_url: false }); setDocs({ ...docs, portrait: null }) }}
+                onExitEditView={() => { setIsEditing({ ...isEditing, portrait_url: false }); setDocs({ ...docs, portrait: null }); }}
                 onFileSelect={handleFileSelect}
                 docType="portrait_url"
               /> :
@@ -158,7 +163,7 @@ export default function DocumentsPage() {
               pdfUrl={state.resume_url}
               uploadedItemName="Resume"
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={() => handleDelete(state.resume_url ?? "", "resume_url")}
               docType="resume_url"
             /> :
             isEditing.resume_url ?
@@ -167,7 +172,7 @@ export default function DocumentsPage() {
                 accepts=".pdf"
                 uploadInstructions="Upload PDF files of up to 50 MB and click save documents"
                 isEditView={isEditing.resume_url}
-                onExitEditView={() => { setIsEditing({ ...isEditing, resume_url: false }); setDocs({ ...docs, resume: null }) }}
+                onExitEditView={() => { setIsEditing({ ...isEditing, resume_url: false }); setDocs({ ...docs, resume: null }); }}
                 onFileSelect={handleFileSelect}
                 docType="resume_url"
               /> :
@@ -185,7 +190,7 @@ export default function DocumentsPage() {
               pdfUrl={state.transcript_url}
               uploadedItemName="Transcript"
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={() => handleDelete(state.transcript_url ?? "", "transcript_url")}
               docType="transcript_url"
             /> :
             isEditing.transcript_url ?
@@ -194,7 +199,7 @@ export default function DocumentsPage() {
                 accepts=".pdf"
                 uploadInstructions="Upload PDF files of up to 50 MB and click save documents"
                 isEditView={isEditing.transcript_url}
-                onExitEditView={() => { setIsEditing({ ...isEditing, transcript_url: false }); setDocs({ ...docs, transcript: null }) }}
+                onExitEditView={() => { setIsEditing({ ...isEditing, transcript_url: false }); setDocs({ ...docs, transcript: null }); }}
                 onFileSelect={handleFileSelect}
                 docType="transcript_url"
               /> :
@@ -207,7 +212,6 @@ export default function DocumentsPage() {
               />
         }
       </div>
-
     </PageContentWrapper>
   );
 }

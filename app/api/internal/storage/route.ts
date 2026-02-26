@@ -31,10 +31,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ message: "Invalid input" }, { status: 400 });
     }
 
-    if (!file.type.startsWith("image/")) {
+    if (
+      (bucketName === "project_thumbnails" || bucketName === "portraits") &&
+      !file.type.startsWith("image/")
+    ) {
       return NextResponse.json(
         { message: "Only image files allowed" },
-        { status: 400 }
+        { status: 400 },
+      );
+    } else if (
+      (bucketName === "resumes" || bucketName === "transcripts") &&
+      file.type !== "application/pdf"
+    ) {
+      return NextResponse.json(
+        { message: "Only PDF files allowed" },
+        { status: 400 },
       );
     }
 
@@ -116,21 +127,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
       return NextResponse.json(
         { publicURL: publicURL.publicUrl },
-        { status: 201 }
+        { status: 201 },
       );
     } else {
       return NextResponse.json(
         { publicURL: publicURL.publicUrl },
-        { status: 201 }
+        { status: 201 },
       );
     }
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
 
@@ -170,8 +178,8 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
         parsedBucket === "portraits"
           ? { portrait_url: null }
           : parsedBucket === "resumes"
-          ? { resume_url: null }
-          : { transcript_url: null };
+            ? { resume_url: null }
+            : { transcript_url: null };
 
       const { error: updateError } = await supabase
         .from("users")
@@ -191,9 +199,6 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

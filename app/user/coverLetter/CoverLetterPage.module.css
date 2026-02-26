@@ -16,3 +16,7 @@
 .coverLetterPageContainer > p {
   margin: 0;
 }
+
+.subtitle {
+  color: var(--page-txt-2);
+}

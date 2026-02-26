@@ -1,11 +1,13 @@
 import Image from "next/image";
 
+import { useToast } from "@/app/context/ToastProvider";
 import { createClient } from "@/utils/supabase/client";
 
 import styles from "./OauthButtons.module.css";
 
 export default function ContinueWithGoogleButton() {
     const supabase = createClient();
+    const toast = useToast();
 
     const handleGoogle = async () => {
         const base = process.env.NEXT_PUBLIC_SITE_URL;
@@ -16,11 +18,11 @@ export default function ContinueWithGoogleButton() {
             options: { redirectTo },
         });
 
-        if (error) alert(error.message);
+        if (error) toast.error("Error logging in with Google")
     };
 
     return (
-        <button onClick={handleGoogle} className={`${styles.button} ${styles.google}`}>
+        <button onClick={handleGoogle} className={`${styles.button}`}>
             <Image
                 src="/images/google-icon.svg"
                 alt="Google icon"

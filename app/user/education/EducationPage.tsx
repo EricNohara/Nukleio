@@ -9,6 +9,7 @@ import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import Table from "@/app/components/Table/Table";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { IEducationInput, IEducationUserInput, } from "@/app/interfaces/IEducation";
 import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
@@ -27,15 +28,17 @@ const EMPTY_EDUCATION: IEducationUserInput = {
     majors: "",
     minors: "",
     awards: "",
-}
+};
 
 export default function EducationPage() {
     const { state, dispatch } = useUser();
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
     const [formValues, setFormValues] = useState<IEducationUserInput>(EMPTY_EDUCATION);
     const [educationToEdit, setEducationToEdit] = useState<IUserEducationInternal | null>(null);
+
     const searchParams = useSearchParams();
     const router = useRouter();
+    const toast = useToast();
 
     const indexParam = searchParams.get("index");
 
@@ -75,19 +78,19 @@ export default function EducationPage() {
         const education = state.education[rowIndex];
         try {
             const res = await fetch(`/api/internal/user/education?id=${education.id}`, { method: "DELETE" });
-            if (!res.ok) throw new Error(`Error deleting education: ${education.institution}, ${education.degree}.`);
+            if (!res.ok) throw new Error();
 
             // update cached state
             dispatch({ type: "DELETE_EDUCATION", payload: education });
-        } catch (error) {
-            console.error(error);
-            alert(error);
+            toast.success("Success", "Successfully deleted user education.");
+        } catch {
+            toast.error("Error", "Failed to delete user education.");
         }
-    }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormValues(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    }
+    };
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -103,19 +106,19 @@ export default function EducationPage() {
 
         // validate input
         if (!institution || !degree) {
-            alert("Please fill out all required fields.");
+            toast.warning("Warning", "Please fill out all required fields before submitting.");
             return;
         }
 
         // Validate dates
         if (year_start && year_end) {
             if (year_end < year_start) {
-                alert("Year end cannot be before year start.");
+                toast.warning("Warning", "Invalid year end. Year end cannot be before year start.");
                 return;
             }
 
             if (year_start < 0 || year_end < 0) {
-                alert("Year start and year end must be positive numbers.");
+                toast.warning("Warning", "Invalid years. Years must be positive numbers.");
                 return;
             }
         }
@@ -129,7 +132,7 @@ export default function EducationPage() {
             majors: majors ? majors.trim().split(",").map(s => s.trim()) : [],
             minors: minors ? minors.trim().split(",").map(s => s.trim()) : [],
             awards: awards ? awards.trim().split(",").map(s => s.trim()) : []
-        }
+        };
 
         try {
             if (educationToEdit) {
@@ -137,7 +140,7 @@ export default function EducationPage() {
                 const editPayload = {
                     id: educationToEdit.id,
                     updatedEducation: newEducation
-                }
+                };
                 const res = await fetch("/api/internal/user/education", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -150,7 +153,7 @@ export default function EducationPage() {
                     ...newEducation,
                     id: educationToEdit.id,
                     courses: educationToEdit.courses
-                }
+                };
 
                 // update cached state
                 dispatch({ type: "UPDATE_EDUCATION", payload: { old: educationToEdit, new: newUserEducation } });
@@ -168,23 +171,22 @@ export default function EducationPage() {
                     ...newEducation,
                     id: data.id,
                     courses: []
-                }
+                };
 
                 // update the cached user
                 dispatch({ type: "ADD_EDUCATION", payload: newUserEducation });
             }
-
+            toast.success("Success", "Successfully saved user education.");
         } catch (err) {
-            console.error(err);
             const error = err as Error;
-            alert(error.message);
+            toast.error("Error", `Failed to save user education: ${error.message}.`);
         }
 
         // reset form
         setFormValues(EMPTY_EDUCATION);
         setIsFormOpen(false);
         setEducationToEdit(null);
-    }
+    };
 
     const onClose = () => {
         setIsFormOpen(false);
@@ -197,7 +199,7 @@ export default function EducationPage() {
         const newUrl = newQuery ? `?${newQuery}` : "";
 
         router.replace(`/user/education${newUrl}`, { scroll: false });
-    }
+    };
 
     const buttonOne: IButton = {
         name: "Add Education",
@@ -206,7 +208,7 @@ export default function EducationPage() {
             setEducationToEdit(null);
             setIsFormOpen(true);
         },
-    }
+    };
 
     const inputRows: IInputFormRow[] = [
         {
@@ -316,7 +318,7 @@ export default function EducationPage() {
         onSubmit: onSubmit,
         inputRows: inputRows,
         onClose: onClose
-    }
+    };
 
     return (
         <PageContentWrapper>

@@ -1,12 +1,22 @@
 .container {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
-  color: var(--page-txt-2);
+  width: 250px;
+  color: var(--page-txt-1);
   border: none;
   border-radius: var(--global-border-radius);
   background-color: inherit;
-  transition: 0.2s ease;
+  padding: 0;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .container:hover {
@@ -14,13 +24,18 @@
 }
 
 .openContainer {
-  background-color: var(--popup-hover);
+  background-color: var(--page-bg);
+  border: 1px solid var(--page-box-border);
+  border-bottom-style: none;
   transition: 0.2s ease;
-  color: var(--page-txt);
+  border-radius: var(--global-border-radius) var(--global-border-radius) 0 0;
 }
 
 .avatar {
   border-radius: var(--global-border-radius);
+  object-fit: cover;
+  object-position: center;
+  flex-shrink: 0;
 }
 
 .relativeContainer {
@@ -33,7 +48,21 @@
   position: absolute;
   top: 100%;
   right: 0;
-  margin-top: 0.5rem;
+  border-radius: 0 0 var(--global-border-radius) var(--global-border-radius);
   z-index: 999;
   width: 100%;
+}
+
+.name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.chevron {
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+  color: var(--page-txt-1);
 }

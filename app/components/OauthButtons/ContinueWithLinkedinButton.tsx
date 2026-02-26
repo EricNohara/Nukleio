@@ -1,11 +1,13 @@
 import Image from "next/image";
 
+import { useToast } from "@/app/context/ToastProvider";
 import { createClient } from "@/utils/supabase/client";
 
 import styles from "./OauthButtons.module.css";
 
 export default function ContinueWithLinkedinButton() {
     const supabase = createClient();
+    const toast = useToast()
 
     const handleLinkedin = async () => {
         const base = process.env.NEXT_PUBLIC_SITE_URL;
@@ -16,11 +18,11 @@ export default function ContinueWithLinkedinButton() {
             options: { redirectTo },
         });
 
-        if (error) alert(error.message);
+        if (error) toast.error("Error logging in with LinkedIn")
     };
 
     return (
-        <button onClick={handleLinkedin} className={`${styles.button} ${styles.linkedin}`}>
+        <button onClick={handleLinkedin} className={`${styles.button}`}>
             <Image
                 src="/images/linkedin-icon.svg"
                 alt="LinkedIn icon"

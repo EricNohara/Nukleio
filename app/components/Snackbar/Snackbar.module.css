@@ -55,35 +55,19 @@
 }
 
 .success {
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--success-color) 75%, black),
-    var(--success-color)
-  );
+  background-color: var(--success-color);
 }
 
 .error {
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--fail-color) 75%, black),
-    var(--fail-color)
-  );
+  background-color: var(--fail-color);
 }
 
 .info {
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--color-primary) 75%, black),
-    var(--color-primary)
-  );
+  background-color: var(--btn-1);
 }
 
 .warning {
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, yellow 75%, black),
-    yellow
-  );
+  background-color: rgb(232, 169, 53);
 }
 
 .messageContainer {

@@ -18,7 +18,7 @@ const settingsLinks: ISettingsLink[] = [
     { name: "User Settings", route: "/user/settings/user" },
     { name: "Password", route: "/user/settings/password" },
     { name: "Billing", route: "/user/settings/billing" }
-]
+];
 
 export default function SettingsNav({ activeSetting }: ISettingsNavProps) {
     const router = useRouter();

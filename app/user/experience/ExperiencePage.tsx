@@ -7,6 +7,7 @@ import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import Table from "@/app/components/Table/Table";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { IExperience } from "@/app/interfaces/IExperience";
 
@@ -26,9 +27,11 @@ export default function ExperiencePage() {
         job_description: null,
     });
     const [experienceToEdit, setExperienceToEdit] = useState<IExperience | null>(null);
+
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
     const router = useRouter();
+    const toast = useToast();
 
     // used to open given experience if inputted as search param
     useEffect(() => {
@@ -40,7 +43,7 @@ export default function ExperiencePage() {
                 setIsFormOpen(true);
             }
         }
-    }, [indexParam, state])
+    }, [indexParam, state]);
 
     const handleEdit = (rowIndex: number) => {
         const experience = state.experiences[rowIndex];
@@ -57,15 +60,16 @@ export default function ExperiencePage() {
 
             // update cached state
             dispatch({ type: "DELETE_EXPERIENCE", payload: experience });
+            toast.success("Success", `Successfully deleted experience: ${experience.company}, ${experience.job_title}.`);
         } catch (error) {
-            console.error(error);
-            alert(error);
+            const err = error as Error;
+            toast.error("Error", err.message);
         }
-    }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormValues(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    }
+    };
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,18 +82,18 @@ export default function ExperiencePage() {
 
         // validate input
         if (!company || !job_title) {
-            alert("Please fill out all required fields.");
+            toast.warning("Warning", "Please fill out all required fields before submitting.");
             return;
         }
 
         // Validate dates
         if (date_end && !date_start) {
-            alert("Start date must be provided if end date exists.");
+            toast.warning("Warning", "Please provide a start date if you provided an end date.");
             return;
         }
 
         if (date_start && date_end && date_end < date_start) {
-            alert("End date cannot be before start date.");
+            toast.warning("Warning", "Invalid end date. End date cannot be before the start date.");
             return;
         }
 
@@ -99,7 +103,7 @@ export default function ExperiencePage() {
             job_description: job_description ? job_description : null,
             date_start: date_start ? date_start.toISOString().split("T")[0] : null,
             date_end: date_end ? date_end.toISOString().split("T")[0] : null
-        }
+        };
 
         try {
             if (experienceToEdit) {
@@ -108,7 +112,7 @@ export default function ExperiencePage() {
                     prevCompany: experienceToEdit.company,
                     prevJob: experienceToEdit.job_title,
                     updatedExperience: newExperience
-                }
+                };
                 const res = await fetch("/api/internal/user/experience", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -132,31 +136,29 @@ export default function ExperiencePage() {
                 // update the cached user
                 dispatch({ type: "ADD_EXPERIENCE", payload: newExperience });
             }
-
+            toast.success("Success", "Successfully saved your experience.");
         } catch (err) {
-            console.error(err);
             const error = err as Error;
-            alert(error.message);
+            toast.error("Error", error.message);
         }
 
         // reset form
         setFormValues({ company: "", job_title: "", job_description: null, date_start: "", date_end: "" });
         setIsFormOpen(false);
         setExperienceToEdit(null);
-    }
+    };
 
     const onClose = () => {
         setIsFormOpen(false);
         setExperienceToEdit(null);
 
-        // remove the ?index param from url
         const current = new URLSearchParams(Array.from(searchParams.entries()));
         current.delete("index");
         const newQuery = current.toString();
         const newUrl = newQuery ? `?${newQuery}` : "";
 
         router.replace(`/user/experience${newUrl}`, { scroll: false });
-    }
+    };
 
     const buttonOne: IButton = {
         name: "Add Experience",
@@ -171,7 +173,7 @@ export default function ExperiencePage() {
             setExperienceToEdit(null);
             setIsFormOpen(true);
         },
-    }
+    };
 
     const inputRows: IInputFormRow[] = [
         {
@@ -244,7 +246,7 @@ export default function ExperiencePage() {
         onSubmit: onSubmit,
         inputRows: inputRows,
         onClose: onClose
-    }
+    };
 
     return (
         <PageContentWrapper>

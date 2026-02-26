@@ -4,8 +4,7 @@
   padding: 2rem;
   text-align: center;
   transition: 0.2s ease;
-  background: var(--file-upload);
-  color: var(--file-upload-border);
+  background-color: var(--page-box-bg);
 
   display: flex;
   flex-direction: column;
@@ -20,8 +19,8 @@
   background-size: 100% 100%;
 }
 
-.uploadBox:hover {
-  border-color: var(--file-upload-border-hover);
+.miniUploadBox {
+  gap: 1rem;
 }
 
 .dragging {
@@ -35,15 +34,20 @@
 
 .label {
   font-size: 1.5rem;
-  color: var(--file-upload-label);
+  color: var(--page-txt-1);
   margin: 0;
   margin-bottom: 0.25rem;
+}
+
+.miniLabel {
+  font-size: 1.15rem;
 }
 
 .subLabel {
   font-size: 1rem;
   font-weight: normal;
   margin: 0;
+  color: var(--page-txt-2);
 
   /* Ellipsis setup */
   white-space: nowrap;
@@ -53,9 +57,14 @@
   width: 300px;
 }
 
+.miniSubLabel {
+  font-size: 0.8rem;
+}
+
 .uploadInstructions {
   font-size: 1rem;
   margin: 0;
+  color: var(--page-txt-2);
 }
 
 .uploadInstructionsContainer {
@@ -67,22 +76,90 @@
   bottom: 2rem;
 }
 
-.saveMsg {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+/*  */
+.previewContainer {
+  border-radius: var(--global-border-radius);
+  overflow: hidden;
+  background-color: var(--page-box-bg);
+  border: 1px solid var(--page-box-border);
+  position: relative;
 }
 
-.checkmark {
+/* LARGE preview (default) */
+.previewLarge {
+  width: 300px;
+}
+
+/* MINI preview */
+.previewMini {
+  width: 300px;
+}
+
+/* Media area */
+.previewLarge .imagePreview,
+.previewLarge .pdfPreview,
+.previewLarge .genericPreview {
+  width: 300px;
+  height: 300px;
+}
+
+.previewMini .imagePreview,
+.previewMini .pdfPreview,
+.previewMini .genericPreview {
+  width: 300px;
+  height: 180px;
+}
+
+.previewInner {
+  display: flex;
+  flex-direction: column;
+}
+
+.imagePreview,
+.pdfPreview {
+  width: 160px;
+  height: 120px;
+  display: block;
+  border: 0;
+}
+
+.imagePreview {
+  object-fit: cover;
+}
+
+.genericPreview {
+  width: 160px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.25rem;
-  border-radius: var(--global-border-radius);
-  background-color: var(--file-uploaded);
-  color: white;
+}
+
+.previewFooter {
+  padding: 0.5rem;
+  background-color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.previewName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: bold;
+  color: var(--page-txt-1);
+}
+
+.previewSize {
+  color: var(--page-txt-2);
+}
+
+.clearPreviewBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 5;
 }

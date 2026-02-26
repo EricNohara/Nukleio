@@ -9,6 +9,7 @@ import InputForm from "@/app/components/InputForm/InputForm";
 import { IInputFormRow, IInputFormProps } from "@/app/components/InputForm/InputForm";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import Table from "@/app/components/Table/Table";
+import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { IApiKeyInternal, IApiKeyInternalInput } from "@/app/interfaces/IApiKey";
 
@@ -27,14 +28,16 @@ export default function ConnectPage() {
         expires: null,
     });
     const [apiKeyToRefresh, setApiKeyToRefresh] = useState<IApiKeyInternalInput | null>(null);
+
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
     const router = useRouter();
+    const toast = useToast();
 
     const buttonFour: IButton = {
         name: "API Docs",
         onClick: () => { router.push("/documentation/doc"); }
-    }
+    };
 
     // used to open given key if inputted as search param
     useEffect(() => {
@@ -46,7 +49,7 @@ export default function ConnectPage() {
                 setIsFormOpen(true);
             }
         }
-    }, [indexParam, apiKeys])
+    }, [indexParam, apiKeys]);
 
     const handleEdit = (rowIndex: number) => {
         const key = apiKeys[rowIndex];
@@ -63,15 +66,16 @@ export default function ConnectPage() {
 
             // update cached state
             dispatch({ type: "DELETE_API_KEY", payload: key });
+            toast.success("Success", `Successfully deleted API key: ${key.description}.`);
         } catch (error) {
-            console.error(error);
-            alert(error);
+            const err = error as Error;
+            toast.error("Error", err.message);
         }
-    }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormValues(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    }
+    };
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -81,19 +85,19 @@ export default function ConnectPage() {
 
         // validate input
         if (!description) {
-            alert("Please fill out all required fields.");
+            toast.warning("Warning", "Please fill out all required fields before submitting.");
             return;
         }
 
         if (expires && expires < new Date()) {
-            alert("Expiration date cannot be in the past")
+            toast.warning("Warning", "Invalid expiration date. API key expiration date cannot be in the past.");
             return;
         }
 
         const newApiKey: IApiKeyInternalInput = {
             description: description,
             expires: expires ? expires.toISOString().split("T")[0] : null
-        }
+        };
 
         let success = false;
 
@@ -103,7 +107,7 @@ export default function ConnectPage() {
                 const editPayload: IApiKeyInternalInput = {
                     description: apiKeyToRefresh.description,
                     expires: newApiKey.expires
-                }
+                };
                 const res = await fetch("/api/internal/user/key", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -116,7 +120,7 @@ export default function ConnectPage() {
                     ...apiKeyToRefresh,
                     created: "",
                     last_used: null
-                }
+                };
 
                 // update cached state
                 dispatch({ type: "UPDATE_API_KEY", payload: { old: oldKey, new: data.key } });
@@ -133,12 +137,11 @@ export default function ConnectPage() {
                 // update the cached user
                 dispatch({ type: "ADD_API_KEY", payload: data.key });
             }
-
+            toast.success("Success", `Successfully saved API key: ${description}.`);
             success = true;
         } catch (err) {
-            console.error(err);
             const error = err as Error;
-            alert(error.message);
+            toast.error("Error", `Failed to create or update API key: ${error.message}.`);
         }
 
         // reset form and show generated key
@@ -147,7 +150,7 @@ export default function ConnectPage() {
         setApiKeyToRefresh(null);
 
         if (success) setKeyToDisplay(description);
-    }
+    };
 
     const onClose = () => {
         setIsFormOpen(false);
@@ -160,11 +163,11 @@ export default function ConnectPage() {
         const newUrl = newQuery ? `?${newQuery}` : "";
 
         router.replace(`/user/connect${newUrl}`, { scroll: false });
-    }
+    };
 
     const onApiKeyDisplayClose = () => {
         setKeyToDisplay(null);
-    }
+    };
 
     const buttonOne: IButton = {
         name: "Generate API Key",
@@ -176,7 +179,7 @@ export default function ConnectPage() {
             setApiKeyToRefresh(null);
             setIsFormOpen(true);
         }
-    }
+    };
 
     const rows = apiKeys.map((key) => ({
         "Description": key.description,
@@ -208,7 +211,7 @@ export default function ConnectPage() {
                 value: formValues.expires ? formValues.expires.split("T")[0] : ""
             }
         }
-    ]
+    ];
 
     const formProps: IInputFormProps = {
         title: apiKeyToRefresh ? "Refresh API Key" : "Generate API Key",
@@ -216,11 +219,11 @@ export default function ConnectPage() {
         onSubmit: onSubmit,
         inputRows: inputRows,
         onClose: onClose
-    }
+    };
 
     return (
         <PageContentWrapper>
-            <PageContentHeader title="Connect" buttonOne={buttonOne} buttonFour={buttonFour} />
+            <PageContentHeader title="API Keys" buttonOne={buttonOne} buttonFour={buttonFour} />
             <Table
                 columns={columns}
                 rows={rows}

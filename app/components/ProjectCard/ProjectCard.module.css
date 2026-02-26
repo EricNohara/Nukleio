@@ -38,6 +38,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--page-txt-1);
 }
 
 .expandBtn {
@@ -47,7 +48,6 @@
   background-color: inherit;
   border: none;
   border-radius: var(--global-border-radius);
-  color: var(--project-card-date-txt);
   padding: 0.25rem 0;
   transition: 0.2s;
 }
@@ -63,8 +63,12 @@
 
 .date {
   margin: 0;
-  color: var(--project-card-date-txt);
+  color: var(--page-txt-2);
   font-size: 0.8rem;
+}
+
+.ellipsis {
+  color: var(--page-txt-1);
 }
 
 .thumbnailContainer {
@@ -87,30 +91,31 @@
 
 .dropdownMenu {
   position: absolute;
-  top: 2.2rem;
+  top: 2.75rem;
   right: 0;
-  background-color: var(--project-card);
+  background-color: var(--page-box-bg);
   border-radius: var(--global-border-radius);
+  border: 1px solid var(--page-box-border);
   display: flex;
   flex-direction: column;
-  min-width: 120px;
-  z-index: 10;
-  padding: 0.5rem 0;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  width: 150px;
+  z-index: 100;
+  padding: 0.5rem;
 }
 
 .dropdownButton {
-  background: none;
+  background-color: inherit;
   border: none;
-  padding: 0.75rem 1rem;
-  text-align: left;
+  border-radius: var(--global-border-radius);
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
-  color: var(--project-card-date-txt);
-  transition: 0.2s ease;
+  transition: 0.1s ease;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 1rem;
   font-size: 1rem;
+  font-weight: bold;
+  color: var(--page-txt-1);
 }
 
 .dropdownButton:hover {
@@ -119,17 +124,4 @@
 
 .dropdownWrapper {
   position: relative;
-}
-
-.dropdownMenu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 0.25rem;
-  background-color: var(--project-list-container);
-  border-radius: var(--global-border-radius);
-  display: flex;
-  flex-direction: column;
-  min-width: 120px;
-  z-index: 10;
 }
