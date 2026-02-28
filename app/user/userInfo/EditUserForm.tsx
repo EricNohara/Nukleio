@@ -129,7 +129,7 @@ export default function EditUserForm({
             <div className={styles.inputCardGrid}>
                 <div className={styles.inputCard}>
                     <div className={styles.cardHeader}>
-                        <SquareUserRound />
+                        <SquareUserRound className={styles.titleIcon} />
                         <h3 className={styles.cardTitle}>Basic Information</h3>
                     </div>
                     <div className={styles.inputRow}>
@@ -177,7 +177,7 @@ export default function EditUserForm({
                 </div>
                 <div className={styles.inputCard}>
                     <div className={styles.cardHeader}>
-                        <Phone />
+                        <Phone className={styles.titleIcon} />
                         <h3 className={styles.cardTitle}>Contact Information</h3>
                     </div>
                     <TextInput
@@ -209,7 +209,7 @@ export default function EditUserForm({
                 </div>
                 <div className={styles.inputCard}>
                     <div className={styles.cardHeader}>
-                        <BriefcaseBusiness />
+                        <BriefcaseBusiness className={styles.titleIcon} />
                         <h3 className={styles.cardTitle}>Employment Information</h3>
                     </div>
                     <TextInput
@@ -246,7 +246,7 @@ export default function EditUserForm({
                 </div>
                 <div className={styles.inputCard}>
                     <div className={styles.cardHeader}>
-                        <Link2 />
+                        <Link2 className={styles.titleIcon} />
                         <h3 className={styles.cardTitle}>Social Media Links</h3>
                     </div>
                     <TextInput

@@ -81,7 +81,7 @@ export default function ProjectFormModal({
                     <TextInput
                         label="End Date"
                         name="date_end"
-                        value={value.date_start}
+                        value={value.date_end}
                         type="date"
                         onChange={onChange}
                         required

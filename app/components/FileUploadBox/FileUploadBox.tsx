@@ -4,7 +4,7 @@ import { FileText, X } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "./FileUploadBox.module.css";
-import { ButtonOne, ButtonTwo, ExitButton } from "../Buttons/Buttons";
+import { ButtonOne, ButtonFour, ExitButton } from "../Buttons/Buttons";
 
 interface IFileUploadBoxProps {
     label?: string;
@@ -182,9 +182,9 @@ export default function FileUploadBox({
             )}
 
             {isEditView && (
-                <ButtonTwo className={styles.exitEditBtn} onClick={onExitEditView}>
+                <ButtonFour className={styles.exitEditBtn} onClick={onExitEditView}>
                     Cancel
-                </ButtonTwo>
+                </ButtonFour>
             )}
         </div>
     );
