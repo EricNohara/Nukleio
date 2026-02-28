@@ -3,6 +3,7 @@
 import React, { Dispatch, FormEvent, SetStateAction, useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
+import AutocompleteListSelector from "@/app/components/AutocompleteListSelector/AutocompleteListSelector";
 import { ButtonOne } from "@/app/components/Buttons/Buttons";
 import FileUploadBox from "@/app/components/FileUploadBox/FileUploadBox";
 import InputFormHeader from "@/app/components/InputForm/InputFormHeader/InputFormHeader";
@@ -10,6 +11,9 @@ import Overlay from "@/app/components/Overlay/Overlay";
 import TextInput from "@/app/components/TextInput/TextInput";
 import { useToast } from "@/app/context/ToastProvider";
 import { IProjectInput } from "@/app/interfaces/IProject";
+import FRAMEWORKS from "@/data/frameworks.json";
+import LANGUAGES from "@/data/languages.json";
+import TECHNOLOGIES from "@/data/technologies.json";
 
 import styles from "./ProjectsPage.module.css";
 
@@ -114,40 +118,34 @@ export default function ProjectFormModal({
                         outerClassname={styles.demo}
                     />
 
-                    <TextInput
+                    <AutocompleteListSelector
                         label="Programming Languages"
                         name="languages_used"
-                        value={value.languages_used ? value.languages_used.join(", ") : ""}
-                        type="text"
-                        placeholder="TypeScript, Python, ..."
+                        value={value.languages_used ?? []}
+                        suggestionsData={LANGUAGES}
                         onChange={onChange}
-                        isInInputForm={true}
-                        focusLabelColor="var(--btn-1)"
-                        outerClassname={styles.langs}
+                        placeholder="TypeScript, Python, ..."
+                        className={styles.langs}
                     />
 
-                    <TextInput
+                    <AutocompleteListSelector
                         label="Frameworks"
                         name="frameworks_used"
-                        value={value.frameworks_used ? value.frameworks_used.join(", ") : ""}
-                        type="text"
-                        placeholder="Next.js, Django, ..."
+                        value={value.frameworks_used ?? []}
+                        suggestionsData={FRAMEWORKS}
                         onChange={onChange}
-                        isInInputForm={true}
-                        focusLabelColor="var(--btn-1)"
-                        outerClassname={styles.frameworks}
+                        placeholder="Next.js, Django, ..."
+                        className={styles.frameworks}
                     />
 
-                    <TextInput
+                    <AutocompleteListSelector
                         label="Technologies"
                         name="technologies_used"
-                        value={value.technologies_used ? value.technologies_used.join(", ") : ""}
-                        type="text"
-                        placeholder="Supabase, Stripe, ..."
+                        value={value.technologies_used ?? []}
+                        suggestionsData={TECHNOLOGIES}
                         onChange={onChange}
-                        isInInputForm={true}
-                        focusLabelColor="var(--btn-1)"
-                        outerClassname={styles.tech}
+                        placeholder="Supabase, Stripe, ..."
+                        className={styles.tech}
                     />
 
                     <TextInput

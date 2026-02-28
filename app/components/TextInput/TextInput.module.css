@@ -46,7 +46,7 @@
 .inputLabel {
   color: var(--login-txt-2);
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: bold;
   transition: 0.2s ease;
 }
 
