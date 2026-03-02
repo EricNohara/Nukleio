@@ -139,7 +139,7 @@ html {
   --table-head-txt: white;
 
   --project-card: #292929;
-  --project-card-hover: #1c1c1c;
+  --project-card-hover: rgba(187, 187, 187, 0.25);
   --project-card-btn-hover: rgba(187, 187, 187, 0.25);
   --project-card-active: rgba(187, 187, 187, 0.25);
 

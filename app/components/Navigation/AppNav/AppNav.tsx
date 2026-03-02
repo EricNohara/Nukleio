@@ -48,7 +48,7 @@ export default function AppNav() {
                         <button
                             key={i}
                             onClick={() => handleClick(item)}
-                            className={`${styles.navButton} ${isActive ? styles.activeNavButton : ""} ${headerFont.className}`}
+                            className={`${styles.navButton} ${isActive && styles.activeNavButton} ${headerFont.className}`}
                         >
                             <Icon />
                             {item.label}
@@ -58,7 +58,7 @@ export default function AppNav() {
                 )}
             </div>
             <div className={styles.navSection}>
-                <button onClick={() => router.push("/user/settings/app")} className={`${styles.navButton} ${headerFont.className}`}>
+                <button onClick={() => router.push("/user/settings/app")} className={`${styles.navButton} ${headerFont.className} ${pathname.includes("/user/settings") && styles.activeNavButton}`}>
                     <Settings />
                     Settings
                 </button>
