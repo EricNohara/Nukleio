@@ -1,5 +1,6 @@
-import { getUserSubscriptionTier, Tier } from "./getUserSubscriptionTier";
 import { NextResponse } from "next/server";
+
+import { getUserSubscriptionTier, Tier } from "./getUserSubscriptionTier";
 
 const ORDER: Record<Tier, number> = { free: 0, developer: 1, premium: 2 };
 

@@ -1,6 +1,7 @@
+import { NextRequest, NextResponse } from "next/server";
+
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 import { requireTier } from "@/utils/auth/requireTier";
-import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 

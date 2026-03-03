@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from "react";
 
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 import LoadingMessageSpinner from "@/app/components/LoadingMessageSpinner/LoadingMessageSpinner";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import TextInput from "@/app/components/TextInput/TextInput";
+import { hasTier, useTier } from "@/app/context/TierProvider";
 import { useToast } from "@/app/context/ToastProvider";
 import { cacheDraft, cleanupDraftCache, loadCachedDraft } from "@/utils/coverLetter/coverLetterCache";
 
 import styles from "./CoverLetterPage.module.css";
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
-import { hasTier, useTier } from "@/app/context/TierProvider";
-import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
 export default function CoverLetterPage() {
     const [userId, setUserId] = useState<string>("");
@@ -66,6 +66,7 @@ export default function CoverLetterPage() {
         finalLetter?: string;
         shouldDownload: boolean;
     }) => {
+        // eslint-disable-next-line
         const payload: Record<string, any> = {
             conversationId: convoId,
             feedback: nextFeedback,

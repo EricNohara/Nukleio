@@ -5,11 +5,11 @@ import React, { useEffect, useState } from "react";
 
 import { ButtonFour, ButtonOne } from "@/app/components/Buttons/Buttons";
 import SubscriptionCard from "@/app/components/SubscriptionCard/SubscriptionCard";
+import { useTier } from "@/app/context/TierProvider";
 import { useToast } from "@/app/context/ToastProvider";
 import { headerFont } from "@/app/localFonts";
 
 import styles from "./BillingPage.module.css";
-import { useTier } from "@/app/context/TierProvider";
 
 type Tier = "free" | "developer" | "premium";
 type Interval = "monthly" | "yearly";
