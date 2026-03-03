@@ -9,6 +9,7 @@ import { useToast } from "@/app/context/ToastProvider";
 import { headerFont } from "@/app/localFonts";
 
 import styles from "./BillingPage.module.css";
+import { useTier } from "@/app/context/TierProvider";
 
 type Tier = "free" | "developer" | "premium";
 type Interval = "monthly" | "yearly";
@@ -71,10 +72,20 @@ async function postJson<T>(url: string, body?: any): Promise<T> {
 export default function BillingPage() {
     const toast = useToast();
 
+    const { refresh } = useTier();
+
     const [sub, setSub] = useState<SubscriptionStatus | null>(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<null | "checkout" | "portal">(null);
     const [selectedInterval, setSelectedInterval] = useState<Interval>("monthly");
+
+    // refresh tier after checkout
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("checkout") || params.get("portal")) {
+            refresh();
+        }
+    }, [refresh]);
 
     useEffect(() => {
         const loadSubscription = async () => {

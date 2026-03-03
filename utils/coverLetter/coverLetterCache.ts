@@ -1,22 +1,17 @@
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-export function getJobCacheKey(
-  jobUrl: string,
-  jobTitle: string,
-  companyName: string
-) {
-  return `coverletter:${jobUrl}|${jobTitle}|${companyName}`;
+export function getJobCacheKey(jobTitle: string, companyName: string) {
+  return `coverletter:${jobTitle}|${companyName}`;
 }
 
 /** Save draft + conversationId with timestamp */
 export function cacheDraft(
-  jobUrl: string,
   jobTitle: string,
   companyName: string,
   draft: string,
-  conversationId: string
+  conversationId: string,
 ) {
-  const key = getJobCacheKey(jobUrl, jobTitle, companyName);
+  const key = getJobCacheKey(jobTitle, companyName);
 
   const data = {
     draft,
@@ -32,11 +27,10 @@ export function cacheDraft(
 
 /** Load draft if it exists AND is not expired */
 export function loadCachedDraft(
-  jobUrl: string,
   jobTitle: string,
-  companyName: string
+  companyName: string,
 ): { draft: string; conversationId: string } | null {
-  const key = getJobCacheKey(jobUrl, jobTitle, companyName);
+  const key = getJobCacheKey(jobTitle, companyName);
   const raw = localStorage.getItem(key);
 
   if (!raw) return null;

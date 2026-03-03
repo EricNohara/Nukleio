@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import LoadingMessageSpinner from "@/app/components/LoadingMessageSpinner/LoadingMessageSpinner";
@@ -11,21 +10,33 @@ import { cacheDraft, cleanupDraftCache, loadCachedDraft } from "@/utils/coverLet
 
 import styles from "./CoverLetterPage.module.css";
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
+import { hasTier, useTier } from "@/app/context/TierProvider";
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
 export default function CoverLetterPage() {
     const [userId, setUserId] = useState<string>("");
-    const [url, setUrl] = useState<string>("");
     const [jobTitle, setJobTitle] = useState<string>("");
     const [companyName, setCompanyName] = useState<string>("");
+    const [jobDescriptionDump, setJobDescriptionDump] = useState<string>("");
     const [writingSample, setWritingSample] = useState<string>("");
     const [conversationId, setConversationId] = useState<string>("");
     const [draft, setDraft] = useState<string>("");
     const [feedback, setFeedback] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [mode, setMode] = useState<"initial" | "revision">("initial");
+    const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string>("");
 
-    const router = useRouter();
     const toast = useToast();
+
+    const { tier, loading: tierLoading } = useTier();
+    const canAccess = hasTier(tier, "premium");
+
+    // Cleanup blob URLs (avoid memory leaks)
+    useEffect(() => {
+        return () => {
+            if (pdfPreviewUrl) URL.revokeObjectURL(pdfPreviewUrl);
+        };
+    }, [pdfPreviewUrl]);
 
     useEffect(() => {
         const fetcher = async () => {
@@ -38,45 +49,78 @@ export default function CoverLetterPage() {
                 toast.error("Error", "Failed to fetch user ID. Please refresh the page and try again.");
             }
         };
+
         cleanupDraftCache();
         fetcher();
     }, [toast]);
 
-    const handleGenerate = async () => {
-        if (!userId || !url || !jobTitle || !companyName) return;
+    // Helper: generate a PDF from current draft (or a provided finalLetter), update preview, optionally download
+    const generatePdfAndPreview = async ({
+        convoId,
+        nextFeedback,
+        finalLetter,
+        shouldDownload,
+    }: {
+        convoId: string;
+        nextFeedback: string;
+        finalLetter?: string;
+        shouldDownload: boolean;
+    }) => {
+        const payload: Record<string, any> = {
+            conversationId: convoId,
+            feedback: nextFeedback,
+        };
 
+        if (typeof finalLetter === "string") payload.finalLetter = finalLetter;
+
+        const res = await fetch("/api/internal/user/coverLetter", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) throw new Error("PDF generation failed");
+
+        const arrayBuffer = await res.arrayBuffer();
+        const blob = new Blob([arrayBuffer], { type: "application/pdf" });
+        const pdfUrl = URL.createObjectURL(blob);
+
+        // Update preview (revoke previous)
+        setPdfPreviewUrl((prev) => {
+            if (prev) URL.revokeObjectURL(prev);
+            return pdfUrl;
+        });
+
+        if (shouldDownload) {
+            const a = document.createElement("a");
+            a.href = pdfUrl;
+            a.download = "cover_letter.pdf";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+    };
+
+    const handleGenerate = async () => {
+        if (!userId || !jobTitle || !companyName || !jobDescriptionDump) return;
+
+        // allow paint before work starts
         setTimeout(async () => {
             if (draft.length > 0) {
                 setMode("revision");
                 setLoading(true);
 
-                // REVISION MODE
+                // REVISION MODE: generates PDF, updates preview, downloads
                 try {
-                    const payload = {
-                        conversationId,
-                        feedback,
-                        ...(feedback.trim() === "" ? { finalLetter: draft } : {})
-                    };
-
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_COVER_LETTER_AGENT_BASE_URL}/revise`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
+                    const shouldSendFinalLetter = feedback.trim() === "";
+                    await generatePdfAndPreview({
+                        convoId: conversationId,
+                        nextFeedback: feedback,
+                        finalLetter: shouldSendFinalLetter ? draft : undefined,
+                        shouldDownload: true,
                     });
 
-                    if (!res.ok) throw new Error("PDF generation failed");
-
-                    const arrayBuffer = await res.arrayBuffer();
-                    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
-                    const pdfUrl = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = pdfUrl;
-                    a.download = "cover_letter.pdf"; // Auto-download filename
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-
-                    toast.success("Success", "Successfully generated cover leter draft with your revision.");
+                    toast.success("Success", "Successfully generated cover letter PDF with your revision.");
                 } catch {
                     toast.error("Error", "Failed to revise cover letter. Please refresh the page and try again.");
                 } finally {
@@ -86,16 +130,29 @@ export default function CoverLetterPage() {
                 setMode("initial");
                 setLoading(true);
 
-                const cached = loadCachedDraft(url, jobTitle, companyName);
+                const cached = loadCachedDraft(jobTitle, companyName);
 
                 if (cached) {
-                    setTimeout(() => {
+                    setTimeout(async () => {
                         setDraft(cached.draft);
                         setConversationId(cached.conversationId);
-                        setLoading(false);
-                    }, 300); // small delay for smooth UI
+                        setFeedback("");
 
-                    setLoading(false);
+                        // load the pdf preview
+                        try {
+                            await generatePdfAndPreview({
+                                convoId: cached.conversationId,
+                                nextFeedback: "",
+                                finalLetter: cached.draft,
+                                shouldDownload: false,
+                            });
+                        } catch (error) {
+                            console.error(error);
+                        }
+
+                        setLoading(false);
+                    }, 300);
+
                     return;
                 }
 
@@ -103,53 +160,54 @@ export default function CoverLetterPage() {
                 try {
                     const payload = {
                         userId,
-                        jobUrl: url,
                         jobTitle,
                         companyName,
-                        writingSample
+                        jobDescriptionDump,
+                        writingSample,
                     };
 
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_COVER_LETTER_AGENT_BASE_URL}/generate`, {
+                    const res = await fetch("/api/internal/user/coverLetter", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(payload),
                     });
-
-                    // Detect job lookup failure and redirect
-                    if (res.status === 400) {
-                        const err = await res.json();
-                        if (
-                            err.error?.includes("No job data found")
-                        ) {
-                            // Redirect to description-mode page with prefilled fields
-                            router.push(
-                                `/user/coverLetter/descriptionMode?jobTitle=${encodeURIComponent(jobTitle)}&companyName=${encodeURIComponent(companyName)}`
-                            );
-                            return;
-                        }
-                    }
 
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.error);
 
                     setDraft(data.currentDraft);
                     setConversationId(data.conversationId);
-                    cacheDraft(url, jobTitle, companyName, data.currentDraft, data.conversationId);
+                    setFeedback("");
+                    cacheDraft(jobTitle, companyName, data.currentDraft, data.conversationId);
 
-                    toast.success("Success", "Successfully generated first draft of your cover letter. You may now add your revisions or save the PDF.");
+                    try {
+                        await generatePdfAndPreview({
+                            convoId: data.conversationId,
+                            nextFeedback: "",
+                            finalLetter: data.currentDraft,
+                            shouldDownload: false,
+                        });
+                    } catch {
+                        // non-fatal: user can still click "Complete Revision" to generate PDF/preview
+                    }
+
+                    toast.success(
+                        "Success",
+                        "Successfully generated first draft of your cover letter. You may now add your revisions or save the PDF."
+                    );
                 } catch {
                     toast.error("Error", "Failed to generate cover letter. Please refresh the page and try again.");
                 } finally {
                     setLoading(false);
                 }
             }
-        }, 0); // Key: allow the event loop to flush before heavy work
+        }, 0);
     };
 
     const buttonOne: IButton = {
         name: draft.length > 0 ? "Complete Revision" : "Generate",
         onClick: handleGenerate,
-        isAsync: true
+        isAsync: true,
     };
 
     const backButton: IButton = {
@@ -157,20 +215,28 @@ export default function CoverLetterPage() {
         onClick: () => {
             setCompanyName("");
             setJobTitle("");
-            setUrl("");
+            setJobDescriptionDump("");
             setWritingSample("");
             setDraft("");
             setFeedback("");
             setConversationId("");
-        }
+
+            setPdfPreviewUrl((prev) => {
+                if (prev) URL.revokeObjectURL(prev);
+                return "";
+            });
+        },
     };
 
     return (
         <PageContentWrapper>
-            <PageContentHeader title="Cover Letter Generation" buttonOne={buttonOne} buttonFour={draft.length > 0 ? backButton : null} />
+            <PageContentHeader
+                title="Cover Letter Generation"
+                buttonOne={canAccess ? buttonOne : undefined}
+                buttonFour={draft.length > 0 ? backButton : null}
+            />
 
             <div className={styles.coverLetterPageContainer}>
-
                 {/* ------------------- LOADING UI ------------------- */}
                 {loading && (
                     <LoadingMessageSpinner
@@ -185,41 +251,38 @@ export default function CoverLetterPage() {
                                     "Evaluating draft...",
                                     "Revising content...",
                                     "Executing feedback loop...",
-                                    "Formatting output..."
+                                    "Formatting output...",
                                 ]
                                 : [
                                     "Analyzing your feedback...",
                                     "Revising draft...",
                                     "Evaluating improvements...",
                                     "Generating PDF...",
-                                    "Finalizing output..."
+                                    "Finalizing output...",
                                 ]
                         }
                         interval={mode === "initial" ? 3000 : 1000}
                     />
                 )}
 
+                {/* tier loading UI */}
+                {tierLoading && <LoadingSpinner />}
+
+                {/* upgrade UI */}
+                {!canAccess && <p>Please upgrade to premium to use this feature.</p>}
+
                 {/* ------------------- INITIAL FORM ------------------- */}
-                {!loading && !draft && !conversationId && (
+                {!loading && !tierLoading && !draft && !conversationId && canAccess && (
                     <>
                         <p className={styles.subtitle}>Generate a cover letter tailored to your personal data.</p>
 
                         <div className={styles.inputsContainer}>
                             <TextInput
-                                label="Job Posting URL"
-                                name="url"
-                                value={url}
-                                isInInputForm={true}
-                                placeholder="Enter a job posting url"
-                                onChange={(e) => setUrl(e.target.value)}
-                                required
-                            />
-                            <TextInput
                                 label="Job Title"
                                 name="jobTitle"
                                 value={jobTitle}
                                 isInInputForm={true}
-                                placeholder="Enter a job title"
+                                placeholder="Enter a job title..."
                                 onChange={(e) => setJobTitle(e.target.value)}
                                 required
                             />
@@ -228,38 +291,63 @@ export default function CoverLetterPage() {
                                 name="companyName"
                                 value={companyName}
                                 isInInputForm={true}
-                                placeholder="Enter a company name"
+                                placeholder="Enter a company name..."
                                 onChange={(e) => setCompanyName(e.target.value)}
                                 required
                             />
-                            <TextInput
-                                label="Optional Writing Sample"
-                                name="writingSample"
-                                type="textarea"
-                                textAreaRows={6}
-                                value={writingSample}
-                                isInInputForm={true}
-                                placeholder="Enter an optional writing sample for the agent to match its writing style to"
-                                onChange={(e) => setWritingSample(e.target.value)}
-                            />
+                            <div className={styles.textAreasContainer}>
+                                <TextInput
+                                    label="Job Description"
+                                    name="jobDescriptionDump"
+                                    type="textarea"
+                                    textAreaRows={16}
+                                    value={jobDescriptionDump}
+                                    isInInputForm={true}
+                                    placeholder="Copy and paste the job description for your job posting..."
+                                    required
+                                    onChange={(e) => setJobDescriptionDump(e.target.value)}
+                                />
+                                <TextInput
+                                    label="Optional Writing Sample"
+                                    name="writingSample"
+                                    type="textarea"
+                                    textAreaRows={16}
+                                    value={writingSample}
+                                    isInInputForm={true}
+                                    placeholder="Enter an optional writing sample for the agent to match its writing style to..."
+                                    onChange={(e) => setWritingSample(e.target.value)}
+                                />
+                            </div>
                         </div>
                     </>
                 )}
 
                 {/* ------------------- REVISION UI ------------------- */}
                 {!loading && draft && conversationId && (
-                    <div className={styles.inputsContainer}>
-                        <TextInput
-                            label="Generated Cover Letter"
-                            name="draft"
-                            type="textarea"
-                            textAreaRows={18}
-                            value={draft}
-                            onChange={() => { }}
-                            isInInputForm={true}
-                            placeholder="Generated cover letter draft"
-                            disabled
-                        />
+                    <div className={styles.reviseContainer}>
+                        <div className={styles.pdfPreviewContainer}>
+                            {pdfPreviewUrl ? (
+                                <iframe
+                                    src={pdfPreviewUrl}
+                                    title="Cover Letter PDF Preview"
+                                    className={styles.pdfIframe}
+                                />
+                            ) : draft ? (
+                                <TextInput
+                                    label="Cover Letter Draft"
+                                    name="draft"
+                                    type="textarea"
+                                    textAreaRows={16}
+                                    value={draft}
+                                    isInInputForm={true}
+                                    onChange={() => { }}
+                                    disabled
+                                />
+                            ) : (
+                                <p>Error displaying cover letter draft.</p>
+                            )}
+                        </div>
+
                         <TextInput
                             label="Your Feedback"
                             name="feedback"
