@@ -118,13 +118,24 @@ export default function BillingPage() {
 
             const { url } = await postJson<{ url: string }>("/api/internal/stripe/checkout", {
                 priceId,
-                // returnTo: window.location.pathname + window.location.search, // optional if you implement it
             });
 
             window.location.assign(url);
         } catch (e) {
             const err = e as Error;
             toast.error("Error", err.message ?? "Failed to start checkout.");
+            setActionLoading(null);
+        }
+    };
+
+    const openPortal = async () => {
+        setActionLoading("portal");
+        try {
+            const { url } = await postJson<{ url: string }>("/api/internal/stripe/portal");
+            window.location.assign(url);
+        } catch (e) {
+            const err = e as Error;
+            toast.error("Error", err.message ?? "Failed to open billing portal.");
             setActionLoading(null);
         }
     };
@@ -139,6 +150,13 @@ export default function BillingPage() {
                 </div>
 
                 <div className={styles.buttons}>
+                    <ButtonOne
+                        onClick={openPortal}
+                        disabled={actionLoading !== null}
+                    >
+                        Manage billing
+                    </ButtonOne>
+
                     {
                         selectedInterval === "monthly" ?
                             <ButtonOne
@@ -178,7 +196,7 @@ export default function BillingPage() {
                     tier="free"
                     title="Free plan"
                     titleIcon={Landmark}
-                    subtitle="Best for small portfolio websites"
+                    subtitle="Default plan for small portfolios"
                     price="0"
                     billingInterval={selectedInterval}
                     benefits={["1 free API key", "Weekly performance stats", "1 free AI generation"]}
@@ -186,6 +204,8 @@ export default function BillingPage() {
                     isLoading={loading}
                     disabled={loading}
                     active={sub?.tier === "free"}
+                    onPortal={openPortal}
+                    currentTier={sub?.tier ?? "free"}
                 />
 
                 <SubscriptionCard
@@ -200,6 +220,8 @@ export default function BillingPage() {
                     isLoading={loading}
                     disabled={loading}
                     active={sub?.tier === "developer"}
+                    onPortal={openPortal}
+                    currentTier={sub?.tier ?? "developer"}
                 />
 
                 <SubscriptionCard
@@ -214,6 +236,8 @@ export default function BillingPage() {
                     isLoading={loading}
                     disabled={loading}
                     active={sub?.tier === "premium"}
+                    onPortal={openPortal}
+                    currentTier={sub?.tier ?? "premium"}
                 />
             </div>
         </div>

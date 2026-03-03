@@ -5,6 +5,10 @@ import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 type Body = { priceId: string };
 
+function isPaidStatus(status: string | null | undefined) {
+  return status === "active" || status === "trialing";
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { priceId } = (await req.json()) as Body;
@@ -27,7 +31,7 @@ export async function POST(req: NextRequest) {
     // Look up stripe_customer_id from subscriptions (single-table approach)
     const { data: subRow, error: subErr } = await supabase
       .from("subscriptions")
-      .select("stripe_customer_id")
+      .select("stripe_customer_id, status")
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -62,6 +66,20 @@ export async function POST(req: NextRequest) {
     }
 
     const appUrl = process.env.NEXT_PUBLIC_SITE_URL!;
+
+    // Prevent multiple subscriptions - send to portal if existing sub
+    if (isPaidStatus(subRow?.status)) {
+      const portal = await stripe.billingPortal.sessions.create({
+        customer: stripeCustomerId,
+        return_url: `${appUrl}/user/settings/billing`,
+      });
+
+      return NextResponse.json(
+        { url: portal.url, mode: "portal" },
+        { status: 200 },
+      );
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: stripeCustomerId,
