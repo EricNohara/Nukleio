@@ -1,3 +1,5 @@
+import { MatchBreakdown } from "@/app/components/Chart/MatchBreakdownChart";
+
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function getJobCacheKey(jobTitle: string, companyName: string) {
@@ -10,12 +12,14 @@ export function cacheDraft(
   companyName: string,
   draft: string,
   conversationId: string,
+  skillsMatchScore: MatchBreakdown,
 ) {
   const key = getJobCacheKey(jobTitle, companyName);
 
   const data = {
     draft,
     conversationId,
+    skillsMatchScore,
     timestamp: Date.now(),
   };
 
@@ -29,7 +33,11 @@ export function cacheDraft(
 export function loadCachedDraft(
   jobTitle: string,
   companyName: string,
-): { draft: string; conversationId: string } | null {
+): {
+  draft: string;
+  conversationId: string;
+  skillsMatchScore: MatchBreakdown;
+} | null {
   const key = getJobCacheKey(jobTitle, companyName);
   const raw = localStorage.getItem(key);
 
@@ -47,6 +55,7 @@ export function loadCachedDraft(
     return {
       draft: data.draft,
       conversationId: data.conversationId,
+      skillsMatchScore: data.skillsMatchScore,
     };
   } catch {
     localStorage.removeItem(key);

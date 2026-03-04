@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 
 import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
+import MatchBreakdownChart, { MatchBreakdown } from "@/app/components/Chart/MatchBreakdownChart";
 import LoadingMessageSpinner from "@/app/components/LoadingMessageSpinner/LoadingMessageSpinner";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import TextInput from "@/app/components/TextInput/TextInput";
@@ -21,6 +22,7 @@ export default function CoverLetterPage() {
     const [writingSample, setWritingSample] = useState<string>("");
     const [conversationId, setConversationId] = useState<string>("");
     const [draft, setDraft] = useState<string>("");
+    const [matchBreakdown, setMatchBreakdown] = useState<MatchBreakdown | null>(null);
     const [feedback, setFeedback] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [mode, setMode] = useState<"initial" | "revision">("initial");
@@ -137,6 +139,7 @@ export default function CoverLetterPage() {
                     setTimeout(async () => {
                         setDraft(cached.draft);
                         setConversationId(cached.conversationId);
+                        setMatchBreakdown(cached.skillsMatchScore);
                         setFeedback("");
 
                         // load the pdf preview
@@ -178,8 +181,9 @@ export default function CoverLetterPage() {
 
                     setDraft(data.currentDraft);
                     setConversationId(data.conversationId);
+                    setMatchBreakdown(data.skillsMatchScore);
                     setFeedback("");
-                    cacheDraft(jobTitle, companyName, data.currentDraft, data.conversationId);
+                    cacheDraft(jobTitle, companyName, data.currentDraft, data.conversationId, data.skillsMatchScore);
 
                     try {
                         await generatePdfAndPreview({
@@ -349,16 +353,27 @@ export default function CoverLetterPage() {
                             )}
                         </div>
 
-                        <TextInput
-                            label="Your Feedback"
-                            name="feedback"
-                            type="textarea"
-                            textAreaRows={6}
-                            value={feedback}
-                            isInInputForm={true}
-                            placeholder="Enter your feedback"
-                            onChange={(e) => setFeedback(e.target.value)}
-                        />
+                        {/* Skills match score bar */}
+                        <div className={styles.reviseRightContainer}>
+                            <div className={styles.jobMatchContainer}>
+                                <p className={styles.jobMatchLabel}>Job Match Breakdown</p>
+                                <MatchBreakdownChart
+                                    breakdown={matchBreakdown}
+                                    height={400}
+                                />
+                            </div>
+
+                            <TextInput
+                                label="Your Feedback"
+                                name="feedback"
+                                type="textarea"
+                                textAreaRows={8}
+                                value={feedback}
+                                isInInputForm={true}
+                                placeholder="Enter your feedback"
+                                onChange={(e) => setFeedback(e.target.value)}
+                            />
+                        </div>
                     </div>
                 )}
             </div>
