@@ -85,11 +85,12 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  align-items: center;
 }
 
 .cacheDropdown {
   width: 300px;
-  padding: 0.6rem 0.75rem;
+  padding: 0.5rem 1rem;
   border-radius: var(--global-border-radius);
   border: 1.5px solid var(--page-box-border);
   background: var(--page-box-bg);
@@ -98,6 +99,6 @@
 }
 
 .cacheDropdown:disabled {
-  opacity: 0.6;
+  color: var(--page-txt-2);
   cursor: not-allowed;
 }

@@ -24,7 +24,7 @@ export default function CoverLetterPage() {
     const [skillsMatchScore, setSkillsMatchScore] = useState<ISkillsMatchScore | null>(null);
     const [feedback, setFeedback] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
-    const [mode, setMode] = useState<"initial" | "revision">("initial");
+    const [mode, setMode] = useState<"initial" | "revision" | "cache">("initial");
     const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string>("");
 
     // cached cover letter state
@@ -77,7 +77,7 @@ export default function CoverLetterPage() {
         if (!convoId) return;
 
         setLoading(true);
-        setMode("initial");
+        setMode("cache");
 
         try {
             const res = await fetch(
@@ -107,12 +107,7 @@ export default function CoverLetterPage() {
 
             // Load PDF preview from latest draft (no download)
             try {
-                await generatePdfAndPreview({
-                    convoId: latest.conversation_id,
-                    nextFeedback: "",
-                    finalLetter: latest.draft,
-                    shouldDownload: false,
-                });
+                await generatePdfAndPreview(latest.draft);
             } catch {
                 // non-fatal: can still show textarea
             }
@@ -127,29 +122,11 @@ export default function CoverLetterPage() {
     };
 
     // Helper: generate a PDF from current draft (or a provided finalLetter), update preview, optionally download
-    const generatePdfAndPreview = async ({
-        convoId,
-        nextFeedback,
-        finalLetter,
-        shouldDownload,
-    }: {
-        convoId: string;
-        nextFeedback: string;
-        finalLetter?: string;
-        shouldDownload: boolean;
-    }) => {
-        // eslint-disable-next-line
-        const payload: Record<string, any> = {
-            conversationId: convoId,
-            feedback: nextFeedback,
-        };
-
-        if (typeof finalLetter === "string") payload.finalLetter = finalLetter;
-
-        const res = await fetch("/api/internal/user/coverLetter", {
-            method: "PUT",
+    const generatePdfAndPreview = async (draft: string) => {
+        const res = await fetch("/api/internal/user/coverLetter/pdf", {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ draft }),
         });
 
         if (!res.ok) throw new Error("PDF generation failed");
@@ -163,15 +140,6 @@ export default function CoverLetterPage() {
             if (prev) URL.revokeObjectURL(prev);
             return pdfUrl;
         });
-
-        if (shouldDownload) {
-            const a = document.createElement("a");
-            a.href = pdfUrl;
-            a.download = "cover_letter.pdf";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        }
     };
 
     const handleGenerate = async () => {
@@ -183,13 +151,20 @@ export default function CoverLetterPage() {
 
                 // REVISION MODE: generates PDF, updates preview, downloads
                 try {
-                    const shouldSendFinalLetter = feedback.trim() === "";
-                    await generatePdfAndPreview({
-                        convoId: conversationId,
-                        nextFeedback: feedback,
-                        finalLetter: shouldSendFinalLetter ? draft : undefined,
-                        shouldDownload: true,
-                    });
+                    // perform the revision
+                    const payload = {
+                        conversationId,
+                        feedback
+                    }
+                    const res = await fetch("/api/internal/user/coverLetter",
+                        { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }
+                    );
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.errpr ?? "Error revising the draft");
+                    const revisedDraft: string = data.revisedDraft;
+
+                    // generate the pdf from the new draft
+                    await generatePdfAndPreview(revisedDraft);
 
                     toast.success("Success", "Successfully generated cover letter PDF with your revision.");
                 } catch {
@@ -241,14 +216,10 @@ export default function CoverLetterPage() {
                     setFeedback("");
 
                     try {
-                        await generatePdfAndPreview({
-                            convoId: data.conversationId,
-                            nextFeedback: "",
-                            finalLetter: data.currentDraft,
-                            shouldDownload: false,
-                        });
+                        // generate the pdf
+                        await generatePdfAndPreview(data.currentDraft);
                     } catch {
-
+                        toast.error("Error loading PDF preview.")
                     }
 
                     toast.success(
@@ -268,6 +239,8 @@ export default function CoverLetterPage() {
         name: draft.length > 0 ? "Revise Draft" : "Generate",
         onClick: handleGenerate,
         isAsync: true,
+        disabled: loading,
+        isLoading: loading
     };
 
     const backButton: IButton = {
@@ -281,7 +254,6 @@ export default function CoverLetterPage() {
             setFeedback("");
             setConversationId("");
             setSelectedConversationId("");
-
             setPdfPreviewUrl((prev) => {
                 if (prev) URL.revokeObjectURL(prev);
                 return "";
@@ -314,13 +286,13 @@ export default function CoverLetterPage() {
                                     "Executing feedback loop...",
                                     "Formatting output...",
                                 ]
-                                : [
+                                : mode === "revision" ? [
                                     "Analyzing your feedback...",
                                     "Revising draft...",
                                     "Evaluating improvements...",
                                     "Generating PDF...",
                                     "Finalizing output...",
-                                ]
+                                ] : ["Loading from cache..."]
                         }
                         interval={mode === "initial" ? 3000 : 1000}
                     />

@@ -6,7 +6,6 @@ import {
 } from "@/app/interfaces/ICachedCoverLetter";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 import { requireTier } from "@/utils/auth/requireTier";
-import { generateCoverLetterPdf } from "@/utils/coverLetter/generateCoverLetterPdf";
 import { createClient } from "@/utils/supabase/server";
 
 export const runtime = "nodejs";
@@ -215,8 +214,6 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const pdfBuffer = await generateCoverLetterPdf(revisedDraft);
-
     // insert into cached_cover_letters table
     const supabase = await createClient();
 
@@ -265,14 +262,8 @@ export async function PUT(req: NextRequest) {
       if (error) throw new Error(`DB insert failed: ${error.message}`);
     }
 
-    return new NextResponse(new Uint8Array(pdfBuffer), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": 'inline; filename="cover_letter.pdf"',
-        "Cache-Control": "no-store",
-      },
-    });
+    // just return the draft as a string
+    return NextResponse.json(revisedDraft, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
