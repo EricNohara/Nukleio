@@ -19,6 +19,7 @@
 
 .subtitle {
   color: var(--page-txt-2);
+  margin: 0;
 }
 
 .textAreasContainer {
@@ -77,4 +78,26 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+/* cache dropdown page */
+.formHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.cacheDropdown {
+  width: 300px;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--global-border-radius);
+  border: 1.5px solid var(--page-box-border);
+  background: var(--page-box-bg);
+  color: var(--page-txt-1);
+  outline: none;
+}
+
+.cacheDropdown:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
