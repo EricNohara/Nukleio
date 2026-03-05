@@ -102,3 +102,7 @@
   color: var(--page-txt-2);
   cursor: not-allowed;
 }
+
+.dropdownContainer {
+  width: 400px;
+}

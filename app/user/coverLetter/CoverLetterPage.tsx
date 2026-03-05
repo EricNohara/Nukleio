@@ -6,6 +6,7 @@ import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/L
 import MatchBreakdownChart from "@/app/components/Chart/MatchBreakdownChart";
 import LoadingMessageSpinner from "@/app/components/LoadingMessageSpinner/LoadingMessageSpinner";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
+import SelectDropdown from "@/app/components/SelectDropdown/SelectDropdown";
 import TextInput from "@/app/components/TextInput/TextInput";
 import { hasTier, useTier } from "@/app/context/TierProvider";
 import { useToast } from "@/app/context/ToastProvider";
@@ -30,7 +31,8 @@ export default function CoverLetterPage() {
     // cached cover letter state
     const [cachedList, setCachedList] = useState<ICachedConversationListItem[]>([]);
     const [cachedListLoading, setCachedListLoading] = useState(false);
-    const [selectedConversationId, setSelectedConversationId] = useState<string>("");
+    const [coverLetterVersions, setCoverLetterVersions] = useState<ICachedCoverLetter[]>([]);
+    const [selectedDraftName, setSelectedDraftName] = useState<string>("");
 
     const toast = useToast();
 
@@ -88,10 +90,12 @@ export default function CoverLetterPage() {
 
             const rows = (Array.isArray(data?.items) ? data.items : []) as ICachedCoverLetter[];
             if (!rows.length) throw new Error("No drafts found for this conversation");
+            setCoverLetterVersions(rows);
 
             // rows are ordered created_at asc per your GET
             const latest = rows[rows.length - 1];
 
+            setSelectedDraftName(latest.draft_name);
             setConversationId(latest.conversation_id);
             setDraft(latest.draft);
             setSkillsMatchScore({
@@ -103,7 +107,6 @@ export default function CoverLetterPage() {
                 overall: Number(latest.overall_score),
             });
             setFeedback("");
-            setSelectedConversationId(latest.conversation_id);
 
             // Load PDF preview from latest draft (no download)
             try {
@@ -116,6 +119,48 @@ export default function CoverLetterPage() {
             setMode("revision");
         } catch {
             toast.error("Error", "Failed to load cached cover letter.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadCachedCoverLetterByName = async (draftName: string) => {
+        if (!draftName) return;
+
+        const version = coverLetterVersions.find((v) => v.draft_name === draftName);
+        if (!version || !version.draft?.trim()) {
+            toast.error("Error", "Failed to load requested cover letter version.");
+            return;
+        }
+
+        setLoading(true);
+        setMode("cache");
+
+        try {
+            setConversationId(version.conversation_id);
+            setDraft(version.draft);
+            setSelectedDraftName(version.draft_name);
+
+            setSkillsMatchScore({
+                education: Number(version.education_score),
+                experience: Number(version.experience_score),
+                skills: Number(version.skills_score),
+                projects: Number(version.projects_score),
+                location: Number(version.location_score),
+                overall: Number(version.overall_score),
+            });
+            setFeedback("");
+
+            try {
+                await generatePdfAndPreview(version.draft);
+            } catch {
+                // non-fatal
+            }
+
+            toast.success("Success", `Loaded cover letter version: ${version.draft_name}.`);
+            setMode("revision");
+        } catch {
+            toast.error("Error", "Failed to load requested cover letter version.");
         } finally {
             setLoading(false);
         }
@@ -253,7 +298,6 @@ export default function CoverLetterPage() {
             setDraft("");
             setFeedback("");
             setConversationId("");
-            setSelectedConversationId("");
             setPdfPreviewUrl((prev) => {
                 if (prev) URL.revokeObjectURL(prev);
                 return "";
@@ -264,7 +308,7 @@ export default function CoverLetterPage() {
     return (
         <PageContentWrapper>
             <PageContentHeader
-                title="Cover Letter Generation"
+                title={selectedDraftName ? selectedDraftName : "Cover Letter Generation"}
                 buttonOne={canAccess ? buttonOne : undefined}
                 buttonFour={draft.length > 0 ? backButton : null}
             />
@@ -309,35 +353,31 @@ export default function CoverLetterPage() {
                     <>
                         <div className={styles.formHeader}>
                             <p className={styles.subtitle}>Generate a cover letter tailored to your personal data.</p>
-                            {/* put the cache selection dropdown here */}
-                            <select
-                                className={styles.cacheDropdown}
-                                value={selectedConversationId}
-                                onChange={async (e) => {
-                                    const id = e.target.value;
-                                    setSelectedConversationId(id);
-                                    if (id) await loadCachedConversation(id);
-                                }}
-                                disabled={cachedListLoading || cachedList.length === 0}
-                            >
-                                <option value="">
-                                    {cachedListLoading
-                                        ? "Loading cached cover letters..."
-                                        : cachedList.length === 0
-                                            ? "No cached cover letters"
-                                            : "Select a cached cover letter..."}
-                                </option>
-
-                                {cachedList.map((item) => {
-                                    const label = `${item.job_title ?? "Untitled"} @ ${item.company_name ?? "Unknown"}`;
-
-                                    return (
-                                        <option key={item.conversation_id} value={item.conversation_id}>
-                                            {label}
-                                        </option>
-                                    );
-                                })}
-                            </select>
+                            <div className={styles.dropdownContainer}>
+                                <SelectDropdown
+                                    value={conversationId}
+                                    options={[
+                                        ...cachedList.map((item) => ({
+                                            value: item.conversation_id,
+                                            label: `${item.job_title ?? "Untitled"} @ ${item.company_name ?? "Unknown"}`
+                                        })),
+                                    ]}
+                                    loading={cachedListLoading}
+                                    disabled={cachedList.length === 0}
+                                    placeholder={
+                                        cachedListLoading
+                                            ? "Loading cached cover letters..."
+                                            : cachedList.length === 0
+                                                ? "No cached cover letters"
+                                                : "Select a cached cover letter..."
+                                    }
+                                    ariaLabel="Cached cover letters"
+                                    onChange={async (id) => {
+                                        setConversationId(id);
+                                        if (id) await loadCachedConversation(id);
+                                    }}
+                                />
+                            </div>
                         </div>
 
                         <div className={styles.inputsContainer}>
@@ -412,13 +452,39 @@ export default function CoverLetterPage() {
                             )}
                         </div>
 
-                        {/* Skills match score bar */}
                         <div className={styles.reviseRightContainer}>
+                            <div className={styles.jobMatchContainer}>
+                                <p className={styles.jobMatchLabel}>Revision History</p>
+                                <SelectDropdown
+                                    value={selectedDraftName}
+                                    options={[
+                                        ...coverLetterVersions.map((v) => ({
+                                            value: v.draft_name,
+                                            label: v.draft_name
+                                        })),
+                                    ]}
+                                    loading={loading}
+                                    disabled={coverLetterVersions.length === 0}
+                                    placeholder={
+                                        loading
+                                            ? "Loading revision versions..."
+                                            : coverLetterVersions.length === 0
+                                                ? "No revision versions"
+                                                : "Select a revision version..."
+                                    }
+                                    ariaLabel="Cover letter revision versions"
+                                    onChange={async (name) => {
+                                        setSelectedDraftName(name);
+                                        if (name) await loadCachedCoverLetterByName(name);
+                                    }}
+                                />
+                            </div>
+
                             <div className={styles.jobMatchContainer}>
                                 <p className={styles.jobMatchLabel}>Job Match Breakdown</p>
                                 <MatchBreakdownChart
                                     breakdown={skillsMatchScore}
-                                    height={400}
+                                    height={300}
                                 />
                             </div>
 
@@ -426,7 +492,7 @@ export default function CoverLetterPage() {
                                 label="Your Feedback"
                                 name="feedback"
                                 type="textarea"
-                                textAreaRows={8}
+                                textAreaRows={9}
                                 value={feedback}
                                 isInInputForm={true}
                                 placeholder="Enter your feedback"
