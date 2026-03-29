@@ -1,0 +1,117 @@
+.root {
+  position: relative;
+  width: 100%; /* you can override by wrapping or passing className */
+}
+
+/* Trigger (closed control) */
+.trigger {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: var(--global-border-radius);
+  border: 1.5px solid var(--page-box-border);
+  background: var(--page-box-bg);
+  color: var(--page-txt-1);
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.triggerOpen {
+  border-radius: var(--global-border-radius) var(--global-border-radius) 0 0;
+}
+
+.trigger:disabled {
+  color: var(--page-txt-2);
+  cursor: not-allowed;
+}
+
+.triggerText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Chevron styling */
+.chevron {
+  display: grid;
+  place-items: center;
+  transition: transform 120ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.chevronIcon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Popover panel */
+.popover {
+  position: absolute;
+  z-index: 50;
+  width: 100%;
+  border-radius: 0 0 var(--global-border-radius) var(--global-border-radius);
+  border: 1.5px solid var(--page-box-border);
+  border-top: none;
+  background: var(--page-box-bg);
+  overflow: hidden;
+}
+
+/* List + Items (fully stylable) */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem;
+  padding-top: 0;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.item {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--global-border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--page-txt-1);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: 0.1s ease;
+}
+
+/* hover */
+.item:hover {
+  background: var(--popup-hover);
+}
+
+/* keyboard focus */
+.item:focus-visible {
+  background: var(--popup-hover);
+}
+
+/* selected */
+.item[data-selected="true"] {
+  background: var(--btn-1);
+  font-weight: bold;
+}
+
+/* disabled option */
+.item[data-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.itemLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

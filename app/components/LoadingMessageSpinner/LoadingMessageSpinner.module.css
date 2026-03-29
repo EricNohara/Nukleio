@@ -15,6 +15,7 @@
   animation: fadeIn 0.4s ease;
   max-width: 280px;
   line-height: 1.4;
+  color: var(--page-txt-1);
 }
 
 @keyframes fadeIn {

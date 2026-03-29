@@ -10,7 +10,7 @@ export default function UserSettingsPage() {
     return (
         <PageContentWrapper>
             <PageContentHeader title="Settings" />
-            <SettingsContentWithNav activeSetting="User Settings">
+            <SettingsContentWithNav activeSetting="User">
                 <EditUserForm />
             </SettingsContentWithNav>
         </PageContentWrapper>

@@ -100,7 +100,7 @@ export default function ProjectsPage() {
 
         // For CSV fields
         if (["languages_used", "frameworks_used", "technologies_used"].includes(name)) {
-            setFormValues(prev => ({ ...prev, [name]: value.split(",").map(v => v.trim()) }));
+            setFormValues(prev => ({ ...prev, [name]: value.split(",").map(v => v.trim()).filter(Boolean) }));
         } else {
             setFormValues(prev => ({ ...prev, [name]: value }));
         }

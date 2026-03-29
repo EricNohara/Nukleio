@@ -10,7 +10,7 @@ export default function AppSettingsPage() {
     return (
         <PageContentWrapper>
             <PageContentHeader title="Settings" />
-            <SettingsContentWithNav activeSetting="App Settings">
+            <SettingsContentWithNav activeSetting="App">
                 <EditAppForm />
             </SettingsContentWithNav>
         </PageContentWrapper>

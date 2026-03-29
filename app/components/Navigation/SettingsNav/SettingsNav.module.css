@@ -15,11 +15,17 @@
 }
 
 .navItem {
-  padding: 1rem;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  margin-right: 1rem;
   color: var(--search-txt);
   font-weight: bold;
+  border-radius: var(--global-border-radius);
 
   transition: 0.2s ease;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }
 
 .navItem:hover {
@@ -30,8 +36,13 @@
 }
 
 .activeItem {
-  background-color: var(--popup-hover);
-  color: var(--page-txt-1);
+  background-color: var(--btn-1);
+  color: white;
+}
+
+.activeItem:hover {
+  background-color: var(--btn-1);
+  color: white;
 }
 
 /* settings content container */
