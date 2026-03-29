@@ -156,6 +156,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       );
 
       const cleanedEducation = {
+        id: education.id,
         degree: education.degree,
         majors: education.majors,
         minors: education.minors,
