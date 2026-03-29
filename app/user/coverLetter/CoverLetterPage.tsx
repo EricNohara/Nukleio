@@ -194,6 +194,12 @@ export default function CoverLetterPage() {
                 setMode("revision");
                 setLoading(true);
 
+                if (!feedback.trim()) {
+                    toast.info("Please input feedback before revising.")
+                    setLoading(false);
+                    return;
+                }
+
                 // REVISION MODE: generates PDF, updates preview, downloads
                 try {
                     // perform the revision
@@ -219,7 +225,10 @@ export default function CoverLetterPage() {
                 }
             } else {
                 // GENERATION MODE
-                if (!jobTitle || !companyName || !jobDescriptionDump) return;
+                if (!jobTitle || !companyName || !jobDescriptionDump) {
+                    toast.info("Please fill out required fields.")
+                    return;
+                }
 
                 setMode("initial");
                 setLoading(true);
@@ -308,7 +317,7 @@ export default function CoverLetterPage() {
     return (
         <PageContentWrapper>
             <PageContentHeader
-                title={selectedDraftName ? selectedDraftName : "Cover Letter Generation"}
+                title={selectedDraftName ? selectedDraftName : "Cover Letter Generator"}
                 buttonOne={canAccess ? buttonOne : undefined}
                 buttonFour={draft.length > 0 ? backButton : null}
             />
@@ -496,6 +505,7 @@ export default function CoverLetterPage() {
                                 value={feedback}
                                 isInInputForm={true}
                                 placeholder="Enter your feedback"
+                                required
                                 onChange={(e) => setFeedback(e.target.value)}
                             />
                         </div>
