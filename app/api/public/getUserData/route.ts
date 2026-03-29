@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 
 import IPublicApiLog from "@/app/interfaces/IPublicApiLog";
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       statusCode = 401;
       return NextResponse.json(
         { message: "Unauthorized" },
-        { status: statusCode }
+        { status: statusCode },
       );
     }
 
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       statusCode = 404;
       return NextResponse.json(
         { message: "User API key not found" },
-        { status: statusCode }
+        { status: statusCode },
       );
     }
 
@@ -53,7 +54,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             message:
               "X-Target-User-Id header is required for Nukleio Super Key",
           },
-          { status: statusCode }
+          { status: statusCode },
         );
       }
       userId = queryUserId;
@@ -64,7 +65,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         statusCode = 401;
         return NextResponse.json(
           { message: "Unauthorized" },
-          { status: statusCode }
+          { status: statusCode },
         );
       }
 
@@ -74,7 +75,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         statusCode = 401;
         return NextResponse.json(
           { message: "Unauthorized" },
-          { status: statusCode }
+          { status: statusCode },
         );
       }
 
@@ -83,7 +84,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         statusCode = 404;
         return NextResponse.json(
           { message: "User id not found" },
-          { status: statusCode }
+          { status: statusCode },
         );
       }
     }
@@ -96,7 +97,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     if (userDataError) throw userDataError;
 
-    const cleanedUserData = userData.map(({ _id, ...rest }) => rest)[0];
+    const cleanedUserData = userData.map(({ id, ...rest }) => rest)[0];
 
     // skills
     const { data: userSkills, error: userSkillsError } = await supabase
@@ -106,7 +107,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     if (userSkillsError) throw userSkillsError;
 
-    const cleanedUserSkills = userSkills.map(({ _user_id, ...rest }) => rest);
+    const cleanedUserSkills = userSkills.map(({ user_id, ...rest }) => rest);
 
     // experiences
     const { data: userExperience, error: userExperienceError } = await supabase
@@ -117,7 +118,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (userExperienceError) throw userExperienceError;
 
     const cleanedUserExperience = userExperience.map(
-      ({ _user_id, ...rest }) => rest
+      ({ user_id, ...rest }) => rest,
     );
 
     // projects
@@ -128,9 +129,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     if (userProjectError) throw userProjectError;
 
-    const cleanedUserProjects = userProject.map(
-      ({ _id, _user_id, ...rest }) => rest
-    );
+    const cleanedUserProjects = userProject.map(({ user_id, ...rest }) => rest);
 
     // education + courses
     const { data: userEducation, error: userEducationError } = await supabase
@@ -153,7 +152,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       if (educationCoursesError) throw educationCoursesError;
 
       const cleanedEducationCourses = educationCourses.map(
-        ({ _education_id, _user_id, ...rest }) => rest
+        ({ education_id, user_id, ...rest }) => rest,
       );
 
       const cleanedEducation = {
@@ -195,7 +194,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           "Access-Control-Allow-Headers":
             "Authorization, User-Email, Content-Type, Accept",
         },
-      }
+      },
     );
   } catch (err) {
     const error = err as Error;
@@ -212,7 +211,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           "Access-Control-Allow-Headers":
             "Authorization, User-Email, Content-Type, Accept",
         },
-      }
+      },
     );
   } finally {
     // add a log and update last used field for api key if we know the user id
