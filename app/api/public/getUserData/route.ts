@@ -89,104 +89,62 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       }
     }
 
-    // get and clean information to add to the userInfo super object that is returned to the user
-    const { data: userData, error: userDataError } = await supabase
-      .from("users")
-      .select()
-      .eq("id", userId);
+    // Try the cached supabase table first and return if hit
+    const { data: cachedRow, error: cachedError } = await supabase
+      .from("cached_user_info")
+      .select("payload")
+      .eq("user_id", userId)
+      .maybeSingle();
 
-    if (userDataError) throw userDataError;
-
-    const cleanedUserData = userData.map(({ id, ...rest }) => rest)[0];
-
-    // skills
-    const { data: userSkills, error: userSkillsError } = await supabase
-      .from("skills")
-      .select()
-      .eq("user_id", userId);
-
-    if (userSkillsError) throw userSkillsError;
-
-    const cleanedUserSkills = userSkills.map(({ user_id, ...rest }) => rest);
-
-    // experiences
-    const { data: userExperience, error: userExperienceError } = await supabase
-      .from("work_experiences")
-      .select()
-      .eq("user_id", userId);
-
-    if (userExperienceError) throw userExperienceError;
-
-    const cleanedUserExperience = userExperience.map(
-      ({ user_id, ...rest }) => rest,
-    );
-
-    // projects
-    const { data: userProject, error: userProjectError } = await supabase
-      .from("projects")
-      .select()
-      .eq("user_id", userId);
-
-    if (userProjectError) throw userProjectError;
-
-    const cleanedUserProjects = userProject.map(({ user_id, ...rest }) => rest);
-
-    // education + courses
-    const { data: userEducation, error: userEducationError } = await supabase
-      .from("education")
-      .select()
-      .eq("user_id", userId);
-
-    if (userEducationError) throw userEducationError;
-
-    const userEducationWithCourses: IUserEducation[] = [];
-
-    for (const education of userEducation) {
-      const { data: educationCourses, error: educationCoursesError } =
-        await supabase
-          .from("course")
-          .select()
-          .eq("user_id", userId)
-          .eq("education_id", education.id);
-
-      if (educationCoursesError) throw educationCoursesError;
-
-      const cleanedEducationCourses = educationCourses.map(
-        ({ education_id, user_id, ...rest }) => rest,
-      );
-
-      const cleanedEducation = {
-        id: education.id,
-        degree: education.degree,
-        majors: education.majors,
-        minors: education.minors,
-        gpa: education.gpa,
-        institution: education.institution,
-        awards: education.awards,
-        year_start: education.year_start,
-        year_end: education.year_end,
-      };
-
-      const educationWithCourses = {
-        ...cleanedEducation,
-        courses: cleanedEducationCourses,
-      };
-
-      userEducationWithCourses.push(educationWithCourses);
+    if (cachedError) {
+      throw cachedError;
     }
 
-    // construct the super object
-    const userInfo: IUserInfo = {
-      ...cleanedUserData,
-      skills: cleanedUserSkills,
-      experiences: cleanedUserExperience,
-      projects: cleanedUserProjects,
-      education: userEducationWithCourses,
-    };
+    if (cachedRow?.payload) {
+      statusCode = 200;
+      return NextResponse.json(
+        { userInfo: cachedRow.payload },
+        {
+          status: statusCode,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET,OPTIONS",
+            "Access-Control-Allow-Headers":
+              "Authorization, User-Email, Content-Type, Accept",
+          },
+        },
+      );
+    }
+
+    // Cache miss: build once and return without updating the cache table
+    const { data: builtPayload, error: buildError } = await supabase.rpc(
+      "build_cached_user_info",
+      { p_user_id: userId },
+    );
+
+    if (buildError) {
+      throw buildError;
+    }
+
+    if (!builtPayload) {
+      statusCode = 404;
+      return NextResponse.json(
+        { message: "User info not found" },
+        {
+          status: statusCode,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET,OPTIONS",
+            "Access-Control-Allow-Headers":
+              "Authorization, User-Email, Content-Type, Accept",
+          },
+        },
+      );
+    }
 
     statusCode = 200;
     return NextResponse.json(
-      { userInfo },
+      { userInfo: builtPayload },
       {
         status: statusCode,
         headers: {
@@ -197,6 +155,115 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         },
       },
     );
+
+    // // get and clean information to add to the userInfo super object that is returned to the user
+    // const { data: userData, error: userDataError } = await supabase
+    //   .from("users")
+    //   .select()
+    //   .eq("id", userId);
+
+    // if (userDataError) throw userDataError;
+
+    // const cleanedUserData = userData.map(({ id, ...rest }) => rest)[0];
+
+    // // skills
+    // const { data: userSkills, error: userSkillsError } = await supabase
+    //   .from("skills")
+    //   .select()
+    //   .eq("user_id", userId);
+
+    // if (userSkillsError) throw userSkillsError;
+
+    // const cleanedUserSkills = userSkills.map(({ user_id, ...rest }) => rest);
+
+    // // experiences
+    // const { data: userExperience, error: userExperienceError } = await supabase
+    //   .from("work_experiences")
+    //   .select()
+    //   .eq("user_id", userId);
+
+    // if (userExperienceError) throw userExperienceError;
+
+    // const cleanedUserExperience = userExperience.map(
+    //   ({ user_id, ...rest }) => rest,
+    // );
+
+    // // projects
+    // const { data: userProject, error: userProjectError } = await supabase
+    //   .from("projects")
+    //   .select()
+    //   .eq("user_id", userId);
+
+    // if (userProjectError) throw userProjectError;
+
+    // const cleanedUserProjects = userProject.map(({ user_id, ...rest }) => rest);
+
+    // // education + courses
+    // const { data: userEducation, error: userEducationError } = await supabase
+    //   .from("education")
+    //   .select()
+    //   .eq("user_id", userId);
+
+    // if (userEducationError) throw userEducationError;
+
+    // const userEducationWithCourses: IUserEducation[] = [];
+
+    // for (const education of userEducation) {
+    //   const { data: educationCourses, error: educationCoursesError } =
+    //     await supabase
+    //       .from("course")
+    //       .select()
+    //       .eq("user_id", userId)
+    //       .eq("education_id", education.id);
+
+    //   if (educationCoursesError) throw educationCoursesError;
+
+    //   const cleanedEducationCourses = educationCourses.map(
+    //     ({ education_id, user_id, ...rest }) => rest,
+    //   );
+
+    //   const cleanedEducation = {
+    //     id: education.id,
+    //     degree: education.degree,
+    //     majors: education.majors,
+    //     minors: education.minors,
+    //     gpa: education.gpa,
+    //     institution: education.institution,
+    //     awards: education.awards,
+    //     year_start: education.year_start,
+    //     year_end: education.year_end,
+    //   };
+
+    //   const educationWithCourses = {
+    //     ...cleanedEducation,
+    //     courses: cleanedEducationCourses,
+    //   };
+
+    //   userEducationWithCourses.push(educationWithCourses);
+    // }
+
+    // // construct the super object
+    // const userInfo: IUserInfo = {
+    //   ...cleanedUserData,
+    //   skills: cleanedUserSkills,
+    //   experiences: cleanedUserExperience,
+    //   projects: cleanedUserProjects,
+    //   education: userEducationWithCourses,
+    // };
+
+    // statusCode = 200;
+    // return NextResponse.json(
+    //   { userInfo },
+    //   {
+    //     status: statusCode,
+    //     headers: {
+    //       "Access-Control-Allow-Origin": "*",
+    //       "Access-Control-Allow-Methods": "GET,OPTIONS",
+    //       "Access-Control-Allow-Headers":
+    //         "Authorization, User-Email, Content-Type, Accept",
+    //     },
+    //   },
+    // );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
