@@ -205,28 +205,19 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const respondedAt = new Date().toISOString();
         const userAgent = req.headers.get("user-agent") || "unknown";
 
-        const publicApiLog: IPublicApiLog = {
-          user_id: userId,
-          requested_at: requestedAt,
-          responded_at: respondedAt,
-          status_code: statusCode,
-          key_description: keyDescription ? keyDescription.trim() : "Unknown",
-          user_agent: userAgent,
-        };
-
-        // insert the log
+        // insert the log and update the last used field for the key
         if (!supabase) {
           supabase = await createServiceRoleClient();
         }
-        await supabase.from("public_api_logs").insert(publicApiLog);
-
-        // update the last_used field
-        if (apiKey) {
-          await supabase
-            .from("api_keys")
-            .update({ last_used: requestedAt })
-            .eq("encrypted_key", apiKey);
-        }
+        await supabase.rpc("log_public_api_request", {
+          p_user_id: userId,
+          p_requested_at: requestedAt,
+          p_responded_at: respondedAt,
+          p_status_code: statusCode,
+          p_key_description: keyDescription,
+          p_user_agent: userAgent,
+          p_encrypted_key: apiKey,
+        });
       } catch (logErr) {
         console.error("Failed to insert API log:", (logErr as Error).message);
       }
