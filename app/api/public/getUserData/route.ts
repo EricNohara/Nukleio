@@ -2,10 +2,22 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import IPublicApiLog from "@/app/interfaces/IPublicApiLog";
-import { IUserEducation, IUserInfo } from "@/app/interfaces/IUserInfo";
+import { IUserInfo } from "@/app/interfaces/IUserInfo";
 import { decrypt } from "@/utils/auth/encrypt";
 import { validateKey } from "@/utils/auth/hash";
+import {
+  getRedis,
+  getUserInfoCacheKey,
+  getUserTtlSettings,
+} from "@/utils/cachedUserInfo/redis";
 import { createServiceRoleClient } from "@/utils/supabase/server";
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET,OPTIONS",
+  "Access-Control-Allow-Headers":
+    "Authorization, User-Email, Content-Type, Accept",
+};
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   // create fields for log
@@ -14,9 +26,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   let keyDescription: string | null = null;
   let statusCode: number = 500;
   let apiKey: string | undefined;
+  let supabase: Awaited<ReturnType<typeof createServiceRoleClient>> | null =
+    null;
 
   try {
-    const supabase = await createServiceRoleClient();
+    supabase = await createServiceRoleClient();
 
     // get the api key from the authorization header
     apiKey = req.headers.get("Authorization")?.split(" ")[1];
@@ -89,34 +103,60 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       }
     }
 
-    // Try the cached supabase table first and return if hit
+    // First try redis cache for user info
+    const redis = getRedis();
+    const redisKey = getUserInfoCacheKey(userId);
+    let redisPayload: IUserInfo | null = null;
+
+    try {
+      redisPayload = await redis.get<IUserInfo>(redisKey);
+    } catch (err) {
+      console.error("Redis read failed:", err);
+    }
+
+    if (redisPayload) {
+      statusCode = 200;
+      return NextResponse.json(
+        { userInfo: redisPayload },
+        {
+          status: 200,
+          headers: CORS_HEADERS,
+        },
+      );
+    }
+
+    // Try the cached supabase table if redis cache miss and return if hit
     const { data: cachedRow, error: cachedError } = await supabase
       .from("cached_user_info")
       .select("payload")
       .eq("user_id", userId)
-      .maybeSingle();
+      .maybeSingle<{ payload: IUserInfo }>();
 
     if (cachedError) {
       throw cachedError;
     }
 
-    if (cachedRow?.payload) {
+    const cachedUserInfo = cachedRow?.payload;
+    const ttlSeconds = getUserTtlSettings(
+      cachedUserInfo?.subscription?.price_id,
+      cachedUserInfo?.subscription?.status,
+    );
+
+    if (cachedUserInfo) {
+      // Add to redis cache
+      await redis.set(redisKey, cachedRow.payload, { ex: ttlSeconds });
+
       statusCode = 200;
       return NextResponse.json(
         { userInfo: cachedRow.payload },
         {
           status: statusCode,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET,OPTIONS",
-            "Access-Control-Allow-Headers":
-              "Authorization, User-Email, Content-Type, Accept",
-          },
+          headers: CORS_HEADERS,
         },
       );
     }
 
-    // Cache miss: build once and return without updating the cache table
+    // Cache miss: build once and return without updating the cache table (do not add to redis cache)
     const { data: builtPayload, error: buildError } = await supabase.rpc(
       "build_cached_user_info",
       { p_user_id: userId },
@@ -132,12 +172,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         { message: "User info not found" },
         {
           status: statusCode,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET,OPTIONS",
-            "Access-Control-Allow-Headers":
-              "Authorization, User-Email, Content-Type, Accept",
-          },
+          headers: CORS_HEADERS,
         },
       );
     }
@@ -147,123 +182,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       { userInfo: builtPayload },
       {
         status: statusCode,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET,OPTIONS",
-          "Access-Control-Allow-Headers":
-            "Authorization, User-Email, Content-Type, Accept",
-        },
+        headers: CORS_HEADERS,
       },
     );
-
-    // // get and clean information to add to the userInfo super object that is returned to the user
-    // const { data: userData, error: userDataError } = await supabase
-    //   .from("users")
-    //   .select()
-    //   .eq("id", userId);
-
-    // if (userDataError) throw userDataError;
-
-    // const cleanedUserData = userData.map(({ id, ...rest }) => rest)[0];
-
-    // // skills
-    // const { data: userSkills, error: userSkillsError } = await supabase
-    //   .from("skills")
-    //   .select()
-    //   .eq("user_id", userId);
-
-    // if (userSkillsError) throw userSkillsError;
-
-    // const cleanedUserSkills = userSkills.map(({ user_id, ...rest }) => rest);
-
-    // // experiences
-    // const { data: userExperience, error: userExperienceError } = await supabase
-    //   .from("work_experiences")
-    //   .select()
-    //   .eq("user_id", userId);
-
-    // if (userExperienceError) throw userExperienceError;
-
-    // const cleanedUserExperience = userExperience.map(
-    //   ({ user_id, ...rest }) => rest,
-    // );
-
-    // // projects
-    // const { data: userProject, error: userProjectError } = await supabase
-    //   .from("projects")
-    //   .select()
-    //   .eq("user_id", userId);
-
-    // if (userProjectError) throw userProjectError;
-
-    // const cleanedUserProjects = userProject.map(({ user_id, ...rest }) => rest);
-
-    // // education + courses
-    // const { data: userEducation, error: userEducationError } = await supabase
-    //   .from("education")
-    //   .select()
-    //   .eq("user_id", userId);
-
-    // if (userEducationError) throw userEducationError;
-
-    // const userEducationWithCourses: IUserEducation[] = [];
-
-    // for (const education of userEducation) {
-    //   const { data: educationCourses, error: educationCoursesError } =
-    //     await supabase
-    //       .from("course")
-    //       .select()
-    //       .eq("user_id", userId)
-    //       .eq("education_id", education.id);
-
-    //   if (educationCoursesError) throw educationCoursesError;
-
-    //   const cleanedEducationCourses = educationCourses.map(
-    //     ({ education_id, user_id, ...rest }) => rest,
-    //   );
-
-    //   const cleanedEducation = {
-    //     id: education.id,
-    //     degree: education.degree,
-    //     majors: education.majors,
-    //     minors: education.minors,
-    //     gpa: education.gpa,
-    //     institution: education.institution,
-    //     awards: education.awards,
-    //     year_start: education.year_start,
-    //     year_end: education.year_end,
-    //   };
-
-    //   const educationWithCourses = {
-    //     ...cleanedEducation,
-    //     courses: cleanedEducationCourses,
-    //   };
-
-    //   userEducationWithCourses.push(educationWithCourses);
-    // }
-
-    // // construct the super object
-    // const userInfo: IUserInfo = {
-    //   ...cleanedUserData,
-    //   skills: cleanedUserSkills,
-    //   experiences: cleanedUserExperience,
-    //   projects: cleanedUserProjects,
-    //   education: userEducationWithCourses,
-    // };
-
-    // statusCode = 200;
-    // return NextResponse.json(
-    //   { userInfo },
-    //   {
-    //     status: statusCode,
-    //     headers: {
-    //       "Access-Control-Allow-Origin": "*",
-    //       "Access-Control-Allow-Methods": "GET,OPTIONS",
-    //       "Access-Control-Allow-Headers":
-    //         "Authorization, User-Email, Content-Type, Accept",
-    //     },
-    //   },
-    // );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
@@ -273,12 +194,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       { message: "Internal server error" },
       {
         status: statusCode,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET,OPTIONS",
-          "Access-Control-Allow-Headers":
-            "Authorization, User-Email, Content-Type, Accept",
-        },
+        headers: CORS_HEADERS,
       },
     );
   } finally {
@@ -299,7 +215,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         };
 
         // insert the log
-        const supabase = await createServiceRoleClient();
+        if (!supabase) {
+          supabase = await createServiceRoleClient();
+        }
         await supabase.from("public_api_logs").insert(publicApiLog);
 
         // update the last_used field
@@ -319,11 +237,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 export async function OPTIONS() {
   return new Response(null, {
     status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET,OPTIONS",
-      "Access-Control-Allow-Headers":
-        "Authorization, User-Email, Content-Type, Accept",
-    },
+    headers: CORS_HEADERS,
   });
 }
