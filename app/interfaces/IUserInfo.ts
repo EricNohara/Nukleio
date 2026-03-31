@@ -2,6 +2,7 @@ import { ICourseInput } from "./ICourse";
 import { IExperience } from "./IExperience";
 import { IProjectInput } from "./IProject";
 import { ISkillsInput } from "./ISkills";
+import { ISubscriptionPublicInfo } from "./ISubscription";
 import IUser from "./IUser";
 
 export interface IUserInfo extends IUser {
@@ -9,6 +10,7 @@ export interface IUserInfo extends IUser {
   experiences: IExperience[];
   projects: IProjectInput[];
   education: IUserEducation[];
+  subscription: ISubscriptionPublicInfo | null;
 }
 
 export interface IUserEducation {
