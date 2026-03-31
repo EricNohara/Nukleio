@@ -15,7 +15,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
     const { data: userData, error: userDataError } = await supabase
       .from("users")
       .select(
-        "name, phone_number, email, github_url, linkedin_url, portrait_url, resume_url, transcript_url, instagram_url, facebook_url, x_url, bio, current_position, current_company, current_address"
+        "name, phone_number, email, github_url, linkedin_url, portrait_url, resume_url, transcript_url, instagram_url, facebook_url, x_url, bio, current_position, current_company, current_address",
       )
       .eq("id", user.id)
       .single();
@@ -39,7 +39,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
     const { data: userProject, error: userProjectError } = await supabase
       .from("projects")
       .select(
-        "id, name, date_start, date_end, languages_used, frameworks_used, technologies_used, description, github_url, demo_url, thumbnail_url"
+        "id, name, date_start, date_end, languages_used, frameworks_used, technologies_used, description, github_url, demo_url, thumbnail_url",
       )
       .eq("user_id", user.id);
     if (userProjectError) throw userProjectError;
@@ -83,7 +83,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
     const { data: publicApiLogs, error: publicApiLogsError } = await supabase
       .from("public_api_logs")
       .select(
-        "key_description, user_agent, requested_at, responded_at, status_code"
+        "key_description, user_agent, requested_at, responded_at, status_code",
       )
       .eq("user_id", user.id);
     if (publicApiLogsError) throw publicApiLogsError;
@@ -105,7 +105,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

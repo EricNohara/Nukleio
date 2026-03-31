@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { ICourseInput } from "@/app/interfaces/ICourse";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
+import { refreshCachedUserInfo } from "@/utils/cachedUserInfo/refreshCachedUserInfo";
 
 const letterGrades = [
   "A+",
@@ -69,7 +70,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -96,16 +97,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return NextResponse.json(
       { message: "Successfully added course" },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -130,13 +134,16 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return new NextResponse(null, { status: 204 });
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -169,23 +176,26 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return NextResponse.json(
       { message: "Successfully updated course" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 function validateInput(
   course: ICourseInput,
-  educationID: string
+  educationID: string,
 ): NextResponse | undefined {
   if (!course || !educationID || !course.name) {
     return NextResponse.json({ message: "Invalid input" }, { status: 400 });
@@ -194,7 +204,7 @@ function validateInput(
   if (course.grade && !VALID_GRADES.includes(course.grade)) {
     return NextResponse.json(
       { message: "Invalid grade input" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }
