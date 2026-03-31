@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { IProjectInput } from "@/app/interfaces/IProject";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
+import { refreshCachedUserInfo } from "@/utils/cachedUserInfo/refreshCachedUserInfo";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (limit && projectID) {
       return NextResponse.json(
         { message: "Limit and projectID cannot both be specified" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       if (isNaN(limitNum) || limitNum <= 0) {
         return NextResponse.json(
           { message: "Limit parameter must be greater than 0" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -64,7 +65,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -93,16 +94,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return NextResponse.json(
       { message: "Successfully created project", id: data.id },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -125,13 +129,16 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return new NextResponse(null, { status: 204 });
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -171,16 +178,19 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return NextResponse.json(
       { message: "Successfully updated project" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

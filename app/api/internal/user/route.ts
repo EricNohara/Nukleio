@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { IProject } from "@/app/interfaces/IProject";
 import IUser from "@/app/interfaces/IUser";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
+import { refreshCachedUserInfo } from "@/utils/cachedUserInfo/refreshCachedUserInfo";
 import parseURL from "@/utils/general/parseURL";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
@@ -29,7 +30,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -48,16 +49,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return NextResponse.json(
       { message: "User successfully created" },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -76,13 +80,16 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return NextResponse.json({ message: "Update successful" }, { status: 200 });
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -147,7 +154,7 @@ export async function DELETE(_req: NextRequest): Promise<NextResponse> {
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

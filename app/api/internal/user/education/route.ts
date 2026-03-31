@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { IEducationInput } from "@/app/interfaces/IEducation";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
+import { refreshCachedUserInfo } from "@/utils/cachedUserInfo/refreshCachedUserInfo";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
@@ -35,7 +36,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -63,16 +64,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return NextResponse.json(
       { message: "Successfully added education", id: data.id },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -95,13 +99,16 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return new NextResponse(null, { status: 204 });
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -135,22 +142,25 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return NextResponse.json(
       { message: "Successfully updated education" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 function validateEducation(
-  education: IEducationInput
+  education: IEducationInput,
 ): NextResponse | undefined {
   if (!education || !education.institution || !education.degree) {
     return NextResponse.json({ message: "Invalid input" }, { status: 400 });

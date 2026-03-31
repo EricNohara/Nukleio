@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { IExperience, IUserExperience } from "@/app/interfaces/IExperience";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
+import { refreshCachedUserInfo } from "@/utils/cachedUserInfo/refreshCachedUserInfo";
 
 export async function GET(_req: NextRequest): Promise<NextResponse> {
   try {
@@ -21,7 +22,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -52,16 +53,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return NextResponse.json(
       { message: "Successfully added work experience" },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -86,13 +90,16 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return new NextResponse(null, { status: 204 });
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -136,16 +143,19 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    // update the user info cache
+    await refreshCachedUserInfo(supabase, user.id);
+
     return NextResponse.json(
       { message: "Successfully updated work experience" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
