@@ -3,7 +3,7 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
 
 import { IApiKeyInternal } from "../interfaces/IApiKey";
-import { ICourseInput } from "../interfaces/ICourse";
+import { ICourseInternal } from "../interfaces/ICourse";
 import { IExperience } from "../interfaces/IExperience";
 import { IPublicApiLogInternal } from "../interfaces/IPublicApiLog";
 import { ISkillsInternal } from "../interfaces/ISkills";
@@ -27,9 +27,9 @@ type Action =
     | { type: "ADD_EDUCATION"; payload: IUserEducationInternal }
     | { type: "UPDATE_EDUCATION"; payload: { old: IUserEducationInternal, new: IUserEducationInternal } }
     | { type: "DELETE_EDUCATION"; payload: IUserEducationInternal }
-    | { type: "ADD_COURSE"; payload: { educationID: number; course: ICourseInput } }
-    | { type: "UPDATE_COURSE"; payload: { educationID: number; courseName: string; newCourse: ICourseInput } }
-    | { type: "DELETE_COURSE"; payload: { educationID: number; courseName: string } }
+    | { type: "ADD_COURSE"; payload: { educationID: string; course: ICourseInternal } }
+    | { type: "UPDATE_COURSE"; payload: { educationID: string; id: string; newCourse: ICourseInternal } }
+    | { type: "DELETE_COURSE"; payload: { educationID: string; id: string } }
     | { type: "ADD_API_KEY"; payload: IApiKeyInternal }
     | { type: "UPDATE_API_KEY"; payload: { old: IApiKeyInternal, new: IApiKeyInternal } }
     | { type: "DELETE_API_KEY"; payload: IApiKeyInternal }
@@ -191,7 +191,7 @@ function reducer(state: IUserInfoInternal, action: Action): IUserInfoInternal {
                         ? {
                             ...edu,
                             courses: edu.courses.filter(
-                                (course) => course.name !== action.payload.courseName
+                                (course) => course.id !== action.payload.id
                             ),
                         }
                         : edu
@@ -205,7 +205,7 @@ function reducer(state: IUserInfoInternal, action: Action): IUserInfoInternal {
                         ? {
                             ...edu,
                             courses: edu.courses.map((course) =>
-                                course.name === action.payload.courseName ? action.payload.newCourse : course
+                                course.id === action.payload.id ? action.payload.newCourse : course
                             ),
                         }
                         : edu

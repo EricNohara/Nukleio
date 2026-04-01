@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+
 import { NextRequest, NextResponse } from "next/server";
 
 import { ICourseInput } from "@/app/interfaces/ICourse";
@@ -19,7 +21,7 @@ const letterGrades = [
   "D-",
   "F",
 ];
-const otherGrades = ["P", "F"];
+const otherGrades = ["P", "F", "Pass", "Fail"];
 const percentageGrades = Array.from({ length: 101 }, (_, i) => i.toString());
 
 const VALID_GRADES = [...letterGrades, ...otherGrades, ...percentageGrades];
@@ -29,32 +31,19 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
-    const education_id = req.nextUrl.searchParams.get("educationID");
-    const courseName = req.nextUrl.searchParams.get("courseName");
+    const educationID = req.nextUrl.searchParams.get("educationID");
 
-    if (education_id) {
-      if (courseName) {
-        const { data, error } = await supabase
-          .from("course")
-          .select()
-          .eq("user_id", user.id)
-          .eq("name", courseName)
-          .eq("education_id", education_id);
+    // get all courses for a given education item
+    if (educationID) {
+      const { data, error } = await supabase
+        .from("course")
+        .select()
+        .eq("user_id", user.id)
+        .eq("education_id", educationID);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        return NextResponse.json(data, { status: 200 });
-      } else {
-        const { data, error } = await supabase
-          .from("course")
-          .select()
-          .eq("user_id", user.id)
-          .eq("education_id", education_id);
-
-        if (error) throw error;
-
-        return NextResponse.json(data, { status: 200 });
-      }
+      return NextResponse.json(data, { status: 200 });
     } else {
       const { data, error } = await supabase
         .from("course")
@@ -80,20 +69,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
-    const sentData = await req.json();
-    const sentCourse: ICourseInput = sentData.course;
-    const sentEducationID = sentData.educationID;
+    const body = await req.json();
+    const course: ICourseInput = body.course;
+    const educationID = body.educationID;
 
-    const inputValidationResponse = validateInput(sentCourse, sentEducationID);
+    const inputValidationResponse = validateInput(course, educationID);
     if (inputValidationResponse) return inputValidationResponse;
 
-    const courseData = {
-      ...sentCourse,
+    const id = randomUUID();
+
+    const payload = {
+      id: id,
+      ...course,
       user_id: user.id,
-      education_id: sentEducationID,
+      education_id: educationID,
     };
 
-    const { error } = await supabase.from("course").insert(courseData);
+    const { error } = await supabase.from("course").insert(payload);
 
     if (error) throw error;
 
@@ -101,7 +93,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     await refreshCachedUserInfo(supabase, user.id);
 
     return NextResponse.json(
-      { message: "Successfully added course" },
+      { message: "Successfully added course", id },
       { status: 201 },
     );
   } catch (err) {
@@ -114,22 +106,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 }
 
+// by id
 export async function DELETE(req: NextRequest): Promise<NextResponse> {
   try {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
-    const educationID = req.nextUrl.searchParams.get("educationID");
-    const courseName = req.nextUrl.searchParams.get("courseName");
-    if (!educationID || !courseName) {
+    const id = req.nextUrl.searchParams.get("id");
+    if (!id) {
       return NextResponse.json({ message: "Invalid input" }, { status: 400 });
     }
 
     const { error } = await supabase
       .from("course")
       .delete()
-      .eq("education_id", educationID)
-      .eq("name", courseName)
+      .eq("id", id)
       .eq("user_id", user.id);
 
     if (error) throw error;
@@ -148,30 +139,31 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
   }
 }
 
+// by id
 export async function PUT(req: NextRequest): Promise<NextResponse> {
   try {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
-    const sentData = await req.json();
-    const educationID = sentData.educationID;
-    const courseName = sentData.courseName;
-    const updatedCourse: ICourseInput = sentData.course;
+    const body = await req.json();
+    const id = body.id;
+    const educationID = body.educationID;
+    const course: ICourseInput = body.course;
 
-    const inputValidationResponse = validateInput(updatedCourse, educationID);
+    const inputValidationResponse = validateInput(course, educationID);
     if (inputValidationResponse) return inputValidationResponse;
 
-    const courseData = {
-      ...updatedCourse,
+    const payload = {
+      id: id,
+      ...course,
       user_id: user.id,
       education_id: educationID,
     };
 
     const { error } = await supabase
       .from("course")
-      .update(courseData)
-      .eq("education_id", educationID)
-      .eq("name", courseName)
+      .update(payload)
+      .eq("id", id)
       .eq("user_id", user.id);
 
     if (error) throw error;

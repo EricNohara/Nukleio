@@ -8,3 +8,7 @@ export interface ICourse extends ICourseInput {
   education_id: string;
   user_id: string;
 }
+
+export interface ICourseInternal extends ICourseInput {
+  id: string;
+}
