@@ -219,13 +219,13 @@ function reducer(state: IUserInfoInternal, action: Action): IUserInfoInternal {
             return {
                 ...state,
                 api_keys: state.api_keys.map((k) =>
-                    k.description === action.payload.old.description ? action.payload.new : k
+                    k.id === action.payload.old.id ? action.payload.new : k
                 ),
             };
         case "DELETE_API_KEY":
             return {
                 ...state,
-                api_keys: state.api_keys.filter((k) => k.description !== action.payload.description),
+                api_keys: state.api_keys.filter((k) => k.id !== action.payload.id),
             };
 
         // --- PUBLIC_API_LOGS ---

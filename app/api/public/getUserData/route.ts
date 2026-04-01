@@ -1,22 +1,27 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 
-import IPublicApiLog from "@/app/interfaces/IPublicApiLog";
-import { IUserInfo } from "@/app/interfaces/IUserInfo";
-import { decrypt } from "@/utils/auth/encrypt";
-import { validateKey } from "@/utils/auth/hash";
-import {
-  getRedis,
-  getUserInfoCacheKey,
-  getUserTtlSettings,
-} from "@/utils/cachedUserInfo/redis";
+// import IPublicApiLog from "@/app/interfaces/IPublicApiLog";
+// import { IUserInfo } from "@/app/interfaces/IUserInfo";
+// import {
+//   getRedis,
+//   getUserInfoCacheKey,
+//   getUserTtlSettings,
+// } from "@/utils/cachedUserInfo/redis";
+import { parseApiKey, signApiKeySecret } from "@/utils/auth/apiKeys";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET,OPTIONS",
   "Access-Control-Allow-Headers":
-    "Authorization, User-Email, Content-Type, Accept",
+    "Authorization, User-Email, Content-Type, Accept, X-Target-User-Id",
+};
+
+type PublicCachedUserInfoRow = {
+  user_id: string;
+  key_description: string;
+  user_info: unknown;
 };
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -26,6 +31,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   let keyDescription: string | null = null;
   let statusCode: number = 500;
   let apiKey: string | undefined;
+  let keyId: string | null = null;
   let supabase: Awaited<ReturnType<typeof createServiceRoleClient>> | null =
     null;
 
@@ -38,153 +44,137 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       statusCode = 401;
       return NextResponse.json(
         { message: "Unauthorized" },
-        { status: statusCode },
+        { status: statusCode, headers: CORS_HEADERS },
       );
     }
 
-    // retrieve the API key information
-    const { data, error } = await supabase
-      .from("api_keys")
-      .select("hashed_key, user_id, description")
-      .filter("encrypted_key", "eq", apiKey);
-
-    if (error || !data || data.length === 0) {
-      statusCode = 404;
+    // parse the key data
+    const parsed = parseApiKey(apiKey);
+    if (!parsed) {
+      statusCode = 401;
       return NextResponse.json(
-        { message: "User API key not found" },
-        { status: statusCode },
+        { message: "Invalid API key format" },
+        { status: statusCode, headers: CORS_HEADERS },
       );
     }
 
-    keyDescription = data[0].description;
+    keyId = parsed.keyId;
+    const hashedKey = signApiKeySecret(parsed.secret);
 
-    if (keyDescription === "Nukleio Super Key") {
-      // if nukleio super key get user id from header
-      const queryUserId = req.headers.get("X-Target-User-Id");
-      if (!queryUserId) {
-        statusCode = 400;
-        return NextResponse.json(
-          {
-            message:
-              "X-Target-User-Id header is required for Nukleio Super Key",
-          },
-          { status: statusCode },
-        );
-      }
-      userId = queryUserId;
-    } else {
-      // decrypt the api key
-      const decryptedKey = decrypt(apiKey);
-      if (!decryptedKey || typeof decryptedKey !== "string") {
-        statusCode = 401;
-        return NextResponse.json(
-          { message: "Unauthorized" },
-          { status: statusCode },
-        );
-      }
+    const targetUserId = req.headers.get("X-Target-User-Id");
+    const { data, error } = await supabase.rpc("get_public_cached_user_info", {
+      p_key_id: keyId,
+      p_hashed_key: hashedKey,
+      p_target_user_id: targetUserId,
+    });
+    if (error) throw error;
 
-      // validate user's key
-      const isValid = await validateKey(decryptedKey, data[0].hashed_key);
-      if (!isValid) {
-        statusCode = 401;
-        return NextResponse.json(
-          { message: "Unauthorized" },
-          { status: statusCode },
-        );
-      }
+    const row = (
+      Array.isArray(data) ? data[0] : data
+    ) as PublicCachedUserInfoRow | null;
 
-      userId = data[0].user_id;
-      if (!userId) {
-        statusCode = 404;
-        return NextResponse.json(
-          { message: "User id not found" },
-          { status: statusCode },
-        );
-      }
-    }
-
-    // First try redis cache for user info
-    const redis = getRedis();
-    const redisKey = getUserInfoCacheKey(userId);
-    let redisPayload: IUserInfo | null = null;
-
-    try {
-      redisPayload = await redis.get<IUserInfo>(redisKey);
-    } catch (err) {
-      console.error("Redis read failed:", err);
-    }
-
-    if (redisPayload) {
-      statusCode = 200;
+    if (!row) {
+      statusCode = 401;
       return NextResponse.json(
-        { userInfo: redisPayload },
-        {
-          status: 200,
-          headers: CORS_HEADERS,
-        },
+        { message: "Unauthorized" },
+        { status: statusCode, headers: CORS_HEADERS },
       );
     }
 
-    // Try the cached supabase table if redis cache miss and return if hit
-    const { data: cachedRow, error: cachedError } = await supabase
-      .from("cached_user_info")
-      .select("payload")
-      .eq("user_id", userId)
-      .maybeSingle<{ payload: IUserInfo }>();
-
-    if (cachedError) {
-      throw cachedError;
-    }
-
-    const cachedUserInfo = cachedRow?.payload;
-    const ttlSeconds = getUserTtlSettings(
-      cachedUserInfo?.subscription?.price_id,
-      cachedUserInfo?.subscription?.status,
-    );
-
-    if (cachedUserInfo) {
-      // Add to redis cache
-      await redis.set(redisKey, cachedRow.payload, { ex: ttlSeconds });
-
-      statusCode = 200;
-      return NextResponse.json(
-        { userInfo: cachedRow.payload },
-        {
-          status: statusCode,
-          headers: CORS_HEADERS,
-        },
-      );
-    }
-
-    // Cache miss: build once and return without updating the cache table (do not add to redis cache)
-    const { data: builtPayload, error: buildError } = await supabase.rpc(
-      "build_cached_user_info",
-      { p_user_id: userId },
-    );
-
-    if (buildError) {
-      throw buildError;
-    }
-
-    if (!builtPayload) {
-      statusCode = 404;
-      return NextResponse.json(
-        { message: "User info not found" },
-        {
-          status: statusCode,
-          headers: CORS_HEADERS,
-        },
-      );
-    }
+    userId = row.user_id;
+    keyDescription = row.key_description;
 
     statusCode = 200;
     return NextResponse.json(
-      { userInfo: builtPayload },
+      { userInfo: row.user_info },
       {
         status: statusCode,
         headers: CORS_HEADERS,
       },
     );
+
+    // // First try redis cache for user info
+    // const redis = getRedis();
+    // const redisKey = getUserInfoCacheKey(userId);
+    // let redisPayload: IUserInfo | null = null;
+
+    // try {
+    //   redisPayload = await redis.get<IUserInfo>(redisKey);
+    // } catch (err) {
+    //   console.error("Redis read failed:", err);
+    // }
+
+    // if (redisPayload) {
+    //   statusCode = 200;
+    //   return NextResponse.json(
+    //     { userInfo: redisPayload },
+    //     {
+    //       status: 200,
+    //       headers: CORS_HEADERS,
+    //     },
+    //   );
+    // }
+
+    // // Try the cached supabase table if redis cache miss and return if hit
+    // const { data: cachedRow, error: cachedError } = await supabase
+    //   .from("cached_user_info")
+    //   .select("payload")
+    //   .eq("user_id", userId)
+    //   .maybeSingle<{ payload: IUserInfo }>();
+
+    // if (cachedError) {
+    //   throw cachedError;
+    // }
+
+    // const cachedUserInfo = cachedRow?.payload;
+    // const ttlSeconds = getUserTtlSettings(
+    //   cachedUserInfo?.subscription?.price_id,
+    //   cachedUserInfo?.subscription?.status,
+    // );
+
+    // if (cachedUserInfo) {
+    //   // Add to redis cache
+    //   await redis.set(redisKey, cachedRow.payload, { ex: ttlSeconds });
+
+    //   statusCode = 200;
+    //   return NextResponse.json(
+    //     { userInfo: cachedRow.payload },
+    //     {
+    //       status: statusCode,
+    //       headers: CORS_HEADERS,
+    //     },
+    //   );
+    // }
+
+    // // Cache miss: build once and return without updating the cache table (do not add to redis cache)
+    // const { data: builtPayload, error: buildError } = await supabase.rpc(
+    //   "build_cached_user_info",
+    //   { p_user_id: userId },
+    // );
+
+    // if (buildError) {
+    //   throw buildError;
+    // }
+
+    // if (!builtPayload) {
+    //   statusCode = 404;
+    //   return NextResponse.json(
+    //     { message: "User info not found" },
+    //     {
+    //       status: statusCode,
+    //       headers: CORS_HEADERS,
+    //     },
+    //   );
+    // }
+
+    // statusCode = 200;
+    // return NextResponse.json(
+    //   { userInfo: builtPayload },
+    //   {
+    //     status: statusCode,
+    //     headers: CORS_HEADERS,
+    //   },
+    // );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
@@ -216,7 +206,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           p_status_code: statusCode,
           p_key_description: keyDescription,
           p_user_agent: userAgent,
-          p_encrypted_key: apiKey,
+          p_key_id: keyId,
         });
       } catch (logErr) {
         console.error("Failed to insert API log:", (logErr as Error).message);

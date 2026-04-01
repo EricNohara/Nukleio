@@ -22,12 +22,12 @@ export default function ConnectPage() {
     const { state, dispatch } = useUser();
     const apiKeys = useMemo(() => state?.api_keys ?? [], [state?.api_keys]);
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
-    const [keyToDisplay, setKeyToDisplay] = useState<string | null>(null);
+    const [oneTimeKeyDisplay, setOneTimeKeyDisplay] = useState<string | null>(null);
     const [formValues, setFormValues] = useState<IApiKeyInternalInput>({
         description: "",
         expires: null,
     });
-    const [apiKeyToRefresh, setApiKeyToRefresh] = useState<IApiKeyInternalInput | null>(null);
+    const [apiKeyToRefresh, setApiKeyToRefresh] = useState<IApiKeyInternal | null>(null);
 
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
@@ -61,7 +61,7 @@ export default function ConnectPage() {
     const handleDelete = async (rowIndex: number) => {
         const key = apiKeys[rowIndex];
         try {
-            const res = await fetch(`/api/internal/user/key?description=${key.description}`, { method: "DELETE" });
+            const res = await fetch(`/api/internal/user/key?id=${key.id}`, { method: "DELETE" });
             if (!res.ok) throw new Error(`Error deleting api key: ${key.description}.`);
 
             // update cached state
@@ -101,9 +101,11 @@ export default function ConnectPage() {
 
         let success = false;
 
+        let apiKey: string | null = null;
+
         try {
             if (apiKeyToRefresh) {
-                // update the skill
+                // update the key
                 const editPayload: IApiKeyInternalInput = {
                     description: apiKeyToRefresh.description,
                     expires: newApiKey.expires
@@ -115,17 +117,13 @@ export default function ConnectPage() {
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message);
-
-                const oldKey: IApiKeyInternal = {
-                    ...apiKeyToRefresh,
-                    created: "",
-                    last_used: null
-                };
+                if (!data.apiKey) throw new Error("Error retrieving api key.");
+                apiKey = data.apiKey;
 
                 // update cached state
-                dispatch({ type: "UPDATE_API_KEY", payload: { old: oldKey, new: data.key } });
+                dispatch({ type: "UPDATE_API_KEY", payload: { old: apiKeyToRefresh, new: data.key } });
             } else {
-                // Add the skill
+                // Add the key
                 const res = await fetch("/api/internal/user/key", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -133,6 +131,8 @@ export default function ConnectPage() {
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message);
+                if (!data.apiKey) throw new Error("Error retrieving api key.");
+                apiKey = data.apiKey;
 
                 // update the cached user
                 dispatch({ type: "ADD_API_KEY", payload: data.key });
@@ -149,7 +149,8 @@ export default function ConnectPage() {
         setIsFormOpen(false);
         setApiKeyToRefresh(null);
 
-        if (success) setKeyToDisplay(description);
+        // set the key to display ONE TIME
+        if (success) setOneTimeKeyDisplay(apiKey);
     };
 
     const onClose = () => {
@@ -166,7 +167,7 @@ export default function ConnectPage() {
     };
 
     const onApiKeyDisplayClose = () => {
-        setKeyToDisplay(null);
+        setOneTimeKeyDisplay(null);
     };
 
     const buttonOne: IButton = {
@@ -245,8 +246,8 @@ export default function ConnectPage() {
             }
 
             {
-                keyToDisplay &&
-                <ApiKeyDisplay keyDescription={keyToDisplay} onClose={onApiKeyDisplayClose} />
+                oneTimeKeyDisplay &&
+                <ApiKeyDisplay apiKey={oneTimeKeyDisplay} onClose={onApiKeyDisplayClose} />
             }
         </PageContentWrapper>
     );

@@ -1,5 +1,5 @@
 import { TriangleAlert, Copy, Eye, EyeClosed } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { useToast } from "@/app/context/ToastProvider";
 
@@ -11,37 +11,18 @@ import Overlay from "../Overlay/Overlay";
 import textInputStyles from "../TextInput/TextInput.module.css";
 
 export interface IApiKeyDisplayProps {
-    keyDescription: string;
+    apiKey: string;
     onClose: () => void;
 }
 
-export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDisplayProps) {
-    const [key, setKey] = useState<string>("Loading key...");
+export default function ApiKeyDisplay({ apiKey, onClose }: IApiKeyDisplayProps) {
     const [isKeyVisible, setIsKeyVisible] = useState<boolean>(false);
     const toast = useToast();
 
-    useEffect(() => {
-        const fetchKeyValue = async () => {
-            try {
-                const res = await fetch(`/api/internal/user/key/encryptedKey?description=${keyDescription}`);
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message);
-                if (!data) throw new Error("Missing data");
-
-                setKey(data.encryptedKey);
-            } catch (err) {
-                const error = err as Error;
-                toast.error("Error", `Error displaying API key: ${error.message}.`)
-            }
-        };
-
-        fetchKeyValue();
-    }, [keyDescription, toast]);
-
     const handleCopy = async () => {
-        if (key === "Loading key...") return;
+        if (!apiKey) return;
         try {
-            await navigator.clipboard.writeText(key);
+            await navigator.clipboard.writeText(apiKey);
             toast.info("Copied to clipboard")
         } catch {
             toast.error("Failed to copy")
@@ -49,10 +30,10 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
     };
 
     const handleDownload = () => {
-        if (key === "Loading key...") return;
+        if (!apiKey) return;
 
         // Construct the .env file contents
-        const envContent = `API_KEY=${key}\n`;
+        const envContent = `API_KEY=${apiKey}\n`;
 
         // Create a Blob with the contents
         const blob = new Blob([envContent], { type: "text/plain" });
@@ -87,7 +68,7 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
                         <div className={textInputStyles.inputDiv}>
                             <label className={textInputStyles.inputLabel}>Access Key</label>
                             <div className={styles.keyValueContainer}>
-                                <p>{isKeyVisible ? key : formatHidden(key)}</p>
+                                <p>{isKeyVisible ? apiKey : formatHidden(apiKey)}</p>
                                 {isKeyVisible ? <EyeClosed className={styles.eyeIcon} onClick={handleVisibleClick} /> : <Eye className={styles.eyeIcon} onClick={handleVisibleClick} />}
                             </div>
                         </div>
@@ -98,7 +79,7 @@ export default function ApiKeyDisplay({ keyDescription, onClose }: IApiKeyDispla
                     <div className={styles.disclaimer}>
                         <TriangleAlert size={52} color="var(--btn-1)" />
                         <p className={styles.disclaimerText}>
-                            This key is shown only once. Save it now — you can regenerate a new key anytime.
+                            This key is shown only once. Save it now.
                         </p>
                     </div>
                 </div>
