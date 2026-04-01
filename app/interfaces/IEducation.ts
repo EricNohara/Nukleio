@@ -21,6 +21,6 @@ export interface IEducationUserInput {
 }
 
 export interface IEducation extends IEducationInput {
-  id: number;
+  id: string;
   user_id: string;
 }
