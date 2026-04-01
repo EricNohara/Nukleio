@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { IExperience, IUserExperience } from "@/app/interfaces/IExperience";
+import {
+  IExperience,
+  IExperienceInput,
+  IUserExperience,
+} from "@/app/interfaces/IExperience";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 import { refreshCachedUserInfo } from "@/utils/cachedUserInfo/refreshCachedUserInfo";
+import { randomUUID } from "crypto";
 
 export async function GET(_req: NextRequest): Promise<NextResponse> {
   try {
@@ -32,24 +37,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
-    const updatedExperience: IExperience = await req.json();
+    const experience: IExperienceInput = await req.json();
 
-    if (
-      !updatedExperience ||
-      !updatedExperience.company ||
-      !updatedExperience.job_title
-    ) {
+    if (!experience || !experience.company || !experience.job_title) {
       return NextResponse.json({ message: "Invalid input" }, { status: 400 });
     }
 
-    const experienceData: IUserExperience = {
-      ...updatedExperience,
+    const id = randomUUID();
+
+    const payload: IUserExperience = {
+      id: id,
+      ...experience,
       user_id: user.id,
     };
 
-    const { error } = await supabase
-      .from("work_experiences")
-      .insert(experienceData);
+    const { error } = await supabase.from("work_experiences").insert(payload);
 
     if (error) throw error;
 
@@ -57,7 +59,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     await refreshCachedUserInfo(supabase, user.id);
 
     return NextResponse.json(
-      { message: "Successfully added work experience" },
+      { message: "Successfully added work experience", id },
       { status: 201 },
     );
   } catch (err) {
@@ -70,22 +72,24 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 }
 
+// delete by id
 export async function DELETE(req: NextRequest): Promise<NextResponse> {
   try {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
-    const company = req.nextUrl.searchParams.get("company");
-    const job_title = req.nextUrl.searchParams.get("job_title");
-    if (!company || !job_title) {
-      return NextResponse.json({ message: "Invalid input" }, { status: 400 });
+    const id = req.nextUrl.searchParams.get("id");
+    if (!id) {
+      return NextResponse.json(
+        { message: "Invalid input: id required" },
+        { status: 400 },
+      );
     }
 
     const { error } = await supabase
       .from("work_experiences")
       .delete()
-      .eq("company", company)
-      .eq("job_title", job_title)
+      .eq("id", id)
       .eq("user_id", user.id);
 
     if (error) throw error;
@@ -104,41 +108,38 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
   }
 }
 
+// update by id
 export async function PUT(req: NextRequest): Promise<NextResponse> {
   try {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
     const {
-      prevCompany,
-      prevJob,
+      id,
       updatedExperience,
     }: {
-      prevCompany: string;
-      prevJob: string;
+      id: string;
       updatedExperience: IExperience;
     } = await req.json();
 
     if (
       !updatedExperience ||
-      !prevCompany ||
-      !prevJob ||
+      !id ||
       !updatedExperience.company ||
       !updatedExperience.job_title
     ) {
       return NextResponse.json({ message: "Invalid input" }, { status: 400 });
     }
 
-    const experienceData: IUserExperience = {
+    const payload: IUserExperience = {
       ...updatedExperience,
       user_id: user.id,
     };
 
     const { error } = await supabase
       .from("work_experiences")
-      .update(experienceData)
-      .eq("company", prevCompany)
-      .eq("job_title", prevJob)
+      .update(payload)
+      .eq("id", id)
       .eq("user_id", user.id);
 
     if (error) throw error;

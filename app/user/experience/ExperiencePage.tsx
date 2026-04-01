@@ -9,7 +9,7 @@ import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentW
 import Table from "@/app/components/Table/Table";
 import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
-import { IExperience } from "@/app/interfaces/IExperience";
+import { IExperience, IExperienceInput } from "@/app/interfaces/IExperience";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
@@ -19,7 +19,7 @@ const columnWidths = [20, 20, 12.5, 12.5, 35];
 export default function ExperiencePage() {
     const { state, dispatch } = useUser();
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
-    const [formValues, setFormValues] = useState<IExperience>({
+    const [formValues, setFormValues] = useState<IExperienceInput>({
         company: "",
         job_title: "",
         date_start: null,
@@ -55,7 +55,7 @@ export default function ExperiencePage() {
     const handleDelete = async (rowIndex: number) => {
         const experience = state.experiences[rowIndex];
         try {
-            const res = await fetch(`/api/internal/user/experience?company=${experience.company}&job_title=${experience.job_title}`, { method: "DELETE" });
+            const res = await fetch(`/api/internal/user/experience?id=${experience.id}`, { method: "DELETE" });
             if (!res.ok) throw new Error(`Error deleting experience: ${experience.company}, ${experience.job_title}.`);
 
             // update cached state
@@ -97,7 +97,7 @@ export default function ExperiencePage() {
             return;
         }
 
-        const newExperience: IExperience = {
+        const newExperience: IExperienceInput = {
             company: company,
             job_title: job_title,
             job_description: job_description ? job_description : null,
@@ -109,8 +109,7 @@ export default function ExperiencePage() {
             if (experienceToEdit) {
                 // update the experience
                 const editPayload = {
-                    prevCompany: experienceToEdit.company,
-                    prevJob: experienceToEdit.job_title,
+                    id: experienceToEdit.id,
                     updatedExperience: newExperience
                 };
                 const res = await fetch("/api/internal/user/experience", {
@@ -122,7 +121,7 @@ export default function ExperiencePage() {
                 if (!res.ok) throw new Error(data.message);
 
                 // update cached state
-                dispatch({ type: "UPDATE_EXPERIENCE", payload: { old: experienceToEdit, new: newExperience } });
+                dispatch({ type: "UPDATE_EXPERIENCE", payload: { old: experienceToEdit, new: { ...newExperience, id: experienceToEdit.id } } });
             } else {
                 // Add the experience
                 const res = await fetch("/api/internal/user/experience", {
@@ -132,9 +131,10 @@ export default function ExperiencePage() {
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message);
+                if (!data.id) throw new Error("Failed to retrieve id");
 
                 // update the cached user
-                dispatch({ type: "ADD_EXPERIENCE", payload: newExperience });
+                dispatch({ type: "ADD_EXPERIENCE", payload: { ...newExperience, id: data.id } });
             }
             toast.success("Success", "Successfully saved your experience.");
         } catch (err) {
