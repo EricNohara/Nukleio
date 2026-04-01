@@ -137,7 +137,7 @@ export default function ConnectPage() {
                 // update the cached user
                 dispatch({ type: "ADD_API_KEY", payload: data.key });
             }
-            toast.success("Success", `Successfully saved API key: ${description}.`);
+            toast.success("Successfully saved API key", "You won’t see this key again. Copy and save it securely.");
             success = true;
         } catch (err) {
             const error = err as Error;

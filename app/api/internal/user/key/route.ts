@@ -16,7 +16,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
 
     const { data, error } = await supabase
       .from("api_keys")
-      .select("key_id, created, expires, description, last_used")
+      .select("id, created, expires, description, last_used")
       .eq("user_id", user.id)
       .order("created", { ascending: false });
 
