@@ -1,5 +1,4 @@
-import { TriangleAlert, Copy, Eye, EyeClosed } from "lucide-react";
-import { useState } from "react";
+import { Copy } from "lucide-react";
 
 import { useToast } from "@/app/context/ToastProvider";
 
@@ -8,7 +7,7 @@ import { ButtonOne } from "../Buttons/Buttons";
 import inputFormStyles from "../InputForm/InputForm.module.css";
 import InputFormHeader from "../InputForm/InputFormHeader/InputFormHeader";
 import Overlay from "../Overlay/Overlay";
-import textInputStyles from "../TextInput/TextInput.module.css";
+import TextInput from "../TextInput/TextInput";
 
 export interface IApiKeyDisplayProps {
     apiKey: string;
@@ -16,7 +15,6 @@ export interface IApiKeyDisplayProps {
 }
 
 export default function ApiKeyDisplay({ apiKey, onClose }: IApiKeyDisplayProps) {
-    const [isKeyVisible, setIsKeyVisible] = useState<boolean>(false);
     const toast = useToast();
 
     const handleCopy = async () => {
@@ -51,37 +49,21 @@ export default function ApiKeyDisplay({ apiKey, onClose }: IApiKeyDisplayProps) 
         toast.info("Download initialized")
     };
 
-    const handleVisibleClick = () => {
-        setIsKeyVisible(!isKeyVisible);
-    };
-
-    const formatHidden = (s: string) => {
-        return s.replace(/./g, '*');
-    };
-
     return (
         <Overlay onClose={onClose}>
             <div className={inputFormStyles.form} onClick={(e) => e.stopPropagation()}>
                 <InputFormHeader title="API Key Generated" onClose={onClose} />
                 <div className={styles.inputContainer}>
-                    <div className={inputFormStyles.inputRow}>
-                        <div className={textInputStyles.inputDiv}>
-                            <label className={textInputStyles.inputLabel}>Access Key</label>
-                            <div className={styles.keyValueContainer}>
-                                <p>{isKeyVisible ? apiKey : formatHidden(apiKey)}</p>
-                                {isKeyVisible ? <EyeClosed className={styles.eyeIcon} onClick={handleVisibleClick} /> : <Eye className={styles.eyeIcon} onClick={handleVisibleClick} />}
-                            </div>
-                        </div>
-                    </div>
+                    <TextInput
+                        label="Access Key"
+                        disabled
+                        isInInputForm={false}
+                        name="accessKey"
+                        value={apiKey}
+                        onChange={() => { }}
+                        type="password"
+                    />
                     <ButtonOne className={styles.copyButton} onClick={handleCopy}><Copy size={18} /></ButtonOne>
-                </div>
-                <div className={styles.disclaimerContainer}>
-                    <div className={styles.disclaimer}>
-                        <TriangleAlert size={52} color="var(--btn-1)" />
-                        <p className={styles.disclaimerText}>
-                            This key is shown only once. Save it now.
-                        </p>
-                    </div>
                 </div>
                 <div className={inputFormStyles.buttonContainer}>
                     <ButtonOne type="submit" onClick={handleDownload}>Download</ButtonOne>

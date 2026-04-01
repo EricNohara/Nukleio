@@ -1,13 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 
-// import IPublicApiLog from "@/app/interfaces/IPublicApiLog";
-// import { IUserInfo } from "@/app/interfaces/IUserInfo";
-// import {
-//   getRedis,
-//   getUserInfoCacheKey,
-//   getUserTtlSettings,
-// } from "@/utils/cachedUserInfo/redis";
 import { parseApiKey, signApiKeySecret } from "@/utils/auth/apiKeys";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
@@ -92,89 +85,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         headers: CORS_HEADERS,
       },
     );
-
-    // // First try redis cache for user info
-    // const redis = getRedis();
-    // const redisKey = getUserInfoCacheKey(userId);
-    // let redisPayload: IUserInfo | null = null;
-
-    // try {
-    //   redisPayload = await redis.get<IUserInfo>(redisKey);
-    // } catch (err) {
-    //   console.error("Redis read failed:", err);
-    // }
-
-    // if (redisPayload) {
-    //   statusCode = 200;
-    //   return NextResponse.json(
-    //     { userInfo: redisPayload },
-    //     {
-    //       status: 200,
-    //       headers: CORS_HEADERS,
-    //     },
-    //   );
-    // }
-
-    // // Try the cached supabase table if redis cache miss and return if hit
-    // const { data: cachedRow, error: cachedError } = await supabase
-    //   .from("cached_user_info")
-    //   .select("payload")
-    //   .eq("user_id", userId)
-    //   .maybeSingle<{ payload: IUserInfo }>();
-
-    // if (cachedError) {
-    //   throw cachedError;
-    // }
-
-    // const cachedUserInfo = cachedRow?.payload;
-    // const ttlSeconds = getUserTtlSettings(
-    //   cachedUserInfo?.subscription?.price_id,
-    //   cachedUserInfo?.subscription?.status,
-    // );
-
-    // if (cachedUserInfo) {
-    //   // Add to redis cache
-    //   await redis.set(redisKey, cachedRow.payload, { ex: ttlSeconds });
-
-    //   statusCode = 200;
-    //   return NextResponse.json(
-    //     { userInfo: cachedRow.payload },
-    //     {
-    //       status: statusCode,
-    //       headers: CORS_HEADERS,
-    //     },
-    //   );
-    // }
-
-    // // Cache miss: build once and return without updating the cache table (do not add to redis cache)
-    // const { data: builtPayload, error: buildError } = await supabase.rpc(
-    //   "build_cached_user_info",
-    //   { p_user_id: userId },
-    // );
-
-    // if (buildError) {
-    //   throw buildError;
-    // }
-
-    // if (!builtPayload) {
-    //   statusCode = 404;
-    //   return NextResponse.json(
-    //     { message: "User info not found" },
-    //     {
-    //       status: statusCode,
-    //       headers: CORS_HEADERS,
-    //     },
-    //   );
-    // }
-
-    // statusCode = 200;
-    // return NextResponse.json(
-    //   { userInfo: builtPayload },
-    //   {
-    //     status: statusCode,
-    //     headers: CORS_HEADERS,
-    //   },
-    // );
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
