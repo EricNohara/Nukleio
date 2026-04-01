@@ -4,6 +4,10 @@ export interface ISkillsInput {
   years_of_experience: number | null;
 }
 
-export interface ISkills extends ISkillsInput {
+export interface ISkillsInternal extends ISkillsInput {
+  id: string;
+}
+
+export interface ISkills extends ISkillsInternal {
   user_id: string;
 }

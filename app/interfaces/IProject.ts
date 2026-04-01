@@ -12,6 +12,6 @@ export interface IProjectInput {
 }
 
 export interface IProject extends IProjectInput {
-  id: number;
+  id: string;
   user_id: string;
 }

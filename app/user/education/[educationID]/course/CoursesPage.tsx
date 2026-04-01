@@ -9,7 +9,7 @@ import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentW
 import Table from "@/app/components/Table/Table";
 import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
-import { ICourseInput } from "@/app/interfaces/ICourse";
+import { ICourseInput, ICourseInternal } from "@/app/interfaces/ICourse";
 import { IUserEducationInternal } from "@/app/interfaces/IUserInfoInternal";
 
 import PageContentHeader, { IButton } from "../../../../components/PageContentHeader/PageContentHeader";
@@ -27,20 +27,19 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
     const { state, dispatch } = useUser();
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
     const [formValues, setFormValues] = useState<ICourseInput>(EMPTY_COURSE);
-    const [courseToEdit, setCourseToEdit] = useState<ICourseInput | null>(null);
+    const [courseToEdit, setCourseToEdit] = useState<ICourseInternal | null>(null);
     const [education, setEducation] = useState<IUserEducationInternal | null>(null);
     const [rows, setRows] = useState<Record<string, React.ReactNode>[]>([]);
 
     const router = useRouter();
-    const educationIDNum = Number(educationID);
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
     const toast = useToast();
 
     useEffect(() => {
-        const education = state.education.find((edu) => edu.id === educationIDNum);
+        const education = state.education.find((edu) => edu.id === educationID);
         setEducation(education ? education : null);
-    }, [state, educationIDNum]);
+    }, [state, educationID]);
 
     useEffect(() => {
         const rows = education === null ? [] : education.courses.map((course) => ({
@@ -68,7 +67,7 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
 
     const handleEdit = (rowIndex: number) => {
         if (!education) return;
-        const course: ICourseInput = education.courses[rowIndex];
+        const course = education.courses[rowIndex];
         setCourseToEdit(course);
         setFormValues(course);
         setIsFormOpen(true);
@@ -76,13 +75,13 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
 
     const handleDelete = async (rowIndex: number) => {
         if (!education) return;
-        const course: ICourseInput = education.courses[rowIndex];
+        const course = education.courses[rowIndex];
         try {
-            const res = await fetch(`/api/internal/user/education/course?educationID=${educationIDNum}&courseName=${course.name}`, { method: "DELETE" });
+            const res = await fetch(`/api/internal/user/education/course?id=${course.id}`, { method: "DELETE" });
             if (!res.ok) throw new Error(`Error deleting course: ${course.name}.`);
 
             // update cached state
-            dispatch({ type: "DELETE_COURSE", payload: { educationID: educationIDNum, courseName: course.name } });
+            dispatch({ type: "DELETE_COURSE", payload: { educationID: educationID, id: course.id } });
             toast.success("Success", `Successfully deleted course: ${course.name}`);
         } catch (error) {
             const err = error as Error;
@@ -117,8 +116,8 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
             if (courseToEdit) {
                 // update the course
                 const putPayload = {
-                    educationID: educationIDNum,
-                    courseName: courseToEdit.name,
+                    id: courseToEdit.id,
+                    educationID: educationID,
                     course: newCourse
                 };
                 const res = await fetch("/api/internal/user/education/course", {
@@ -130,11 +129,11 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
                 if (!res.ok) throw new Error(data.message);
 
                 // update cached state
-                dispatch({ type: "UPDATE_COURSE", payload: { educationID: educationIDNum, courseName: courseToEdit.name, newCourse: newCourse } });
+                dispatch({ type: "UPDATE_COURSE", payload: { educationID: educationID, id: courseToEdit.id, newCourse: { ...newCourse, id: courseToEdit.id } } });
             } else {
                 // Add the skill
                 const postPayload = {
-                    educationID: educationIDNum,
+                    educationID: educationID,
                     course: newCourse
                 };
                 const res = await fetch("/api/internal/user/education/course", {
@@ -144,9 +143,10 @@ export default function CoursesPage({ educationID }: { educationID: string }) {
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message);
+                if (!data.id) throw new Error("Error retrieving course id");
 
                 // update the cached user
-                dispatch({ type: "ADD_COURSE", payload: { educationID: educationIDNum, course: newCourse } });
+                dispatch({ type: "ADD_COURSE", payload: { educationID: educationID, course: { ...newCourse, id: data.id } } });
             }
             toast.success("Success", `Successfully saved course: ${name}.`);
         } catch (err) {

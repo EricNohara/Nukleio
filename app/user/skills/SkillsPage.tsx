@@ -9,7 +9,7 @@ import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentW
 import Table from "@/app/components/Table/Table";
 import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
-import { ISkillsInput } from "@/app/interfaces/ISkills";
+import { ISkillsInput, ISkillsInternal } from "@/app/interfaces/ISkills";
 
 import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
@@ -24,7 +24,7 @@ export default function SkillsPage() {
         proficiency: null,
         years_of_experience: null
     });
-    const [skillToEdit, setSkillToEdit] = useState<ISkillsInput | null>(null);
+    const [skillToEdit, setSkillToEdit] = useState<ISkillsInternal | null>(null);
 
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
@@ -53,7 +53,7 @@ export default function SkillsPage() {
     const handleDelete = async (rowIndex: number) => {
         const skill = state.skills[rowIndex];
         try {
-            const res = await fetch(`/api/internal/user/skills?skillName=${skill.name}`, { method: "DELETE" });
+            const res = await fetch(`/api/internal/user/skills?id=${skill.id}`, { method: "DELETE" });
             if (!res.ok) throw new Error(`Error deleting skill: ${skill.name}.`);
 
             // update cached state
@@ -102,7 +102,7 @@ export default function SkillsPage() {
             if (skillToEdit) {
                 // update the skill
                 const editPayload = {
-                    skillName: skillToEdit.name,
+                    id: skillToEdit.id,
                     updatedSkill: newSkill
                 };
                 const res = await fetch("/api/internal/user/skills", {
@@ -114,7 +114,7 @@ export default function SkillsPage() {
                 if (!res.ok) throw new Error(data.message);
 
                 // update cached state
-                dispatch({ type: "UPDATE_SKILL", payload: { old: skillToEdit, new: newSkill } });
+                dispatch({ type: "UPDATE_SKILL", payload: { old: skillToEdit, new: { ...newSkill, id: skillToEdit.id } } });
             } else {
                 // Add the skill
                 const res = await fetch("/api/internal/user/skills", {
@@ -124,9 +124,10 @@ export default function SkillsPage() {
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message);
+                if (!data.id) throw new Error("Error retrieving skill id");
 
                 // update the cached user
-                dispatch({ type: "ADD_SKILL", payload: newSkill });
+                dispatch({ type: "ADD_SKILL", payload: { ...newSkill, id: data.id } });
             }
             toast.success("Success", `Successfully saved skill: ${name}`);
         } catch (err) {

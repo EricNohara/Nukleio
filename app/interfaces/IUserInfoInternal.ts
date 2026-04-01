@@ -1,21 +1,21 @@
 import { IApiKeyInternal } from "./IApiKey";
-import { ICourseInput } from "./ICourse";
+import { ICourseInternal } from "./ICourse";
 import { IExperience } from "./IExperience";
 import { IPublicApiLogInternal } from "./IPublicApiLog";
-import { ISkillsInput } from "./ISkills";
+import { ISkillsInternal } from "./ISkills";
 import IUser from "./IUser";
 
 export interface IUserInfoInternal extends IUser {
   api_keys: IApiKeyInternal[];
   public_api_logs: IPublicApiLogInternal[];
-  skills: ISkillsInput[];
+  skills: ISkillsInternal[];
   experiences: IExperience[];
   projects: IProjectInternal[];
   education: IUserEducationInternal[];
 }
 
 export interface IUserEducationInternal {
-  id: number;
+  id: string;
   degree: string;
   majors: string[];
   minors: string[];
@@ -24,11 +24,11 @@ export interface IUserEducationInternal {
   awards: string[];
   year_start: number | null;
   year_end: number | null;
-  courses: ICourseInput[];
+  courses: ICourseInternal[];
 }
 
 export interface IProjectInternal {
-  id: number;
+  id: string;
   name: string;
   date_start: string;
   date_end: string;
