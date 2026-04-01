@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { IApiKeyInternal } from "@/app/interfaces/IApiKey";
-import { generateAndStoreKey } from "@/utils/auth/generateAndStoreKey";
+import {
+  buildApiKey,
+  generateApiKeyId,
+  generateApiKeySecret,
+  signApiKeySecret,
+} from "@/utils/auth/apiKeys";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 
 export async function GET(_req: NextRequest): Promise<NextResponse> {
@@ -11,8 +16,9 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
 
     const { data, error } = await supabase
       .from("api_keys")
-      .select("created, expires, description, last_used")
-      .eq("user_id", user.id);
+      .select("key_id, created, expires, description, last_used")
+      .eq("user_id", user.id)
+      .order("created", { ascending: false });
 
     if (error) throw error;
 
@@ -22,7 +28,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
     console.error(error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -32,7 +38,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
-    // parse body
+    // validate the request body
     const result = await validateKeyRequestBody(req);
     if (!result.valid) {
       return NextResponse.json({ error: result.error }, { status: 400 });
@@ -40,39 +46,58 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const { description, expires } = result;
 
-    // get user email
-    const { data, error } = await supabase
-      .from("users")
-      .select("email")
-      .eq("id", user.id);
+    const keyId = generateApiKeyId();
+    const secret = generateApiKeySecret();
+    const hashedKey = signApiKeySecret(secret); // store this in the db
 
-    if (error) throw error;
+    const createdAt = new Date().toISOString();
 
-    const email = data[0].email;
-
-    // generate and store new key
-    const { key } = await generateAndStoreKey(
-      supabase,
-      user.id,
-      email,
+    // upload key data to supabase (not the real key though)
+    const { error } = await supabase.from("api_keys").insert({
+      id: keyId,
+      user_id: user.id,
+      hashed_key: hashedKey,
       description,
-      expires
-    );
+      expires,
+      created: createdAt,
+      last_used: null,
+    });
 
+    if (error) {
+      if (error.code === "23505") {
+        return NextResponse.json(
+          { error: "You already have an API key with that description." },
+          { status: 409 },
+        );
+      }
+      throw error;
+    }
+
+    // return the REAL key
     const newKey: IApiKeyInternal = {
-      description: key.description,
-      expires: key.expires,
-      created: key.created,
+      id: keyId,
+      description,
+      expires,
+      created: createdAt,
       last_used: null,
     };
 
-    return NextResponse.json({ key: newKey }, { status: 201 });
+    // build the full api key using the key id and secret
+    const apiKey = buildApiKey(keyId, secret);
+
+    return NextResponse.json(
+      {
+        key: newKey,
+        apiKey,
+      },
+      { status: 201 },
+    );
   } catch (err) {
     const error = err as Error;
     console.error(error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -82,7 +107,6 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
-    // parse body
     const result = await validateKeyRequestBody(req);
     if (!result.valid) {
       return NextResponse.json({ error: result.error }, { status: 400 });
@@ -90,72 +114,81 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     const { description, expires } = result;
 
-    // deleting old key if it exists
-    await supabase
+    const { error: deleteError } = await supabase
       .from("api_keys")
       .delete()
       .eq("user_id", user.id)
       .eq("description", description);
 
-    // generating the new key
-    const { data, error } = await supabase
-      .from("users")
-      .select("email")
-      .eq("id", user.id);
+    if (deleteError) throw deleteError;
 
-    if (error) throw error;
+    const keyId = generateApiKeyId();
+    const secret = generateApiKeySecret();
+    const hashedKey = signApiKeySecret(secret);
 
-    const email = data[0].email;
+    const createdAt = new Date().toISOString();
 
-    // generate and store new key
-    const { key } = await generateAndStoreKey(
-      supabase,
-      user.id,
-      email,
+    const { error: insertError } = await supabase.from("api_keys").insert({
+      id: keyId,
+      user_id: user.id,
+      hashed_key: hashedKey,
       description,
-      expires
-    );
+      expires,
+      created: createdAt,
+      last_used: null,
+    });
+
+    if (insertError) throw insertError;
 
     const updatedKey: IApiKeyInternal = {
-      description: key.description,
-      expires: key.expires,
-      created: key.created,
+      id: keyId,
+      description,
+      expires,
+      created: createdAt,
       last_used: null,
     };
+    const apiKey = buildApiKey(keyId, secret);
 
-    return NextResponse.json({ key: updatedKey }, { status: 201 });
+    return NextResponse.json(
+      {
+        key: updatedKey,
+        apiKey,
+      },
+      { status: 201 },
+    );
   } catch (err) {
     const error = err as Error;
     console.error(error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
+// delete by id - users can only delete their own keys
 export async function DELETE(req: NextRequest): Promise<NextResponse> {
   try {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
-    // parse body
     const { searchParams } = new URL(req.url);
-    const description = searchParams.get("description");
+    const keyId = searchParams.get("id");
 
-    if (!description) {
+    if (!keyId) {
       return NextResponse.json(
         { error: "Missing required parameter" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // deleting old key if it exists
-    await supabase
+    const { error } = await supabase
       .from("api_keys")
       .delete()
-      .eq("user_id", user.id)
-      .eq("description", description);
+      .eq("id", keyId)
+      .eq("user_id", user.id);
+
+    if (error) throw error;
 
     return new NextResponse(null, { status: 204 });
   } catch (err) {
@@ -163,23 +196,22 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
     console.error(error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-// validation helper function
+// helper functions
 type KeyRequestValidation =
   | { valid: true; description: string; expires: string | null }
   | { valid: false; error: string };
 
 async function validateKeyRequestBody(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<KeyRequestValidation> {
   const body = await req.json();
   const { description, expires } = body;
 
-  // description must not be null or empty
   if (
     !description ||
     typeof description !== "string" ||
@@ -191,9 +223,9 @@ async function validateKeyRequestBody(
     };
   }
 
-  // validate expires to be either null or a timestamp in the future
   let expiresAt: string | null = null;
-  if (expires !== null) {
+
+  if (expires !== null && expires !== undefined) {
     if (typeof expires !== "string" || isNaN(Date.parse(expires))) {
       return {
         valid: false,
@@ -207,11 +239,11 @@ async function validateKeyRequestBody(
     if (parsedDate <= now) {
       return {
         valid: false,
-        error: "expires must be a timestamp in the future.",
+        error: "Expires must be a timestamp in the future.",
       };
     }
 
-    expiresAt = new Date(expires).toISOString();
+    expiresAt = parsedDate.toISOString();
   }
 
   return { valid: true, description: description.trim(), expires: expiresAt };
