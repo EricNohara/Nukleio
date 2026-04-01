@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+
 import { NextRequest, NextResponse } from "next/server";
 
 import {
@@ -7,7 +9,6 @@ import {
 } from "@/app/interfaces/IExperience";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 import { refreshCachedUserInfo } from "@/utils/cachedUserInfo/refreshCachedUserInfo";
-import { randomUUID } from "crypto";
 
 export async function GET(_req: NextRequest): Promise<NextResponse> {
   try {

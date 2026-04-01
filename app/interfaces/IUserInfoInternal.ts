@@ -2,13 +2,13 @@ import { IApiKeyInternal } from "./IApiKey";
 import { ICourseInput } from "./ICourse";
 import { IExperience } from "./IExperience";
 import { IPublicApiLogInternal } from "./IPublicApiLog";
-import { ISkillsInput } from "./ISkills";
+import { ISkillsInternal } from "./ISkills";
 import IUser from "./IUser";
 
 export interface IUserInfoInternal extends IUser {
   api_keys: IApiKeyInternal[];
   public_api_logs: IPublicApiLogInternal[];
-  skills: ISkillsInput[];
+  skills: ISkillsInternal[];
   experiences: IExperience[];
   projects: IProjectInternal[];
   education: IUserEducationInternal[];

@@ -1,36 +1,24 @@
+import { randomUUID } from "crypto";
+
 import { NextRequest, NextResponse } from "next/server";
 
 import { ISkills, ISkillsInput } from "@/app/interfaces/ISkills";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 import { refreshCachedUserInfo } from "@/utils/cachedUserInfo/refreshCachedUserInfo";
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+export async function GET(_req: NextRequest): Promise<NextResponse> {
   try {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
-    const skillName = req.nextUrl.searchParams.get("skillName");
+    const { data, error } = await supabase
+      .from("skills")
+      .select()
+      .eq("user_id", user.id);
 
-    if (skillName) {
-      const { data, error } = await supabase
-        .from("skills")
-        .select()
-        .eq("user_id", user.id)
-        .eq("name", skillName);
+    if (error) throw error;
 
-      if (error) throw error;
-
-      return NextResponse.json(data, { status: 200 });
-    } else {
-      const { data, error } = await supabase
-        .from("skills")
-        .select()
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-
-      return NextResponse.json(data, { status: 200 });
-    }
+    return NextResponse.json(data, { status: 200 });
   } catch (err) {
     const error = err as Error;
     console.error(error.message);
@@ -47,24 +35,26 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (!user) return response;
 
     // validate body
-    const sentSkill: ISkillsInput = await req.json();
-    const skillValidationResponse = validateSkill(sentSkill);
+    const skill: ISkillsInput = await req.json();
+    const skillValidationResponse = validateSkill(skill);
     if (skillValidationResponse) return skillValidationResponse;
 
-    const skillData: ISkills = {
-      ...sentSkill,
+    const id = randomUUID();
+
+    const payload: ISkills = {
+      id: id,
       user_id: user.id,
+      ...skill,
     };
 
-    const { error } = await supabase.from("skills").insert(skillData);
-
+    const { error } = await supabase.from("skills").insert(payload);
     if (error) throw error;
 
     // update the user info cache
     await refreshCachedUserInfo(supabase, user.id);
 
     return NextResponse.json(
-      { message: "Successfully created skill" },
+      { message: "Successfully created skill", id },
       { status: 201 },
     );
   } catch (err) {
@@ -77,17 +67,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 }
 
+// by id
 export async function DELETE(req: NextRequest): Promise<NextResponse> {
   try {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
     // validate input
-    const skillName = req.nextUrl.searchParams.get("skillName");
+    const id = req.nextUrl.searchParams.get("id");
 
-    if (!skillName) {
+    if (!id) {
       return NextResponse.json(
-        { message: "Invalid skill name" },
+        { message: "Invalid skill id" },
         { status: 400 },
       );
     }
@@ -95,7 +86,7 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
     const { error } = await supabase
       .from("skills")
       .delete()
-      .eq("name", skillName)
+      .eq("id", id)
       .eq("user_id", user.id);
 
     if (error) throw error;
@@ -114,6 +105,7 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
   }
 }
 
+// by id
 export async function PUT(req: NextRequest): Promise<NextResponse> {
   try {
     const { user, supabase, response } = await getAuthenticatedUser();
@@ -121,23 +113,25 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     // validate body
     const sentData = await req.json();
-    const skillName = sentData.skillName;
-    if (!skillName)
+    const id = sentData.id;
+    if (!id) {
       return NextResponse.json({ message: "Invalid input" }, { status: 400 });
+    }
 
     const updatedSkill: ISkillsInput = sentData.updatedSkill;
     const skillValidationResponse = validateSkill(updatedSkill);
     if (skillValidationResponse) return skillValidationResponse;
 
-    const skillData: ISkills = {
-      ...updatedSkill,
+    const payload: ISkills = {
+      id: id,
       user_id: user.id,
+      ...updatedSkill,
     };
 
     const { error } = await supabase
       .from("skills")
-      .update(skillData)
-      .eq("name", skillName)
+      .update(payload)
+      .eq("id", id)
       .eq("user_id", user.id);
 
     if (error) throw error;

@@ -6,7 +6,7 @@ import { IApiKeyInternal } from "../interfaces/IApiKey";
 import { ICourseInput } from "../interfaces/ICourse";
 import { IExperience } from "../interfaces/IExperience";
 import { IPublicApiLogInternal } from "../interfaces/IPublicApiLog";
-import { ISkillsInput } from "../interfaces/ISkills";
+import { ISkillsInternal } from "../interfaces/ISkills";
 import IUser from "../interfaces/IUser";
 import { IUserEducationInternal, IUserInfoInternal, IProjectInternal } from "../interfaces/IUserInfoInternal";
 
@@ -18,9 +18,9 @@ type Action =
     | { type: "ADD_EXPERIENCE"; payload: IExperience }
     | { type: "UPDATE_EXPERIENCE"; payload: { old: IExperience, new: IExperience } }
     | { type: "DELETE_EXPERIENCE"; payload: IExperience }
-    | { type: "ADD_SKILL"; payload: ISkillsInput }
-    | { type: "UPDATE_SKILL"; payload: { old: ISkillsInput, new: ISkillsInput } }
-    | { type: "DELETE_SKILL"; payload: ISkillsInput }
+    | { type: "ADD_SKILL"; payload: ISkillsInternal }
+    | { type: "UPDATE_SKILL"; payload: { old: ISkillsInternal, new: ISkillsInternal } }
+    | { type: "DELETE_SKILL"; payload: ISkillsInternal }
     | { type: "ADD_PROJECT"; payload: IProjectInternal }
     | { type: "UPDATE_PROJECT"; payload: { old: IProjectInternal, new: IProjectInternal } }
     | { type: "DELETE_PROJECT"; payload: IProjectInternal }
