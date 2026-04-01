@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 
 import { parseApiKey, signApiKeySecret } from "@/utils/auth/apiKeys";
 import { createServiceRoleClient } from "@/utils/supabase/server";
@@ -78,6 +78,35 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     keyDescription = row.key_description;
 
     statusCode = 200;
+
+    if (
+      row.key_description &&
+      row.key_description !== "Nukleio Super Key" &&
+      row.user_id
+    ) {
+      after(async () => {
+        try {
+          if (!supabase) {
+            supabase = await createServiceRoleClient();
+          }
+          const respondedAt = new Date().toISOString();
+          const userAgent = req.headers.get("user-agent") || "unknown";
+
+          await supabase.rpc("log_public_api_request", {
+            p_user_id: row.user_id,
+            p_requested_at: requestedAt,
+            p_responded_at: respondedAt,
+            p_status_code: statusCode,
+            p_key_description: row.key_description,
+            p_user_agent: userAgent,
+            p_key_id: keyId,
+          });
+        } catch (logErr) {
+          console.error("Failed to insert API log:", (logErr as Error).message);
+        }
+      });
+    }
+
     return NextResponse.json(
       { userInfo: row.user_info },
       {
@@ -97,31 +126,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         headers: CORS_HEADERS,
       },
     );
-  } finally {
-    // add a log and update last used field for api key if we know the user id
-    if (keyDescription && keyDescription !== "Nukleio Super Key" && userId) {
-      try {
-        // create the log
-        const respondedAt = new Date().toISOString();
-        const userAgent = req.headers.get("user-agent") || "unknown";
-
-        // insert the log and update the last used field for the key
-        if (!supabase) {
-          supabase = await createServiceRoleClient();
-        }
-        await supabase.rpc("log_public_api_request", {
-          p_user_id: userId,
-          p_requested_at: requestedAt,
-          p_responded_at: respondedAt,
-          p_status_code: statusCode,
-          p_key_description: keyDescription,
-          p_user_agent: userAgent,
-          p_key_id: keyId,
-        });
-      } catch (logErr) {
-        console.error("Failed to insert API log:", (logErr as Error).message);
-      }
-    }
   }
 }
 
