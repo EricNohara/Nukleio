@@ -20,7 +20,7 @@ export default function CoverLetterPage() {
     const [companyName, setCompanyName] = useState<string>("");
     const [jobDescriptionDump, setJobDescriptionDump] = useState<string>("");
     const [writingSample, setWritingSample] = useState<string>("");
-    const [conversationId, setConversationId] = useState<string>("");
+    const [sessionId, setSessionId] = useState<string>("");
     const [draft, setDraft] = useState<string>("");
     const [skillsMatchScore, setSkillsMatchScore] = useState<ISkillsMatchScore | null>(null);
     const [feedback, setFeedback] = useState<string>("");
@@ -57,6 +57,7 @@ export default function CoverLetterPage() {
             try {
                 const res = await fetch("/api/internal/user/coverLetter?mode=list");
                 const data = await res.json();
+
                 if (!res.ok) throw new Error(data?.error ?? "Failed to load cached cover letters");
 
                 if (!cancelled) {
@@ -75,28 +76,28 @@ export default function CoverLetterPage() {
     }, [canAccess, tierLoading, toast]);
 
     // load a cached draft into revision ui
-    const loadCachedConversation = async (convoId: string) => {
-        if (!convoId) return;
+    const loadSession = async (sessionId: string) => {
+        if (!sessionId) return;
 
         setLoading(true);
         setMode("cache");
 
         try {
             const res = await fetch(
-                `/api/internal/user/coverLetter?conversationId=${encodeURIComponent(convoId)}`
+                `/api/internal/user/coverLetter?sessionId=${encodeURIComponent(sessionId)}`
             );
             const data = await res.json();
             if (!res.ok) throw new Error(data?.error ?? "Failed to load cached drafts");
 
             const rows = (Array.isArray(data?.items) ? data.items : []) as ICachedCoverLetter[];
-            if (!rows.length) throw new Error("No drafts found for this conversation");
+            if (!rows.length) throw new Error("No drafts found for this session");
             setCoverLetterVersions(rows);
 
             // rows are ordered created_at asc per your GET
             const latest = rows[rows.length - 1];
 
             setSelectedDraftName(latest.draft_name);
-            setConversationId(latest.conversation_id);
+            setSessionId(latest.session_id);
             setDraft(latest.draft);
             setSkillsMatchScore({
                 education: Number(latest.education_score),
@@ -105,6 +106,13 @@ export default function CoverLetterPage() {
                 projects: Number(latest.projects_score),
                 location: Number(latest.location_score),
                 overall: Number(latest.overall_score),
+                explanations: {
+                    education: latest.education_score_exp,
+                    experience: latest.experience_score_exp,
+                    skills: latest.skills_score_exp,
+                    projects: latest.projects_score_exp,
+                    location: latest.location_score_exp
+                }
             });
             setFeedback("");
 
@@ -137,7 +145,7 @@ export default function CoverLetterPage() {
         setMode("cache");
 
         try {
-            setConversationId(version.conversation_id);
+            setSessionId(version.session_id);
             setDraft(version.draft);
             setSelectedDraftName(version.draft_name);
 
@@ -148,6 +156,13 @@ export default function CoverLetterPage() {
                 projects: Number(version.projects_score),
                 location: Number(version.location_score),
                 overall: Number(version.overall_score),
+                explanations: {
+                    education: version.education_score_exp,
+                    experience: version.experience_score_exp,
+                    skills: version.skills_score_exp,
+                    projects: version.projects_score_exp,
+                    location: version.location_score_exp,
+                }
             });
             setFeedback("");
 
@@ -204,7 +219,7 @@ export default function CoverLetterPage() {
                 try {
                     // perform the revision
                     const payload = {
-                        conversationId,
+                        sessionId,
                         feedback
                     }
                     const res = await fetch("/api/internal/user/coverLetter",
@@ -242,7 +257,7 @@ export default function CoverLetterPage() {
                     )[0];
 
                 if (cachedCoverLetter) {
-                    loadCachedConversation(cachedCoverLetter.conversation_id);
+                    loadSession(cachedCoverLetter.session_id);
                     return;
                 }
 
@@ -265,7 +280,7 @@ export default function CoverLetterPage() {
                     if (!res.ok) throw new Error(data.error);
 
                     setDraft(data.currentDraft);
-                    setConversationId(data.conversationId);
+                    setSessionId(data.sessionId);
                     setSkillsMatchScore(data.skillsMatchScore);
                     setFeedback("");
 
@@ -306,11 +321,12 @@ export default function CoverLetterPage() {
             setWritingSample("");
             setDraft("");
             setFeedback("");
-            setConversationId("");
+            setSessionId("");
             setPdfPreviewUrl((prev) => {
                 if (prev) URL.revokeObjectURL(prev);
                 return "";
             });
+            setSelectedDraftName("");
         },
     };
 
@@ -358,16 +374,16 @@ export default function CoverLetterPage() {
                 {!canAccess && <p>Please upgrade to premium to use this feature.</p>}
 
                 {/* ------------------- INITIAL FORM ------------------- */}
-                {!loading && !tierLoading && !draft && !conversationId && canAccess && (
+                {!loading && !tierLoading && !draft && !sessionId && canAccess && (
                     <>
                         <div className={styles.formHeader}>
                             <p className={styles.subtitle}>Generate a cover letter tailored to your personal data.</p>
                             <div className={styles.dropdownContainer}>
                                 <SelectDropdown
-                                    value={conversationId}
+                                    value={sessionId}
                                     options={[
                                         ...cachedList.map((item) => ({
-                                            value: item.conversation_id,
+                                            value: item.session_id,
                                             label: `${item.job_title ?? "Untitled"} @ ${item.company_name ?? "Unknown"}`
                                         })),
                                     ]}
@@ -382,8 +398,8 @@ export default function CoverLetterPage() {
                                     }
                                     ariaLabel="Cached cover letters"
                                     onChange={async (id) => {
-                                        setConversationId(id);
-                                        if (id) await loadCachedConversation(id);
+                                        setSessionId(id);
+                                        if (id) await loadSession(id);
                                     }}
                                 />
                             </div>
@@ -436,7 +452,7 @@ export default function CoverLetterPage() {
                 )}
 
                 {/* ------------------- REVISION UI ------------------- */}
-                {!loading && draft && conversationId && (
+                {!loading && draft && sessionId && (
                     <div className={styles.reviseContainer}>
                         <div className={styles.pdfPreviewContainer}>
                             {pdfPreviewUrl ? (
@@ -493,7 +509,6 @@ export default function CoverLetterPage() {
                                 <p className={styles.jobMatchLabel}>Job Match Breakdown</p>
                                 <MatchBreakdownChart
                                     breakdown={skillsMatchScore}
-                                    height={300}
                                 />
                             </div>
 

@@ -34,25 +34,11 @@
   white-space: nowrap;
 }
 
-/* Chevron styling */
-.chevron {
-  display: grid;
-  place-items: center;
-  transition: transform 120ms ease;
-}
-
-.chevronOpen {
-  transform: rotate(180deg);
-}
-
-.chevronIcon {
-  width: 18px;
-  height: 18px;
-}
-
 /* Popover panel */
 .popover {
   position: absolute;
+  top: 100%;
+  left: 0;
   z-index: 50;
   width: 100%;
   border-radius: 0 0 var(--global-border-radius) var(--global-border-radius);
@@ -60,6 +46,20 @@
   border-top: none;
   background: var(--page-box-bg);
   overflow: hidden;
+
+  transform-origin: top;
+  transition: 0.1s ease;
+  opacity: 0;
+  transform: translateY(-10px) scaleY(0.96);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.popover[data-open="true"] {
+  opacity: 1;
+  transform: translateY(0) scaleY(1);
+  visibility: visible;
+  pointer-events: auto;
 }
 
 /* List + Items (fully stylable) */

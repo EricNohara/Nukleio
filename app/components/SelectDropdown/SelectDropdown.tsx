@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "./SelectDropdown.module.css";
+import AnimatedChevronIcon from "../AnimatedIcons/AnimatedChevronIcon";
 
 export type SelectOption = {
     value: string;
@@ -145,48 +146,37 @@ export default function SelectDropdown({
                 aria-expanded={open}
             >
                 <span className={styles.triggerText}>{displayText}</span>
-
-                {/* Custom chevron (fully stylable) */}
-                <span className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`} aria-hidden="true">
-                    <svg viewBox="0 0 20 20" className={styles.chevronIcon}>
-                        <path
-                            d="M5.5 7.5L10 12l4.5-4.5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                    </svg>
-                </span>
+                <AnimatedChevronIcon open={open} />
             </button>
 
-            {open && (
-                <div className={styles.popover}>
-                    <ul ref={listRef} className={styles.list} role="listbox" aria-label={ariaLabel}>
-                        {options.map((opt) => {
-                            const isSelected = opt.value === value;
-                            const disabledItem = !!opt.disabled;
+            <div
+                className={styles.popover}
+                data-open={open ? "true" : "false"}
+                aria-hidden={!open}
+            >
+                <ul ref={listRef} className={styles.list} role="listbox" aria-label={ariaLabel}>
+                    {options.map((opt) => {
+                        const isSelected = opt.value === value;
+                        const disabledItem = !!opt.disabled;
 
-                            return (
-                                <li
-                                    key={opt.value}
-                                    role="option"
-                                    aria-selected={isSelected}
-                                    tabIndex={disabledItem ? -1 : 0}
-                                    data-selected={isSelected ? "true" : "false"}
-                                    data-disabled={disabledItem ? "true" : "false"}
-                                    className={styles.item}
-                                    onClick={() => handleSelect(opt)}
-                                    onKeyDown={(e) => onItemKeyDown(e, opt)}
-                                >
-                                    <span className={styles.itemLabel}>{opt.label}</span>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </div>
-            )}
+                        return (
+                            <li
+                                key={opt.value}
+                                role="option"
+                                aria-selected={isSelected}
+                                tabIndex={open && !disabledItem ? 0 : -1}
+                                data-selected={isSelected ? "true" : "false"}
+                                data-disabled={disabledItem ? "true" : "false"}
+                                className={styles.item}
+                                onClick={() => handleSelect(opt)}
+                                onKeyDown={(e) => onItemKeyDown(e, opt)}
+                            >
+                                <span className={styles.itemLabel}>{opt.label}</span>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
         </div>
     );
 }

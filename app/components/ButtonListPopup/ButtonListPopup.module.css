@@ -3,10 +3,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: var(--page-bg);
+  background-color: var(--page-box-bg);
   color: var(--page-txt-1);
   border-radius: 0 0 var(--global-border-radius) var(--global-border-radius);
-  border: 1px solid var(--page-box-border);
+  border: 1.5px solid var(--page-box-border);
   padding: 0.5rem;
 }
 

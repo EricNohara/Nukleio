@@ -1,9 +1,8 @@
+import { randomUUID } from "crypto";
+
 import { NextRequest, NextResponse } from "next/server";
 
-import {
-  ICachedCoverLetter,
-  ISkillsMatchScore,
-} from "@/app/interfaces/ICachedCoverLetter";
+import { ICachedCoverLetter } from "@/app/interfaces/ICachedCoverLetter";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 import { requireTier } from "@/utils/auth/requireTier";
 import { createClient } from "@/utils/supabase/server";
@@ -23,7 +22,7 @@ function getNowFormatted() {
 /**
  * GET:
  * - ?mode=list  -> list all cached cover letters (metadata only)
- * - ?conversationId=... -> fetch all drafts for that conversation (full rows)
+ * - ?sessionId=... -> fetch all drafts for that session (full rows)
  * - Cached cover letters should only be available to premium users - one shot generations should not be saved
  */
 export async function GET(req: NextRequest) {
@@ -38,7 +37,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
 
     const mode = searchParams.get("mode");
-    const conversationId = searchParams.get("conversationId");
+    const sessionId = searchParams.get("sessionId");
 
     // Case 1: list view (latest draft per conversation)
     if (mode === "list") {
@@ -61,10 +60,10 @@ export async function GET(req: NextRequest) {
     }
 
     // Case 2: fetch all drafts for a conversation (full rows)
-    if (conversationId) {
+    if (sessionId) {
       const { data, error } = await supabase.rpc(
-        "get_cached_cover_letters_by_conversation",
-        { p_conversation_id: conversationId },
+        "get_cached_cover_letters_by_session",
+        { p_session_id: sessionId },
       );
 
       if (error) {
@@ -130,25 +129,53 @@ export async function POST(req: NextRequest) {
 
     // insert into cached_cover_letters table
     const draft: string = data?.currentDraft ?? "";
-    const conversationId: string = data?.conversationId ?? "";
-    const skillsMatchScore: ISkillsMatchScore = data?.skillsMatchScore;
+    const jobData = data?.jobData ?? null;
+    const writingAnalysis = data?.writingAnalysis ?? null;
+    const writingSample = data?.writingSample ?? null;
+    const skillsMatchScore = data?.skillsMatchScore ?? null;
 
     const supabase = await createClient();
+    let sessionId: string | null = null;
 
-    if (draft && conversationId && skillsMatchScore) {
+    // store the generation as a session
+    if (draft && jobData) {
+      sessionId = randomUUID();
+      const sessionPayload = {
+        id: sessionId,
+        user_id: user.id,
+        job_data: jobData,
+        current_draft: draft,
+        writing_analysis: writingAnalysis,
+        writing_sample: writingSample?.trim() ? writingSample : null,
+      };
+
+      const { error } = await supabase
+        .from("cover_letter_sessions")
+        .insert(sessionPayload);
+
+      if (error) throw new Error(`Session insert failed: ${error.message}`);
+    }
+
+    // cache the cover letter generation only if a session insert occurred
+    if (sessionId && skillsMatchScore) {
       const payload: ICachedCoverLetter = {
         user_id: user.id,
         job_title: body.jobTitle,
         company_name: body.companyName,
+        session_id: sessionId,
         draft_name: `First Draft: ${getNowFormatted()}`,
-        conversation_id: conversationId,
         education_score: skillsMatchScore.education,
-        skills_score: skillsMatchScore.skills,
-        location_score: skillsMatchScore.location,
-        projects_score: skillsMatchScore.projects,
         experience_score: skillsMatchScore.experience,
+        skills_score: skillsMatchScore.skills,
+        projects_score: skillsMatchScore.projects,
+        location_score: skillsMatchScore.location,
         overall_score: skillsMatchScore.overall,
-        draft: draft,
+        education_score_exp: skillsMatchScore.explanations.education,
+        experience_score_exp: skillsMatchScore.explanations.experience,
+        skills_score_exp: skillsMatchScore.explanations.skills,
+        projects_score_exp: skillsMatchScore.explanations.projects,
+        location_score_exp: skillsMatchScore.explanations.location,
+        draft,
       };
 
       const { error } = await supabase
@@ -158,7 +185,8 @@ export async function POST(req: NextRequest) {
       if (error) throw new Error(`DB insert failed: ${error.message}`);
     }
 
-    return NextResponse.json(data, { status: 200 });
+    // return the session id and all the cover letter data
+    return NextResponse.json({ ...data, sessionId }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
@@ -189,10 +217,19 @@ export async function PUT(req: NextRequest) {
 
     const body = await req.json();
 
+    const sessionId: string = body?.sessionId ?? "";
+    if (!sessionId.trim()) {
+      return NextResponse.json({ error: "Missing sessionId" }, { status: 400 });
+    }
+    const feedback: string = body?.feedback ?? "";
+    if (!feedback.trim()) {
+      return NextResponse.json({ error: "Missing feedback" }, { status: 400 });
+    }
+
     const agentRes = await fetch(`${AGENT_BASE}/revise`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ userId: user.id, sessionId, feedback }),
     });
 
     const data = await agentRes.json().catch(() => null);
@@ -204,8 +241,8 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const revisedDraft: string = data.revisedDraft;
-    const draftName: string = data.draftName;
+    const revisedDraft: string = data?.revisedDraft ?? "";
+    const draftName: string = data?.draftName ?? "";
 
     if (!revisedDraft.trim() || !draftName.trim()) {
       return NextResponse.json(
@@ -217,53 +254,28 @@ export async function PUT(req: NextRequest) {
     // insert into cached_cover_letters table
     const supabase = await createClient();
 
-    if (revisedDraft && draftName) {
-      // retrieve ANY draft from cache
-      const { data: existing, error: fetchErr } = await supabase
-        .from("cached_cover_letters")
-        .select(
-          "education_score,skills_score,experience_score,projects_score,location_score,overall_score,job_title,company_name",
-        )
-        .eq("user_id", user.id)
-        .eq("conversation_id", body.conversationId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+    const { data: savedRow, error: rpcError } = await supabase.rpc(
+      "save_cover_letter_revision",
+      {
+        p_session_id: sessionId,
+        p_draft_name: `${draftName}: ${getNowFormatted()}`,
+        p_revised_draft: revisedDraft,
+      },
+    );
 
-      if (fetchErr) {
-        throw new Error(`DB fetch failed: ${fetchErr.message}`);
-      }
-
-      if (!existing) {
-        // This means they revised without ever generating the first draft row
-        throw new Error(
-          "No cached cover letter found for this job; generate first draft before revising.",
-        );
-      }
-
-      const payload: ICachedCoverLetter = {
-        user_id: user.id,
-        job_title: existing.job_title,
-        company_name: existing.company_name,
-        draft_name: `${draftName}: ${getNowFormatted()}`,
-        conversation_id: body.conversationId,
-        education_score: existing.education_score,
-        skills_score: existing.skills_score,
-        location_score: existing.location_score,
-        projects_score: existing.projects_score,
-        experience_score: existing.experience_score,
-        overall_score: existing.overall_score,
-        draft: revisedDraft,
-      };
-
-      const { error } = await supabase
-        .from("cached_cover_letters")
-        .insert(payload);
-      if (error) throw new Error(`DB insert failed: ${error.message}`);
+    if (rpcError) {
+      throw new Error(`Revision save failed: ${rpcError.message}`);
     }
 
-    // just return the draft as a string
-    return NextResponse.json(revisedDraft, { status: 200 });
+    return NextResponse.json(
+      {
+        revisedDraft,
+        draftName,
+        sessionId,
+        cachedCoverLetter: savedRow,
+      },
+      { status: 200 },
+    );
   } catch (error) {
     console.error(error);
     return NextResponse.json(

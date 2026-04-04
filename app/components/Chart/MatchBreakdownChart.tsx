@@ -11,19 +11,12 @@ import {
     Tooltip,
 } from "recharts";
 
+import { ISkillsMatchScore } from "@/app/interfaces/ICachedCoverLetter";
+
 import styles from "./MatchBreakdownChart.module.css";
 
-export type MatchBreakdown = {
-    education: number;
-    experience: number;
-    skills: number;
-    projects: number;
-    location: number;
-    overall: number;
-};
-
 type Props = {
-    breakdown: MatchBreakdown | null | undefined;
+    breakdown: ISkillsMatchScore | null | undefined;
     height?: number | string;
 };
 
@@ -35,38 +28,48 @@ function clamp100(n: unknown) {
 
 export default function MatchBreakdownChart({
     breakdown,
-    height = "100%",
 }: Props) {
-    const containerStyle: React.CSSProperties = {
-        width: "100%",
-        minWidth: 0,
-        minHeight: 0,
-        height,
-    };
     const data = useMemo(() => {
         if (!breakdown) return [];
 
-        const education = clamp100(breakdown.education);
-        const experience = clamp100(breakdown.experience);
-        const skills = clamp100(breakdown.skills);
-        const projects = clamp100(breakdown.projects);
-        const location = clamp100(breakdown.location);
-        const overall = clamp100(breakdown.overall);
-
         return [
-            { name: "Overall", value: overall },
-            { name: "Skills", value: skills },
-            { name: "Experience", value: experience },
-            { name: "Projects", value: projects },
-            { name: "Education", value: education },
-            { name: "Location", value: location },
+            {
+                name: "Overall",
+                value: clamp100(breakdown.overall),
+                explanation: null,
+            },
+            {
+                name: "Skills",
+                value: clamp100(breakdown.skills),
+                explanation: breakdown.explanations.skills,
+            },
+            {
+                name: "Experience",
+                value: clamp100(breakdown.experience),
+                explanation: breakdown.explanations.experience,
+            },
+            {
+                name: "Projects",
+                value: clamp100(breakdown.projects),
+                explanation: breakdown.explanations.projects,
+            },
+            {
+                name: "Education",
+                value: clamp100(breakdown.education),
+                explanation: breakdown.explanations.education,
+            },
+            {
+                name: "Location",
+                value: clamp100(breakdown.location),
+                explanation: breakdown.explanations.location,
+            },
         ];
     }, [breakdown]);
 
     // No data state (mirrors your pattern)
     if (!data) {
         return (
-            <div className={styles.root} style={containerStyle}>
+            <div className={styles.root}>
                 <div
                     style={{
                         height: "100%",
@@ -84,7 +87,7 @@ export default function MatchBreakdownChart({
     }
 
     return (
-        <div className={styles.root} style={containerStyle}>
+        <div className={styles.root}>
             <div className={styles.chart} style={{ height: "100%" }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={data} outerRadius="72%">
@@ -115,24 +118,25 @@ export default function MatchBreakdownChart({
                             content={({ active, payload }) => {
                                 if (!active || !payload?.length) return null;
 
-                                const p = payload[0]?.payload as { name?: string; value?: number } | undefined;
+                                const p = payload[0]?.payload as {
+                                    name?: string;
+                                    value?: number;
+                                    explanation?: string | null;
+                                };
+
                                 if (!p?.name) return null;
 
                                 return (
-                                    <div
-                                        style={{
-                                            fontSize: "0.8rem",
-                                            fontWeight: "bold",
-                                            padding: "0.5rem 1rem",
-                                            whiteSpace: "normal",
-                                            wordBreak: "break-word",
-                                            background: "var(--page-box-bg)",
-                                            color: "var(--page-txt-1)",
-                                            border: "1px solid var(--page-box-border)",
-                                            borderRadius: "var(--global-border-radius)",
-                                        }}
-                                    >
-                                        <div>{p.name}: {Math.round(Number(p.value ?? 0))}%</div>
+                                    <div className={styles.tooltipContainer}>
+                                        <div className={styles.tooltipTitle}>
+                                            {p.name}: {Math.round(Number(p.value ?? 0))}%
+                                        </div>
+
+                                        {p.explanation && (
+                                            <div className={styles.tooltipSubtitle}>
+                                                {p.explanation}
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             }}
