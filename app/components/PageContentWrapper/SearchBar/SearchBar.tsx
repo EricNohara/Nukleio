@@ -233,7 +233,10 @@ export default function SearchBar({ onFocusChange }: ISearchBarProps) {
             onFocus={handleFocus}
             onBlur={handleBlur}
         >
-            <form className={styles.searchBarForm} onSubmit={handleSubmit}>
+            <form
+                className={`${styles.searchBarForm} ${showDropdown && filtered.length > 0 ? styles.searchBarFormOpen : ""}`}
+                onSubmit={handleSubmit}
+            >
                 <Search />
                 <input
                     type="text"
@@ -249,16 +252,18 @@ export default function SearchBar({ onFocusChange }: ISearchBarProps) {
 
             {showDropdown && filtered.length > 0 && (
                 <ul className={styles.dropdown}>
-                    {filtered.map((item, index) => (
-                        <li
-                            key={index}
-                            ref={(el) => { itemRefs.current[index] = el; }}
-                            className={`${styles.dropdownItem} ${index === activeIndex ? styles.activeItem : ""}`}
-                            onClick={() => handleSelect(item.path)}
-                        >
-                            {item.label}
-                        </li>
-                    ))}
+                    <div className={styles.dropdownScroll}>
+                        {filtered.map((item, index) => (
+                            <li
+                                key={index}
+                                ref={(el) => { itemRefs.current[index] = el; }}
+                                className={`${styles.dropdownItem} ${index === activeIndex ? styles.activeItem : ""}`}
+                                onClick={() => handleSelect(item.path)}
+                            >
+                                {item.label}
+                            </li>
+                        ))}
+                    </div>
                 </ul>
             )}
         </div>

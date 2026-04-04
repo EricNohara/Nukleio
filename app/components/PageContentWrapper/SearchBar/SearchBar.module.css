@@ -7,8 +7,9 @@
 .searchBarForm {
   display: flex;
   align-items: center;
-  background-color: var(--search-bg);
-  color: var(--search-txt);
+  background-color: var(--page-box-bg);
+  border: 1.5px solid var(--page-box-border);
+  color: var(--page-txt-1);
   width: 100%;
   padding: 0 1rem;
   border-radius: var(--global-border-radius);
@@ -16,7 +17,7 @@
 
 .searchBarInput {
   background-color: inherit;
-  color: var(--search-txt);
+  color: var(--page-txt-1);
   border: none;
   width: 100%;
   font-size: 1rem;
@@ -27,28 +28,37 @@
   outline: none;
 }
 
-/* dropdown */
+.searchBarFormOpen {
+  border-bottom-color: transparent;
+  border-radius: var(--global-border-radius) var(--global-border-radius) 0 0;
+}
+
 .dropdown {
   position: absolute;
   width: 100%;
-  background: var(--search-bg);
-  border-radius: var(--global-border-radius);
+  background: var(--page-box-bg);
+  border-radius: 0 0 var(--global-border-radius) var(--global-border-radius);
+  border: 1.5px solid var(--page-box-border);
   list-style: none;
   z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  margin-top: 0.5rem;
-  padding: 1rem 0;
-  max-height: 300px;
-  overflow: scroll;
+  margin: 0;
+  padding: 0;
+  color: var(--page-txt-1);
+  overflow: hidden;
+}
+
+.dropdownScroll {
+  max-height: 400px;
+  padding: 0.5rem;
+  overflow-y: auto;
   overflow-x: hidden;
-  color: var(--search-txt);
 }
 
 .dropdownItem {
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.25rem;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: 0.1s ease;
+  border-radius: var(--global-border-radius);
 }
 
 .dropdownItem:hover {
@@ -57,5 +67,5 @@
 
 .dropdownItem.activeItem {
   background-color: var(--popup-hover);
-  transition: 0.2s ease;
+  transition: 0.1s ease;
 }

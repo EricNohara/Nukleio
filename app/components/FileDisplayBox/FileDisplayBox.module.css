@@ -24,7 +24,7 @@
 
 .badge {
   padding: 0.5rem 1rem;
-  background-color: var(--success-color);
+  background-color: var(--btn-1);
   border-radius: var(--global-border-radius);
   color: white;
   font-weight: bold;
