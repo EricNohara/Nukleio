@@ -11,6 +11,13 @@
   margin: 0;
 }
 
+.selectionLabel {
+  color: var(--page-txt-1);
+  font-weight: bold;
+  font-size: 1.25rem;
+  margin: 0.5rem 0 0.5rem 0;
+}
+
 .dropdownContainer {
   width: 400px;
 }
@@ -46,7 +53,7 @@
 .modeCard {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
   width: 100%;
   padding: 1rem;
@@ -65,8 +72,15 @@
 
 .modeCard h3 {
   color: var(--page-txt-1);
+  font-size: 1.75rem;
+  margin: 0;
+}
+
+.modeCard h4 {
+  color: var(--page-txt-2);
+  font-weight: normal;
   font-size: 1rem;
-  font-weight: 600;
+  margin: 0;
 }
 
 .modeCard p {
@@ -75,11 +89,81 @@
   line-height: 1.45;
 }
 
+.modeCard ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modeCard ul li {
+  color: var(--page-txt-2);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .templateGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   width: 100%;
+}
+
+.modeTokens {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 1rem;
+  margin: 2rem 0 2rem 0;
+}
+
+.modeTokens h1 {
+  margin: 0;
+  font-size: 4rem;
+}
+
+.modeIconsRow {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.modeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border-radius: var(--global-border-radius);
+  border: 1px solid var(--page-box-border);
+  transition: 0.1s ease;
+}
+
+.checkbox {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 2px solid var(--page-box-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  background: transparent;
+  color: transparent;
+}
+
+.checkboxChecked {
+  background: var(--page-txt-1);
+  border-color: var(--page-txt-1);
+  color: var(--page-box-bg);
+}
+
+.modeCard:hover .checkbox {
+  border-color: var(--page-txt-1);
 }
 
 .templateCard {
@@ -169,7 +253,6 @@
 }
 
 .selectedCard {
-  border-width: 2px;
   border-color: var(--page-txt-1);
 }
 
@@ -193,8 +276,7 @@
 
 .previewContainer {
   width: 100%;
-  height: calc(100vh - 200px);
-  min-height: 700px;
+  height: 100%;
   border-radius: var(--global-border-radius);
   border: 1.5px solid var(--page-box-border);
   background: var(--page-box-bg);
@@ -205,7 +287,6 @@
   width: 100%;
   height: 100%;
   border: none;
-  background: white;
 }
 
 @media (max-width: 1100px) {

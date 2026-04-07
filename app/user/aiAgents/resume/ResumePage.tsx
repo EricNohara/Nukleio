@@ -1,5 +1,6 @@
 "use client";
 
+import { BadgeCheck, Bot, Check, CircleDollarSign, Hammer } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -14,6 +15,7 @@ import { hasTier, useTier } from "@/app/context/TierProvider";
 import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { ICachedResume } from "@/app/interfaces/ICachedResume";
+import { headerFont, titleFont } from "@/app/localFonts";
 import formatDate from "@/utils/general/formatDate";
 
 import styles from "./ResumePage.module.css";
@@ -362,8 +364,8 @@ export default function ResumePage() {
                                     </div>
                                 </div>
                                 <div className={styles.stepContainer}>
-                                    <p className={styles.subtitle}>
-                                        Choose a generation mode.
+                                    <p className={styles.selectionLabel}>
+                                        Generation Mode
                                     </p>
 
                                     <div className={styles.modeCards}>
@@ -372,8 +374,39 @@ export default function ResumePage() {
                                             className={`${styles.modeCard} ${formData.generationType === "generate" ? styles.selectedCard : ""}`}
                                             onClick={() => updateFormData("generationType", "generate")}
                                         >
-                                            <h3>Manual</h3>
-                                            <p>Select exactly what to include.</p>
+                                            <div className={styles.modeIconsRow}>
+                                                <div className={`${styles.modeIcon} ${formData.generationType === "generate" ? styles.selectedCard : ""}`}>
+                                                    <Hammer size={30} />
+                                                </div>
+                                                <div
+                                                    className={`${styles.checkbox} ${formData.generationType === "generate" ? styles.checkboxChecked : ""
+                                                        }`}
+                                                >
+                                                    {formData.generationType === "generate" && (
+                                                        <Check size={20} strokeWidth={3} />
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <h3 className={headerFont.className}>Manual Selection</h3>
+                                            <h4 className={headerFont.className}>Best for cheap templating</h4>
+                                            <div className={styles.modeTokens}>
+                                                <CircleDollarSign size={60} strokeWidth={2.5} />
+                                                <h1 className={titleFont.className}>1</h1>
+                                            </div>
+                                            <ul>
+                                                <li>
+                                                    <BadgeCheck color="var(--btn-1)" />
+                                                    Select exactly what to include
+                                                </li>
+                                                <li>
+                                                    <BadgeCheck color="var(--btn-1)" />
+                                                    Choose from our resume templates
+                                                </li>
+                                                <li>
+                                                    <BadgeCheck color="var(--btn-1)" />
+                                                    Build your resume with full control
+                                                </li>
+                                            </ul>
                                         </button>
 
                                         <button
@@ -382,8 +415,39 @@ export default function ResumePage() {
                                                 }`}
                                             onClick={() => updateFormData("generationType", "generateAi")}
                                         >
-                                            <h3>AI</h3>
-                                            <p>Let the model choose the strongest content.</p>
+                                            <div className={styles.modeIconsRow}>
+                                                <div className={`${styles.modeIcon} ${formData.generationType === "generateAi" ? styles.selectedCard : ""}`}>
+                                                    <Bot size={30} />
+                                                </div>
+                                                <div
+                                                    className={`${styles.checkbox} ${formData.generationType === "generateAi" ? styles.checkboxChecked : ""
+                                                        }`}
+                                                >
+                                                    {formData.generationType === "generateAi" && (
+                                                        <Check size={20} strokeWidth={3} />
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <h3 className={headerFont.className}>AI Enhanced</h3>
+                                            <h4 className={headerFont.className}>Best for highest quality</h4>
+                                            <div className={styles.modeTokens}>
+                                                <CircleDollarSign size={60} strokeWidth={2.5} />
+                                                <h1 className={titleFont.className}>10</h1>
+                                            </div>
+                                            <ul>
+                                                <li>
+                                                    <BadgeCheck color="var(--btn-1)" />
+                                                    Let the model choose your strongest content
+                                                </li>
+                                                <li>
+                                                    <BadgeCheck color="var(--btn-1)" />
+                                                    Cater your resume to the job you want
+                                                </li>
+                                                <li>
+                                                    <BadgeCheck color="var(--btn-1)" />
+                                                    Build your resume with premium templates
+                                                </li>
+                                            </ul>
                                         </button>
                                     </div>
                                 </div>
@@ -391,7 +455,7 @@ export default function ResumePage() {
                         )}
                         {step === "template" && (
                             <div className={styles.stepContainer}>
-                                <p className={styles.subtitle}>Choose a resume template.</p>
+                                <p className={styles.selectionLabel}>Resume Template</p>
 
                                 <div className={styles.templateGrid}>
                                     {TEMPLATE_OPTIONS.map((template) => (
@@ -418,7 +482,7 @@ export default function ResumePage() {
 
                         {step === "jobs" && (
                             <SelectionStep
-                                title="Select target jobs"
+                                title="Target Jobs"
                                 items={TARGET_JOB_OPTIONS}
                                 selectedIds={formData.targetJobs}
                                 onToggle={(id) => toggleSelection("targetJobs", id)}
@@ -427,7 +491,7 @@ export default function ResumePage() {
 
                         {step === "education" && (
                             <SelectionStep
-                                title="Select education entries"
+                                title="Education Entries"
                                 items={state.education.map((e) => {
                                     const educationItem: SelectableItem = {
                                         id: e.id,
@@ -443,7 +507,7 @@ export default function ResumePage() {
 
                         {step === "courses" && (
                             <SelectionStep
-                                title="Select course entries"
+                                title="Course Entries"
                                 items={state.education.flatMap((e) =>
                                     (e.courses ?? []).map((c) => ({
                                         id: c.id,
@@ -457,7 +521,7 @@ export default function ResumePage() {
 
                         {step === "experience" && (
                             <SelectionStep
-                                title="Select experience entries"
+                                title="Experience Entries"
                                 items={state.experiences.map((e) => {
                                     const experienceItem: SelectableItem = {
                                         id: e.id,
@@ -473,7 +537,7 @@ export default function ResumePage() {
 
                         {step === "projects" && (
                             <SelectionStep
-                                title="Select projects"
+                                title="Project Entries"
                                 items={state.projects.map((p) => {
                                     const projectItem: SelectableItem = {
                                         id: p.id,
@@ -489,7 +553,7 @@ export default function ResumePage() {
 
                         {step === "skills" && (
                             <SelectionStep
-                                title="Select skills"
+                                title="Skill Entries"
                                 items={state.skills.map((s) => {
                                     const skillItem: SelectableItem = {
                                         id: s.id,
@@ -504,7 +568,7 @@ export default function ResumePage() {
 
                         {step === "review" && (
                             <div className={styles.stepContainer}>
-                                <p className={styles.subtitle}>Review your selections.</p>
+                                <p className={styles.selectionLabel}>Review Selections</p>
 
                                 <div className={styles.reviewCard}>
                                     <p><strong>Mode:</strong> {formData.generationType}</p>
@@ -552,7 +616,7 @@ function SelectionStep({
 }) {
     return (
         <div className={styles.stepContainer}>
-            <p className={styles.subtitle}>{title}</p>
+            <p className={styles.selectionLabel}>{title}</p>
 
             <div className={styles.selectionList}>
                 {items.map((item) => {

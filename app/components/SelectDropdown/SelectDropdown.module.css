@@ -101,6 +101,7 @@
 /* selected */
 .item[data-selected="true"] {
   background: var(--btn-1);
+  color: white;
   font-weight: bold;
 }
 
