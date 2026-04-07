@@ -1,0 +1,15 @@
+.agentsList {
+  height: 100%;
+  color: var(--page-txt-1);
+}
+
+.agentsList > li > a {
+  text-decoration: none;
+  color: var(--btn-1);
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.agentsList > li > a:hover {
+  text-decoration: underline;
+}

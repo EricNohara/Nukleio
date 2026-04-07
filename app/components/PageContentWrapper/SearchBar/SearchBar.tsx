@@ -32,7 +32,8 @@ const DEFAULT_SUGGESTIONS: ISuggestion[] = [
     { label: "API Keys", path: "/user/connect" },
     { label: "User Settings", path: "/user/settings/user" },
     { label: "App Settings", path: "/user/settings/app" },
-    { label: "Cover Letter", path: "/user/coverLetter" }
+    { label: "AI Agents", path: "/user/aiAgents" },
+    { label: "Cover Letter", path: "/user/aiAgents/coverLetter" }
 ];
 
 export default function SearchBar({ onFocusChange }: ISearchBarProps) {

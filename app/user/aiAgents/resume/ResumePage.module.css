@@ -1,0 +1,235 @@
+.resumePageContainer {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.subtitle {
+  color: var(--page-txt-2);
+  margin: 0;
+}
+
+.dropdownContainer {
+  width: 400px;
+}
+
+.formHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/*  */
+.stepContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+  border-radius: var(--global-border-radius);
+  border: 1.5px solid var(--page-box-border);
+  background: var(--page-box-bg);
+}
+
+.modeCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.modeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 140px;
+  padding: 1rem;
+  border-radius: var(--global-border-radius);
+  border: 1.5px solid var(--page-box-border);
+  background: var(--page-box-bg2, var(--page-box-bg));
+  color: var(--page-txt-1);
+  text-align: left;
+  transition: 0.12s ease;
+}
+
+.modeCard:hover {
+  cursor: pointer;
+  border-color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.modeCard h3 {
+  color: var(--page-txt-1);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.modeCard p {
+  color: var(--page-txt-2);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.templateGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.templateCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: var(--global-border-radius);
+  border: 1.5px solid var(--page-box-border);
+  background: var(--page-box-bg2, var(--page-box-bg));
+  color: var(--page-txt-1);
+  transition: 0.12s ease;
+}
+
+.templateCard:hover {
+  cursor: pointer;
+  border-color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.templateImagePlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 0.77 / 1;
+  overflow: hidden;
+  border-radius: calc(var(--global-border-radius) - 4px);
+  border: 1.5px solid var(--page-box-border);
+  background: var(--main-bg);
+}
+
+.templateImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.templateCard p {
+  color: var(--page-txt-1);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.selectionList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.selectionCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 72px;
+  padding: 0.9rem 1rem;
+  border-radius: var(--global-border-radius);
+  border: 1.5px solid var(--page-box-border);
+  background: var(--page-box-bg2, var(--page-box-bg));
+  color: var(--page-txt-1);
+  text-align: left;
+  transition: 0.12s ease;
+}
+
+.selectionCard:hover {
+  cursor: pointer;
+  border-color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.selectionCard p {
+  color: var(--page-txt-1);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.selectionCard span {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--page-txt-2);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.selectedCard {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 1px var(--accent-color) inset;
+}
+
+.reviewCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 1rem;
+  border-radius: var(--global-border-radius);
+  border: 1.5px solid var(--page-box-border);
+  background: var(--page-box-bg2, var(--page-box-bg));
+}
+
+.reviewCard p {
+  color: var(--page-txt-1);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.previewContainer {
+  width: 100%;
+  height: calc(100vh - 200px);
+  min-height: 700px;
+  border-radius: var(--global-border-radius);
+  border: 1.5px solid var(--page-box-border);
+  background: var(--page-box-bg);
+  overflow: hidden;
+}
+
+.pdfIframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+}
+
+@media (max-width: 1100px) {
+  .templateGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .selectionList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .modeCards {
+    grid-template-columns: 1fr;
+  }
+
+  .templateGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .previewContainer {
+    min-height: 550px;
+  }
+}

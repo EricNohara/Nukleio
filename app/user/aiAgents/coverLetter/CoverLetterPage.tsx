@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 import MatchBreakdownChart from "@/app/components/Chart/MatchBreakdownChart";
 import LoadingMessageSpinner from "@/app/components/LoadingMessageSpinner/LoadingMessageSpinner";
+import PageContentHeader, { IButton } from "@/app/components/PageContentHeader/PageContentHeader";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import SelectDropdown from "@/app/components/SelectDropdown/SelectDropdown";
 import TextInput from "@/app/components/TextInput/TextInput";
@@ -13,7 +15,6 @@ import { useToast } from "@/app/context/ToastProvider";
 import { ICachedConversationListItem, ICachedCoverLetter, ISkillsMatchScore } from "@/app/interfaces/ICachedCoverLetter";
 
 import styles from "./CoverLetterPage.module.css";
-import PageContentHeader, { IButton } from "../../components/PageContentHeader/PageContentHeader";
 
 export default function CoverLetterPage() {
     const [jobTitle, setJobTitle] = useState<string>("");
@@ -35,6 +36,7 @@ export default function CoverLetterPage() {
     const [selectedDraftName, setSelectedDraftName] = useState<string>("");
 
     const toast = useToast();
+    const router = useRouter();
 
     const { tier, loading: tierLoading } = useTier();
     const canAccess = hasTier(tier, "premium");
@@ -55,7 +57,7 @@ export default function CoverLetterPage() {
         (async () => {
             setCachedListLoading(true);
             try {
-                const res = await fetch("/api/internal/user/coverLetter?mode=list");
+                const res = await fetch("/api/internal/user/aiAgents/coverLetter?mode=list");
                 const data = await res.json();
 
                 if (!res.ok) throw new Error(data?.error ?? "Failed to load cached cover letters");
@@ -84,7 +86,7 @@ export default function CoverLetterPage() {
 
         try {
             const res = await fetch(
-                `/api/internal/user/coverLetter?sessionId=${encodeURIComponent(sessionId)}`
+                `/api/internal/user/aiAgents/coverLetter?sessionId=${encodeURIComponent(sessionId)}`
             );
             const data = await res.json();
             if (!res.ok) throw new Error(data?.error ?? "Failed to load cached drafts");
@@ -183,7 +185,7 @@ export default function CoverLetterPage() {
 
     // Helper: generate a PDF from current draft (or a provided finalLetter), update preview, optionally download
     const generatePdfAndPreview = async (draft: string) => {
-        const res = await fetch("/api/internal/user/coverLetter/pdf", {
+        const res = await fetch("/api/internal/user/aiAgents/coverLetter/pdf", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ draft }),
@@ -222,7 +224,7 @@ export default function CoverLetterPage() {
                         sessionId,
                         feedback
                     }
-                    const res = await fetch("/api/internal/user/coverLetter",
+                    const res = await fetch("/api/internal/user/aiAgents/coverLetter",
                         { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }
                     );
                     const data = await res.json();
@@ -270,7 +272,7 @@ export default function CoverLetterPage() {
                         writingSample,
                     };
 
-                    const res = await fetch("/api/internal/user/coverLetter", {
+                    const res = await fetch("/api/internal/user/aiAgents/coverLetter", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(payload),
@@ -330,12 +332,17 @@ export default function CoverLetterPage() {
         },
     };
 
+    const backToAgentsButton: IButton = {
+        name: "Back",
+        onClick: () => router.push("/user/aiAgents")
+    }
+
     return (
         <PageContentWrapper>
             <PageContentHeader
                 title={selectedDraftName ? selectedDraftName : "Cover Letter Generator"}
                 buttonOne={canAccess ? buttonOne : undefined}
-                buttonFour={draft.length > 0 ? backButton : null}
+                buttonFour={draft.length > 0 ? backButton : backToAgentsButton}
             />
 
             <div className={styles.coverLetterPageContainer}>
@@ -371,7 +378,7 @@ export default function CoverLetterPage() {
                 {tierLoading && <LoadingSpinner />}
 
                 {/* upgrade UI */}
-                {!canAccess && <p>Please upgrade to premium to use this feature.</p>}
+                {!canAccess && <p className={styles.subtitle}>Please upgrade to premium to use this feature.</p>}
 
                 {/* ------------------- INITIAL FORM ------------------- */}
                 {!loading && !tierLoading && !draft && !sessionId && canAccess && (

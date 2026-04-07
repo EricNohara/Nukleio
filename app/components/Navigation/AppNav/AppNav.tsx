@@ -1,6 +1,6 @@
 "use client";
 
-import { House, File, Briefcase, GraduationCap, Rocket, Brain, Settings, Mail, User, KeyRound } from "lucide-react";
+import { House, File, Briefcase, GraduationCap, Rocket, Brain, Settings, User, KeyRound, Bot } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 import { headerFont } from "@/app/localFonts";
@@ -26,7 +26,7 @@ const navItems: INavItem[] = [
     { label: "Projects", path: "/user/projects", icon: Rocket },
     { label: "Skills", path: "/user/skills", icon: Brain },
     { label: "API Keys", path: "/user/connect", icon: KeyRound },
-    { label: "Cover Letter", path: "/user/coverLetter", icon: Mail }
+    { label: "AI Agents", path: "/user/aiAgents", icon: Bot }
 ];
 
 export default function AppNav() {
