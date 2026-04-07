@@ -174,6 +174,8 @@ export async function POST(req: NextRequest) {
 
     const generationType = (rawBody as Record<string, unknown>).generationType;
 
+    console.log(rawBody);
+
     if (!isGenerationType(generationType)) {
       return NextResponse.json(
         { error: "Invalid generationType." },

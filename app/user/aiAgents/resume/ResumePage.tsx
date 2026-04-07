@@ -12,17 +12,18 @@ import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentW
 import SelectDropdown from "@/app/components/SelectDropdown/SelectDropdown";
 import { hasTier, useTier } from "@/app/context/TierProvider";
 import { useToast } from "@/app/context/ToastProvider";
+import { useUser } from "@/app/context/UserProvider";
 import { ICachedResume } from "@/app/interfaces/ICachedResume";
+import formatDate from "@/utils/general/formatDate";
 
 import styles from "./ResumePage.module.css";
-
-type GenerationType = "generate" | "generateAi";
 
 type ResumeStep =
     | "start"
     | "template"
     | "jobs"
     | "education"
+    | "courses"
     | "experience"
     | "projects"
     | "skills"
@@ -34,15 +35,44 @@ type SelectableItem = {
     subtitle?: string;
 };
 
+type GenerationType = "generate" | "generateAi";
+
 type ResumeFormData = {
-    generationType: GenerationType | "";
+    generationType: GenerationType;
     templateId: string;
     targetJobs: string[];
     educationIds: string[];
+    courseIds: string[];
     experienceIds: string[];
     projectIds: string[];
     skillIds: string[];
 };
+
+type GenerateResumeRequest = {
+    generationType: "generate";
+    templateId?: string;
+    educationIds?: string[];
+    courseIds?: string[];
+    experienceIds?: string[];
+    projectIds?: string[];
+    skillIds?: string[];
+};
+
+type GenerateResumeAiRequest = {
+    generationType: "generateAi";
+    templateId?: string;
+    targetJobs?: string[];
+};
+
+type ResumeRequestBody = GenerateResumeRequest | GenerateResumeAiRequest;
+
+type MultiSelectKey =
+    | "targetJobs"
+    | "educationIds"
+    | "courseIds"
+    | "experienceIds"
+    | "projectIds"
+    | "skillIds";
 
 const TEMPLATE_OPTIONS = [
     {
@@ -55,11 +85,6 @@ const TEMPLATE_OPTIONS = [
         name: "AwesomeCV",
         imageUrl: "/images/resumeTemplates/awesomecv.jpg",
     },
-    // {
-    //     id: "template-3",
-    //     name: "Minimal",
-    //     imageUrl: "/images/resumeTemplates/template3.png",
-    // },
 ];
 
 const TARGET_JOB_OPTIONS: SelectableItem[] = [
@@ -71,36 +96,24 @@ const TARGET_JOB_OPTIONS: SelectableItem[] = [
     { id: "data", label: "Data Engineer" },
 ];
 
-const EDUCATION_OPTIONS: SelectableItem[] = [
-    { id: "edu-1", label: "Boston University - BS Computer Science" },
-    { id: "edu-2", label: "Boston University - MS Computer Science" },
-];
-
-const EXPERIENCE_OPTIONS: SelectableItem[] = [
-    { id: "exp-1", label: "Dot Foods - Software Developer Intern" },
-    { id: "exp-2", label: "Dot Foods - RPA Developer" },
-    { id: "exp-3", label: "BU - Course Assistant" },
-];
-
-const PROJECT_OPTIONS: SelectableItem[] = [
-    { id: "proj-1", label: "Nukleio" },
-    { id: "proj-2", label: "Portfolio Website" },
-];
-
-const SKILL_OPTIONS: SelectableItem[] = [
-    { id: "skill-1", label: "C#" },
-    { id: "skill-2", label: ".NET" },
-    { id: "skill-3", label: "TypeScript" },
-    { id: "skill-4", label: "React" },
-    { id: "skill-5", label: "Next.js" },
-    { id: "skill-6", label: "SQL" },
-];
+// default to manual process
+const DEFAULT_FORM_DATA: ResumeFormData = {
+    generationType: "generate",
+    templateId: "default",
+    targetJobs: [],
+    educationIds: [],
+    courseIds: [],
+    experienceIds: [],
+    projectIds: [],
+    skillIds: [],
+}
 
 export default function ResumePage() {
     const router = useRouter();
     const toast = useToast();
 
     const { tier, loading: tierLoading } = useTier();
+    const { state } = useUser();
     const canAccess = hasTier(tier, "premium");
 
     const [step, setStep] = useState<ResumeStep>("start");
@@ -111,16 +124,9 @@ export default function ResumePage() {
     const [cachedResumesLoading, setCachedResumesLoading] = useState(false);
     const [selectedCachedResumeId, setSelectedCachedResumeId] = useState("");
 
-    const [formData, setFormData] = useState<ResumeFormData>({
-        generationType: "",
-        templateId: "",
-        targetJobs: [],
-        educationIds: [],
-        experienceIds: [],
-        projectIds: [],
-        skillIds: [],
-    });
+    const [formData, setFormData] = useState<ResumeFormData>(DEFAULT_FORM_DATA);
 
+    // load cached resumes
     useEffect(() => {
         if (!canAccess || tierLoading) return;
 
@@ -159,8 +165,8 @@ export default function ResumePage() {
         return [
             "start",
             "template",
-            "jobs",
             "education",
+            "courses",
             "experience",
             "projects",
             "skills",
@@ -179,12 +185,11 @@ export default function ResumePage() {
         setFormData((prev) => ({ ...prev, [key]: value }));
     }
 
-    function toggleSelection(key: keyof ResumeFormData, id: string) {
+    function toggleSelection(key: MultiSelectKey, id: string) {
         setFormData((prev) => {
             const current = prev[key];
-            if (!Array.isArray(current)) return prev;
-
             const exists = current.includes(id);
+
             return {
                 ...prev,
                 [key]: exists
@@ -200,20 +205,8 @@ export default function ResumePage() {
                 return !!formData.generationType;
             case "template":
                 return !!formData.templateId;
-            case "jobs":
-                return formData.targetJobs.length > 0;
-            case "education":
-                return formData.educationIds.length > 0;
-            case "experience":
-                return formData.experienceIds.length > 0;
-            case "projects":
-                return formData.projectIds.length > 0;
-            case "skills":
-                return formData.skillIds.length > 0;
-            case "review":
-                return true;
             default:
-                return false;
+                return true;
         }
     }
 
@@ -241,18 +234,18 @@ export default function ResumePage() {
         setLoading(true);
 
         try {
-            const payload =
+            const payload: ResumeRequestBody =
                 formData.generationType === "generateAi"
                     ? {
-                        generationType: "generateAi" as const,
+                        generationType: "generateAi",
                         templateId: formData.templateId,
                         targetJobs: formData.targetJobs,
                     }
                     : {
-                        generationType: "generate" as const,
+                        generationType: "generate",
                         templateId: formData.templateId,
-                        targetJobs: formData.targetJobs,
                         educationIds: formData.educationIds,
+                        courseIds: formData.courseIds,
                         experienceIds: formData.experienceIds,
                         projectIds: formData.projectIds,
                         skillIds: formData.skillIds,
@@ -281,15 +274,7 @@ export default function ResumePage() {
         setResumeUrl("");
         setSelectedCachedResumeId("");
         setStep("start");
-        setFormData({
-            generationType: "",
-            templateId: "",
-            targetJobs: [],
-            educationIds: [],
-            experienceIds: [],
-            projectIds: [],
-            skillIds: [],
-        });
+        setFormData(DEFAULT_FORM_DATA);
     }
 
     const primaryButton: IButton | undefined = resumeUrl
@@ -345,60 +330,65 @@ export default function ResumePage() {
                 {!loading && !tierLoading && canAccess && !resumeUrl && (
                     <>
                         {step === "start" && (
-                            <div className={styles.stepContainer}>
-                                <p className={styles.subtitle}>
-                                    Start from a cached resume or create a new one.
-                                </p>
+                            <>
+                                <div className={styles.formHeader}>
+                                    <p className={styles.subtitle}>
+                                        View a previous resume or create a new one.
+                                    </p>
 
-                                <div className={styles.dropdownContainer}>
-                                    <SelectDropdown
-                                        value={selectedCachedResumeId}
-                                        options={cachedResumes.map((item) => ({
-                                            value: item.id,
-                                            label: new Date(item.created_at).toLocaleString(),
-                                        }))}
-                                        loading={cachedResumesLoading}
-                                        disabled={cachedResumes.length === 0}
-                                        placeholder={
-                                            cachedResumesLoading
-                                                ? "Loading cached resumes..."
-                                                : cachedResumes.length === 0
-                                                    ? "No cached resumes"
-                                                    : "Select a cached resume..."
-                                        }
-                                        ariaLabel="Cached resumes"
-                                        onChange={(id) => {
-                                            setSelectedCachedResumeId(id);
-                                            const selected = cachedResumes.find((item) => item.id === id);
-                                            if (selected?.url) setResumeUrl(selected.url);
-                                        }}
-                                    />
+                                    <div className={styles.dropdownContainer}>
+                                        <SelectDropdown
+                                            value={selectedCachedResumeId}
+                                            options={cachedResumes.map((item) => ({
+                                                value: item.id,
+                                                label: new Date(item.created_at).toLocaleString(),
+                                            }))}
+                                            loading={cachedResumesLoading}
+                                            disabled={cachedResumes.length === 0}
+                                            placeholder={
+                                                cachedResumesLoading
+                                                    ? "Loading cached resumes..."
+                                                    : cachedResumes.length === 0
+                                                        ? "No cached resumes"
+                                                        : "Select a cached resume..."
+                                            }
+                                            ariaLabel="Cached resumes"
+                                            onChange={(id) => {
+                                                setSelectedCachedResumeId(id);
+                                                const selected = cachedResumes.find((item) => item.id === id);
+                                                if (selected?.url) setResumeUrl(selected.url);
+                                            }}
+                                        />
+                                    </div>
                                 </div>
+                                <div className={styles.stepContainer}>
+                                    <p className={styles.subtitle}>
+                                        Choose a generation mode.
+                                    </p>
 
-                                <div className={styles.modeCards}>
-                                    <button
-                                        type="button"
-                                        className={`${styles.modeCard} ${formData.generationType === "generate" ? styles.selectedCard : ""
-                                            }`}
-                                        onClick={() => updateFormData("generationType", "generate")}
-                                    >
-                                        <h3>Manual</h3>
-                                        <p>Select exactly what to include.</p>
-                                    </button>
+                                    <div className={styles.modeCards}>
+                                        <button
+                                            type="button"
+                                            className={`${styles.modeCard} ${formData.generationType === "generate" ? styles.selectedCard : ""}`}
+                                            onClick={() => updateFormData("generationType", "generate")}
+                                        >
+                                            <h3>Manual</h3>
+                                            <p>Select exactly what to include.</p>
+                                        </button>
 
-                                    <button
-                                        type="button"
-                                        className={`${styles.modeCard} ${formData.generationType === "generateAi" ? styles.selectedCard : ""
-                                            }`}
-                                        onClick={() => updateFormData("generationType", "generateAi")}
-                                    >
-                                        <h3>AI</h3>
-                                        <p>Let the model choose the strongest content.</p>
-                                    </button>
+                                        <button
+                                            type="button"
+                                            className={`${styles.modeCard} ${formData.generationType === "generateAi" ? styles.selectedCard : ""
+                                                }`}
+                                            onClick={() => updateFormData("generationType", "generateAi")}
+                                        >
+                                            <h3>AI</h3>
+                                            <p>Let the model choose the strongest content.</p>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            </>
                         )}
-
                         {step === "template" && (
                             <div className={styles.stepContainer}>
                                 <p className={styles.subtitle}>Choose a resume template.</p>
@@ -438,16 +428,44 @@ export default function ResumePage() {
                         {step === "education" && (
                             <SelectionStep
                                 title="Select education entries"
-                                items={EDUCATION_OPTIONS}
+                                items={state.education.map((e) => {
+                                    const educationItem: SelectableItem = {
+                                        id: e.id,
+                                        label: e.institution,
+                                        subtitle: e.degree
+                                    };
+                                    return educationItem;
+                                })}
                                 selectedIds={formData.educationIds}
                                 onToggle={(id) => toggleSelection("educationIds", id)}
+                            />
+                        )}
+
+                        {step === "courses" && (
+                            <SelectionStep
+                                title="Select course entries"
+                                items={state.education.flatMap((e) =>
+                                    (e.courses ?? []).map((c) => ({
+                                        id: c.id,
+                                        label: c.name,
+                                    }))
+                                )}
+                                selectedIds={formData.courseIds}
+                                onToggle={(id) => toggleSelection("courseIds", id)}
                             />
                         )}
 
                         {step === "experience" && (
                             <SelectionStep
                                 title="Select experience entries"
-                                items={EXPERIENCE_OPTIONS}
+                                items={state.experiences.map((e) => {
+                                    const experienceItem: SelectableItem = {
+                                        id: e.id,
+                                        label: e.company,
+                                        subtitle: e.job_title
+                                    };
+                                    return experienceItem;
+                                })}
                                 selectedIds={formData.experienceIds}
                                 onToggle={(id) => toggleSelection("experienceIds", id)}
                             />
@@ -456,7 +474,14 @@ export default function ResumePage() {
                         {step === "projects" && (
                             <SelectionStep
                                 title="Select projects"
-                                items={PROJECT_OPTIONS}
+                                items={state.projects.map((p) => {
+                                    const projectItem: SelectableItem = {
+                                        id: p.id,
+                                        label: p.name,
+                                        subtitle: `${formatDate(p.date_start)} - ${formatDate(p.date_end)}`
+                                    };
+                                    return projectItem;
+                                })}
                                 selectedIds={formData.projectIds}
                                 onToggle={(id) => toggleSelection("projectIds", id)}
                             />
@@ -465,7 +490,13 @@ export default function ResumePage() {
                         {step === "skills" && (
                             <SelectionStep
                                 title="Select skills"
-                                items={SKILL_OPTIONS}
+                                items={state.skills.map((s) => {
+                                    const skillItem: SelectableItem = {
+                                        id: s.id,
+                                        label: s.name,
+                                    };
+                                    return skillItem;
+                                })}
                                 selectedIds={formData.skillIds}
                                 onToggle={(id) => toggleSelection("skillIds", id)}
                             />
