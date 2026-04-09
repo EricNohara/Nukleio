@@ -111,6 +111,8 @@ html {
   --project-card-hover: #e6e6e6;
   --project-card-btn-hover: rgb(187, 187, 187, 0.5);
   --project-card-active: #d6e2f2;
+
+  /* resume */
 }
 
 /* Dark mode overrides */

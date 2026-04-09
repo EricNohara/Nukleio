@@ -6,6 +6,10 @@
   gap: 1rem;
 }
 
+.coverLetterPageContentContainer {
+  padding-bottom: 1rem;
+}
+
 .inputsContainer {
   display: flex;
   flex-direction: column;

@@ -343,6 +343,7 @@ export default function CoverLetterPage() {
                 title={selectedDraftName ? selectedDraftName : "Cover Letter Generator"}
                 buttonOne={canAccess ? buttonOne : undefined}
                 buttonFour={draft.length > 0 ? backButton : backToAgentsButton}
+                className={styles.coverLetterPageContentContainer}
             />
 
             <div className={styles.coverLetterPageContainer}>

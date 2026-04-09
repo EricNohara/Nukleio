@@ -4,6 +4,11 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-height: 0;
+}
+
+.resumePageContentContainer {
+  padding-bottom: 1rem;
 }
 
 .subtitle {
@@ -30,16 +35,13 @@
 }
 
 /*  */
-.stepContainer {
+.modeContentContainer {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   width: 100%;
   height: 100%;
-  padding: 1rem;
-  border-radius: var(--global-border-radius);
-  border: 1.5px solid var(--page-box-border);
-  background: var(--page-box-bg);
+  align-items: center;
+  justify-content: center;
 }
 
 .modeCards {
@@ -51,6 +53,7 @@
 }
 
 .modeCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -58,7 +61,7 @@
   width: 100%;
   padding: 1rem;
   border-radius: var(--global-border-radius);
-  border: 1.5px solid var(--page-box-border);
+  border: 2px solid var(--page-box-border);
   background: var(--page-box-bg);
   color: var(--page-txt-1);
   text-align: left;
@@ -67,12 +70,12 @@
 
 .modeCard:hover {
   cursor: pointer;
-  border-color: var(--page-txt-1);
+  border-color: var(--btn-1);
 }
 
 .modeCard h3 {
   color: var(--page-txt-1);
-  font-size: 1.75rem;
+  font-size: 1.8rem;
   margin: 0;
 }
 
@@ -89,7 +92,7 @@
   line-height: 1.45;
 }
 
-.modeCard ul {
+.benefitsList {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -98,7 +101,7 @@
   gap: 1rem;
 }
 
-.modeCard ul li {
+.benefitsList li {
   color: var(--page-txt-2);
   font-size: 1rem;
   display: flex;
@@ -106,19 +109,12 @@
   gap: 1rem;
 }
 
-.templateGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  width: 100%;
-}
-
 .modeTokens {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  gap: 1rem;
+  gap: 1.5rem;
   margin: 2rem 0 2rem 0;
 }
 
@@ -128,7 +124,11 @@
 }
 
 .modeIconsRow {
-  width: 100%;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  width: calc(100% - 2rem);
   display: flex;
   justify-content: space-between;
 }
@@ -139,109 +139,151 @@
   justify-content: center;
   padding: 1rem;
   border-radius: var(--global-border-radius);
-  border: 1px solid var(--page-box-border);
+  border: 2px solid var(--page-box-border);
   transition: 0.1s ease;
 }
 
-.checkbox {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  border: 2px solid var(--page-box-border);
+.selectedModeIcon {
+  border-color: white;
+  background-color: var(--btn-1);
+  color: white;
+}
+
+.stepContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  border-radius: var(--global-border-radius);
+  border: 1.5px solid var(--page-box-border);
+  background: var(--page-box-bg);
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+.templateGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+}
+
+.templateHeader {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-  background: transparent;
-  color: transparent;
+  justify-content: space-between;
+  width: 100%;
 }
 
-.checkboxChecked {
-  background: var(--page-txt-1);
-  border-color: var(--page-txt-1);
-  color: var(--page-box-bg);
-}
-
-.modeCard:hover .checkbox {
-  border-color: var(--page-txt-1);
+.templateHeader h3 {
+  color: var(--page-txt-1);
+  font-size: 1.25rem;
+  font-weight: normal;
+  margin: 0;
 }
 
 .templateCard {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  align-items: flex-end;
+  gap: 1rem;
   width: 100%;
-  padding: 0.75rem;
+  height: 100%;
+  padding: 1rem;
   border-radius: var(--global-border-radius);
-  border: 1.5px solid var(--page-box-border);
+  border: 2px solid var(--page-box-border);
   background: var(--page-box-bg2, var(--page-box-bg));
   color: var(--page-txt-1);
   transition: 0.1s ease;
+}
+
+.templateImagePlaceholder {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 200px;
+  overflow: hidden;
+  border-radius: var(--global-border-radius);
+  border: 1px solid var(--page-box-border);
+}
+
+.templateImage {
+  object-fit: cover;
+  object-position: top;
 }
 
 .templateCard:hover {
   cursor: pointer;
-  border-color: var(--accent-color);
-}
-
-.templateImagePlaceholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  aspect-ratio: 0.77 / 1;
-  overflow: hidden;
-  border-radius: calc(var(--global-border-radius) - 4px);
-  border: 1.5px solid var(--page-box-border);
-  background: var(--main-bg);
-}
-
-.templateImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.templateCard p {
-  color: var(--page-txt-1);
-  font-size: 0.95rem;
-  font-weight: 500;
+  border-color: var(--btn-1);
 }
 
 .selectionList {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
   width: 100%;
 }
 
-.selectionCard {
+.selectionCardContent {
+  position: relative;
+  z-index: 1;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  flex-direction: column;
   width: 100%;
-  min-height: 72px;
-  padding: 0.9rem 1rem;
-  border-radius: var(--global-border-radius);
-  border: 1.5px solid var(--page-box-border);
-  background: var(--page-box-bg2, var(--page-box-bg));
+  align-items: flex-start;
+}
+
+.selectionCardHeader {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+}
+
+.selectionCardHeader h3 {
   color: var(--page-txt-1);
+  font-weight: normal;
+  font-size: 1.25rem;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
   text-align: left;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.selectionCheckboxWrapper {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+.selectionCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  height: 200px;
+  padding: 1rem;
+  border-radius: var(--global-border-radius);
+  border: 2px solid var(--page-box-border);
+  background: var(--page-box-bg);
+  color: var(--page-txt-1);
   transition: 0.1s ease;
+  overflow: hidden;
 }
 
 .selectionCard:hover {
   cursor: pointer;
-  border-color: var(--accent-color);
-}
-
-.selectionCard p {
-  color: var(--page-txt-1);
-  font-size: 0.95rem;
-  font-weight: 500;
-  line-height: 1.35;
+  border-color: var(--btn-1);
 }
 
 .selectionCard span {
@@ -253,7 +295,54 @@
 }
 
 .selectedCard {
-  border-color: var(--page-txt-1);
+  border-color: var(--btn-1);
+  background: var(--btn-1-hover);
+  color: white;
+}
+
+.selectedCard h3 {
+  color: white;
+}
+
+.selectedCard h4 {
+  color: #e6e6e6;
+}
+
+.selectedCard span {
+  color: #e6e6e6;
+}
+
+/* background container */
+.selectionCardBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* image */
+.selectionBgImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* dark overlay */
+.selectionOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 20, 0.75);
+}
+
+.selectedOverlay {
+  transition: 0.1s ease;
+  background: rgba(55, 138, 251, 0.8);
+}
+
+.selectionCardDark h3 {
+  color: white !important;
+}
+
+.selectionCardDark span {
+  color: #c2c2c2 !important;
 }
 
 .reviewCard {

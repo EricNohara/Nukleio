@@ -19,11 +19,12 @@ export interface IPageContentHeaderProps {
     title: string;
     buttonOne?: IButton;
     buttonFour?: IButton | null;
+    className?: string;
 }
 
-export default function PageContentHeader({ title, buttonOne, buttonFour }: IPageContentHeaderProps) {
+export default function PageContentHeader({ title, buttonOne, buttonFour, className }: IPageContentHeaderProps) {
     return (
-        <div className={styles.container}>
+        <div className={`${styles.container} ${className ?? ""}`}>
             <h1 className={`${styles.title} ${headerFont.className}`}>{title}</h1>
             <div className={styles.buttons}>
                 {buttonFour && (
