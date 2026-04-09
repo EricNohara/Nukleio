@@ -21,15 +21,30 @@ export default function SelectionStep({
     items,
     selectedIds,
     onToggle,
+    allSelected,
+    onToggleAll,
 }: {
     title: string;
     items: SelectableItem[];
     selectedIds: string[];
     onToggle: (id: string) => void;
+    allSelected: boolean;
+    onToggleAll: () => void;
 }) {
     return (
         <div className={styles.stepContainer}>
-            <p className={styles.selectionLabel}>{title}</p>
+            <div className={styles.selectionTopRow}>
+                <p className={styles.selectionLabel}>{title}</p>
+
+                <button
+                    type="button"
+                    className={styles.selectAllButton}
+                    onClick={onToggleAll}
+                >
+                    <span>{allSelected ? "Deselect All" : "Select All"}</span>
+                    <CheckboxIndicator checked={allSelected} />
+                </button>
+            </div>
 
             <div className={styles.selectionList}>
                 {items.map((item) => {

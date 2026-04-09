@@ -333,7 +333,7 @@
 
 .selectedOverlay {
   transition: 0.1s ease;
-  background: rgba(55, 138, 251, 0.8);
+  background: rgba(44, 111, 203, 0.85);
 }
 
 .selectionCardDark {
@@ -342,6 +342,32 @@
 
 .selectionCardDarkContent {
   color: #c2c2c2 !important;
+}
+
+.selectionTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.selectAllButton {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--page-box-border);
+  background: var(--page-box-bg);
+  color: var(--page-txt-2);
+  font-size: 0.85rem;
+  border-radius: var(--global-border-radius);
+  padding: 0.55rem 0.8rem;
+  transition: 0.1s ease;
+  flex-shrink: 0;
+}
+
+.selectAllButton:hover {
+  cursor: pointer;
+  border-color: var(--btn-1);
 }
 
 .reviewCard {

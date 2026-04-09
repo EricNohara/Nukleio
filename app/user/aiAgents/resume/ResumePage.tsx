@@ -196,7 +196,7 @@ export default function ResumePage() {
         setFormData((prev) => ({ ...prev, [key]: value }));
     }
 
-    function toggleSelection(key: MultiSelectKey, id: string) {
+    const handleToggle = (key: MultiSelectKey, id: string) => {
         setFormData((prev) => {
             const current = prev[key];
             const exists = current.includes(id);
@@ -204,11 +204,23 @@ export default function ResumePage() {
             return {
                 ...prev,
                 [key]: exists
-                    ? current.filter((item) => item !== id)
+                    ? current.filter((itemId) => itemId !== id)
                     : [...current, id],
             };
         });
-    }
+    };
+
+    const handleToggleAll = (key: MultiSelectKey, ids: string[]) => {
+        setFormData((prev) => {
+            const current = prev[key];
+            const allSelected = ids.length > 0 && ids.every((id) => current.includes(id));
+
+            return {
+                ...prev,
+                [key]: allSelected ? [] : ids,
+            };
+        });
+    };
 
     function canGoNext() {
         switch (step) {
@@ -396,7 +408,8 @@ export default function ResumePage() {
                                 formData={formData}
                                 targetJobOptions={TARGET_JOB_OPTIONS}
                                 state={state}
-                                onToggle={toggleSelection}
+                                onToggle={handleToggle}
+                                onToggleAll={handleToggleAll}
                             />
                         )}
 
