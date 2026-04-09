@@ -11,6 +11,7 @@ export type SelectableItem = {
     id: string;
     label: string;
     subtitle?: string;
+    footer?: string;
     imageUrl?: string;
     icon?: LucideIcon;
 };
@@ -53,19 +54,20 @@ export default function SelectionStep({
                                 </div>
                             )}
 
-                            <div className={`${styles.selectionCardHeader} ${item.imageUrl ? styles.selectionCardDark : ""}`}>
-                                <h3 className={titleFont.className}>
-                                    {item.icon && <item.icon />}
-                                    {item.label}
-                                </h3>
-                                <div className={styles.selectionCheckboxWrapper}>
-                                    <CheckboxIndicator checked={selected} />
+                            <div>
+                                <div className={styles.selectionCardHeader}>
+                                    <h3 className={`${titleFont.className} ${item.imageUrl ? styles.selectionCardDark : ""}`}>
+                                        {item.icon && <item.icon />}
+                                        {item.label}
+                                    </h3>
+                                    <div className={styles.selectionCheckboxWrapper}>
+                                        <CheckboxIndicator checked={selected} />
+                                    </div>
                                 </div>
+                                {item.subtitle && <p className={`${styles.itemContent} ${item.imageUrl ? styles.selectionCardDarkContent : ""}`}>{item.subtitle}</p>}
                             </div>
 
-                            <div className={`${styles.selectionCardContent} ${item.imageUrl ? styles.selectionCardDark : ""}`}>
-                                {item.subtitle && <span>{item.subtitle}</span>}
-                            </div>
+                            {item.footer && <p className={`${styles.itemContent} ${item.imageUrl ? styles.selectionCardDarkContent : ""}`}>{item.footer}</p>}
                         </button>
                     );
                 })}

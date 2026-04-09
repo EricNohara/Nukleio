@@ -6,6 +6,7 @@ import { IUserInfoInternal } from "@/app/interfaces/IUserInfoInternal";
 import formatDate from "@/utils/general/formatDate";
 
 import SelectionStep from "./SelectionStep";
+import { SelectableItem } from "./SelectionStep";
 
 type ResumeStep =
     | "jobs"
@@ -14,12 +15,6 @@ type ResumeStep =
     | "experience"
     | "projects"
     | "skills";
-
-type SelectableItem = {
-    id: string;
-    label: string;
-    subtitle?: string;
-};
 
 type MultiSelectKey =
     | "targetJobs"
@@ -42,19 +37,16 @@ type ResumeFormData = {
     skillIds: string[];
 };
 
-type TargetJobOption = {
-    id: string;
-    label: string;
-    subtitle?: string;
-};
-
 type ResumeSelectionStepProps = {
     step: ResumeStep;
     formData: ResumeFormData;
-    targetJobOptions: TargetJobOption[];
+    targetJobOptions: SelectableItem[];
     state: IUserInfoInternal;
     onToggle: (key: MultiSelectKey, id: string) => void;
 };
+
+const isString = (value: unknown): value is string =>
+    typeof value === "string" && value.trim().length > 0;
 
 export default function ResumeSelectionStep({
     step,
@@ -92,7 +84,7 @@ function getSelectionStepConfig({
 }: {
     step: ResumeStep;
     formData: ResumeFormData;
-    targetJobOptions: TargetJobOption[];
+    targetJobOptions: SelectableItem[];
     state: ResumeSelectionStepProps["state"];
     onToggle: (key: MultiSelectKey, id: string) => void;
 }): {
@@ -116,7 +108,12 @@ function getSelectionStepConfig({
                 items: state.education.map((e) => ({
                     id: e.id,
                     label: e.institution,
-                    subtitle: e.degree,
+                    subtitle: [
+                        e.degree,
+                        ...(e.majors ?? []).filter(isString),
+                        ...(e.minors ?? []).filter(isString),
+                    ].join(" | "),
+                    footer: e.year_start && e.year_end ? `${e.year_start} - ${e.year_end}` : undefined,
                     icon: GraduationCap
                 })),
                 selectedIds: formData.educationIds,
@@ -130,6 +127,8 @@ function getSelectionStepConfig({
                     (e.courses ?? []).map((c) => ({
                         id: c.id,
                         label: c.name,
+                        subtitle: c.description ?? undefined,
+                        footer: c.grade ? `Grade: ${c.grade}` : undefined,
                         icon: BookMarked
                     })),
                 ),
@@ -140,10 +139,18 @@ function getSelectionStepConfig({
         case "experience":
             return {
                 title: "Experience Entries",
-                items: state.experiences.map((e) => ({
+                items: state.experiences.sort((a, b) => {
+                    const aTime = a.date_end ? new Date(a.date_end).getTime() : Date.now();
+                    const bTime = b.date_end ? new Date(b.date_end).getTime() : Date.now();
+                    return bTime - aTime;
+                }).map((e) => ({
                     id: e.id,
                     label: e.company,
                     subtitle: e.job_title,
+                    footer: e.date_start
+                        ? `${formatDate(e.date_start, true)} - ${e.date_end ? formatDate(e.date_end, true) : "Present"
+                        }`
+                        : undefined,
                     icon: Briefcase
                 })),
                 selectedIds: formData.experienceIds,
@@ -153,12 +160,15 @@ function getSelectionStepConfig({
         case "projects":
             return {
                 title: "Project Entries",
-                items: state.projects.map((p) => ({
+                items: state.projects.sort((b, a) => (new Date(a.date_end).getTime() ?? Date.now()) - (new Date(b.date_end).getTime() ?? Date.now())).map((p) => ({
                     id: p.id,
                     label: p.name,
-                    subtitle: p.date_start && p.date_end ? `${formatDate(p.date_start)} - ${formatDate(p.date_end)}` : "",
-                    imageUrl: p.thumbnail_url,
-                    icon: Rocket
+                    footer: p.date_start
+                        ? `${formatDate(p.date_start, true)} - ${p.date_end ? formatDate(p.date_end, true) : "Present"
+                        }`
+                        : undefined,
+                    imageUrl: p.thumbnail_url ?? undefined,
+                    icon: Rocket,
                 })),
                 selectedIds: formData.projectIds,
                 onToggle: (id) => onToggle("projectIds", id),
@@ -167,9 +177,11 @@ function getSelectionStepConfig({
         case "skills":
             return {
                 title: "Skill Entries",
-                items: state.skills.map((s) => ({
+                items: state.skills.sort((b, a) => (a.proficiency ?? 0) + (a.years_of_experience ?? 0) - (b.proficiency ?? 0) - (b.years_of_experience ?? 0)).map((s) => ({
                     id: s.id,
                     label: s.name,
+                    subtitle: s.proficiency ? `${s.proficiency}/10 proficiency` : undefined,
+                    footer: s.years_of_experience ? `${s.years_of_experience} years of experience` : undefined,
                     icon: Brain
                 })),
                 selectedIds: formData.skillIds,
