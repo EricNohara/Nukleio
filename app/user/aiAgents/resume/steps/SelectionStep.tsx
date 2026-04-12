@@ -79,10 +79,10 @@ export default function SelectionStep({
                                         <CheckboxIndicator checked={selected} />
                                     </div>
                                 </div>
-                                {item.subtitle && <p className={`${styles.itemContent} ${item.imageUrl ? styles.selectionCardDarkContent : ""}`}>{item.subtitle}</p>}
+                                {item.subtitle && <p className={`${styles.itemContentSubtitle} ${item.imageUrl ? styles.selectionCardDarkContent : ""}`}>{item.subtitle}</p>}
                             </div>
 
-                            {item.footer && <p className={`${styles.itemContent} ${item.imageUrl ? styles.selectionCardDarkContent : ""}`}>{item.footer}</p>}
+                            {item.footer && <p className={`${styles.itemContentFooter} ${item.imageUrl ? styles.selectionCardDarkContent : ""}`}>{item.footer}</p>}
                         </button>
                     );
                 })}

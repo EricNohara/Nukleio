@@ -228,12 +228,22 @@
   width: 100%;
 }
 
-.itemContent {
+.itemContentSubtitle {
   position: relative;
   z-index: 1;
   color: var(--page-txt-2);
   text-align: left;
   margin: 0;
+  font-weight: bold;
+}
+
+.itemContentFooter {
+  position: relative;
+  z-index: 1;
+  color: var(--page-txt-2);
+  text-align: left;
+  margin: 0;
+  font-style: italic;
 }
 
 .selectionCardHeader {
@@ -359,6 +369,7 @@
   background: var(--page-box-bg);
   color: var(--page-txt-2);
   font-size: 0.85rem;
+  font-weight: bold;
   border-radius: var(--global-border-radius);
   padding: 0.55rem 0.8rem;
   transition: 0.1s ease;

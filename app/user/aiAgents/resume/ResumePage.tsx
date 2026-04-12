@@ -85,12 +85,23 @@ const TEMPLATE_OPTIONS = [
 ];
 
 const TARGET_JOB_OPTIONS: SelectableItem[] = [
-    { id: "frontend", label: "Frontend Developer" },
-    { id: "backend", label: "Backend Developer" },
-    { id: "fullstack", label: "Full Stack Developer" },
-    { id: "software", label: "Software Engineer" },
-    { id: "cloud", label: "Cloud Engineer" },
-    { id: "data", label: "Data Engineer" },
+    { id: "frontend", label: "Frontend Developer", subtitle: "UI, UX, client-side apps" },
+    { id: "backend", label: "Backend Developer", subtitle: "APIs, servers, databases" },
+    { id: "fullstack", label: "Full Stack Developer", subtitle: "Frontend + backend systems" },
+    { id: "software", label: "Software Engineer", subtitle: "General application development" },
+    { id: "cloud", label: "Cloud Engineer", subtitle: "Cloud infra, scaling, DevOps" },
+    { id: "data", label: "Data Engineer", subtitle: "Pipelines, ETL, big data" },
+    { id: "devops", label: "DevOps Engineer", subtitle: "CI/CD, automation, infra" },
+    { id: "mobile", label: "Mobile Developer", subtitle: "iOS, Android applications" },
+    { id: "ml", label: "ML Engineer", subtitle: "Models, training, deployment" },
+    { id: "ai", label: "AI Engineer", subtitle: "LLMs, AI systems, agents" },
+    { id: "security", label: "Security Engineer", subtitle: "App security, vulnerabilities" },
+    { id: "qa", label: "QA Engineer", subtitle: "Testing, reliability, automation" },
+    { id: "systems", label: "Systems Engineer", subtitle: "Low-level, performance systems" },
+    { id: "platform", label: "Platform Engineer", subtitle: "Internal tools, infrastructure" },
+    { id: "embedded", label: "Embedded Engineer", subtitle: "Hardware, firmware systems" },
+    { id: "game", label: "Game Developer", subtitle: "Game engines, gameplay systems" },
+    { id: "site-reliability", label: "Site Reliability Engineer", subtitle: "Uptime, monitoring, scaling" },
 ];
 
 const manualModeBenefits = [
