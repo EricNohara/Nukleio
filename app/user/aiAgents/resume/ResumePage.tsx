@@ -20,6 +20,7 @@ import ResumeSelectionStep from "./steps/ResumeSelectionStep";
 import { SelectableItem } from "./steps/SelectionStep";
 import StartStep from "./steps/StartStep";
 import TemplateStep from "./steps/TemplateStep";
+import ReviewStep from "./steps/ReviewStep";
 
 type ResumeStep =
     | "start"
@@ -332,6 +333,72 @@ export default function ResumePage() {
         onClick: resumeUrl ? resetFlow : handleBackStep,
     };
 
+    // data needed in review step
+    const templateName =
+        TEMPLATE_OPTIONS.find((template) => template.id === formData.templateId)?.name ??
+        "None";
+
+    const educationItems: SelectableItem[] =
+        state.education?.map((education) => ({
+            id: education.id,
+            label: education.institution,
+            subtitle: [
+                education.degree,
+                education.majors?.join(", "),
+                education.year_start && education.year_end
+                    ? `${education.year_start} - ${education.year_end}`
+                    : undefined,
+            ]
+                .filter(Boolean)
+                .join(" • "),
+        })) ?? [];
+
+    const courseItems: SelectableItem[] =
+        state.education?.flatMap((education) =>
+            education.courses?.map((course) => ({
+                id: course.id,
+                label: course.name,
+                subtitle: education.institution,
+            })) ?? [],
+        ) ?? [];
+
+    const experienceItems: SelectableItem[] =
+        state.experiences?.map((experience) => ({
+            id: experience.id,
+            label: experience.job_title,
+            subtitle: experience.company,
+        })) ?? [];
+
+    const projectItems: SelectableItem[] =
+        state.projects?.map((project) => ({
+            id: project.id,
+            label: project.name,
+            subtitle: [
+                project.languages_used?.join(", "),
+                project.frameworks_used?.join(", "),
+                project.technologies_used?.join(", "),
+            ]
+                .filter(Boolean)
+                .join(" • "),
+        })) ?? [];
+
+    const skillItems: SelectableItem[] =
+        state.skills?.map((skill) => ({
+            id: skill.id,
+            label: skill.name,
+            subtitle: `${skill.proficiency ?? ""}`,
+        })) ?? [];
+
+    function handleRemoveSelection(
+        key: MultiSelectKey,
+        id: string,
+    ) {
+        setFormData((prev) => ({
+            ...prev,
+            [key]: prev[key].filter((itemId) => itemId !== id),
+        }));
+    }
+
     return (
         <PageContentWrapper>
             <PageContentHeader
@@ -425,24 +492,18 @@ export default function ResumePage() {
                         )}
 
                         {step === "review" && (
-                            <div className={styles.stepContainer}>
-                                <p className={styles.selectionLabel}>Review Selections</p>
-
-                                <div className={styles.reviewCard}>
-                                    <p><strong>Mode:</strong> {formData.generationType}</p>
-                                    <p><strong>Template:</strong> {formData.templateId || "None"}</p>
-                                    <p><strong>Target jobs:</strong> {formData.targetJobs.join(", ") || "None"}</p>
-
-                                    {formData.generationType === "generate" && (
-                                        <>
-                                            <p><strong>Education:</strong> {formData.educationIds.join(", ") || "None"}</p>
-                                            <p><strong>Experience:</strong> {formData.experienceIds.join(", ") || "None"}</p>
-                                            <p><strong>Projects:</strong> {formData.projectIds.join(", ") || "None"}</p>
-                                            <p><strong>Skills:</strong> {formData.skillIds.join(", ") || "None"}</p>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
+                            <ReviewStep
+                                formData={formData}
+                                templateName={templateName}
+                                targetJobOptions={TARGET_JOB_OPTIONS}
+                                educationItems={educationItems}
+                                courseItems={courseItems}
+                                experienceItems={experienceItems}
+                                projectItems={projectItems}
+                                skillItems={skillItems}
+                                onRemove={handleRemoveSelection}
+                                onGoToStep={(step) => setStep(step)}
+                            />
                         )}
                     </>
                 )}

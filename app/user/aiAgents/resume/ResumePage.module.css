@@ -313,11 +313,9 @@
   color: white;
 }
 
-.selectedCard h4 {
-  color: #e6e6e6;
-}
-
-.selectedCard li {
+.selectedCard li,
+.selectedCard h4,
+.selectedCard p {
   color: #e6e6e6;
 }
 
@@ -365,19 +363,23 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  border: 1px solid var(--page-box-border);
+  border: 2px solid var(--page-box-border);
   background: var(--page-box-bg);
   color: var(--page-txt-2);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: bold;
   border-radius: var(--global-border-radius);
-  padding: 0.55rem 0.8rem;
+  padding: 0.5rem 1rem;
   transition: 0.1s ease;
   flex-shrink: 0;
 }
 
 .selectAllButton:hover {
   cursor: pointer;
+  border-color: var(--btn-1);
+}
+
+.selectAllButtonSelected {
   border-color: var(--btn-1);
 }
 
@@ -436,4 +438,132 @@
   .previewContainer {
     min-height: 550px;
   }
+}
+
+/* review step */
+.reviewHeader {
+  margin-bottom: 1rem;
+  border-bottom: 1.5px solid var(--page-box-border);
+  color: var(--page-txt-1);
+}
+
+.reviewHeader h2 {
+  margin: 0.5rem 0 0 0;
+}
+
+.reviewSubtitle {
+  color: var(--page-txt-2);
+  font-size: 0.9rem;
+  margin: 1rem 0 1rem 0;
+}
+
+.reviewTopCards {
+  display: flex;
+  gap: 1rem;
+}
+
+.summaryCard {
+  flex: 1;
+  border: 1px solid var(--page-box-border);
+  border-radius: var(--global-border-radius);
+  padding: 0.75rem 1rem;
+  background: var(--page-bg);
+}
+
+.summaryLabel {
+  font-size: 0.75rem;
+  margin: 0 0 0.25rem 0;
+  color: var(--page-txt-2);
+}
+
+.summaryValue {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: var(--page-txt-1);
+  margin: 0;
+}
+
+.reviewSection {
+  margin-bottom: 1rem;
+}
+
+.reviewSectionTitle {
+  font-size: 1rem;
+  margin: 0 0 1rem 0;
+  font-weight: bold;
+  color: var(--page-txt-1);
+}
+
+.chipContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chipSubtitle {
+  font-size: 0.75rem;
+  color: var(--page-txt-2);
+  font-weight: normal;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reviewSectionTitleButton {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--page-txt-1);
+  cursor: pointer;
+  transition: 0.1s ease;
+}
+
+.reviewSectionTitleButton:hover {
+  color: var(--btn-1);
+}
+
+.chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--global-border-radius);
+  background: var(--page-bg);
+  border: 1px solid var(--page-box-border);
+  color: var(--page-txt-1);
+  font-size: 0.8rem;
+  font-weight: bold;
+  flex: 0 0 calc(20% - 0.75rem);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.removeChipButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  border: none;
+  background: none;
+  color: var(--page-txt-1);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  line-height: 1;
+  padding: 0;
+  transition: 0.1s ease;
+}
+
+.removeChipButton:hover {
+  color: var(--exit-btn);
 }

@@ -38,7 +38,7 @@ export default function SelectionStep({
 
                 <button
                     type="button"
-                    className={styles.selectAllButton}
+                    className={`${styles.selectAllButton} ${allSelected ? styles.selectAllButtonSelected : ""}`}
                     onClick={onToggleAll}
                 >
                     <span>{allSelected ? "Deselect All" : "Select All"}</span>
