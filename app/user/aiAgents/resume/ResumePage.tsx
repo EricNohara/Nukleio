@@ -17,10 +17,10 @@ import { ICachedResume } from "@/app/interfaces/ICachedResume";
 
 import styles from "./ResumePage.module.css";
 import ResumeSelectionStep from "./steps/ResumeSelectionStep";
+import ReviewStep from "./steps/ReviewStep";
 import { SelectableItem } from "./steps/SelectionStep";
 import StartStep from "./steps/StartStep";
 import TemplateStep from "./steps/TemplateStep";
-import ReviewStep from "./steps/ReviewStep";
 
 type ResumeStep =
     | "start"

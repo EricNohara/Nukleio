@@ -2,12 +2,12 @@ import { Suspense } from "react";
 
 import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 
-import ResumePage from "./ResumePage";
+import ProfessionalHeadshotPage from "./ProfessionalHeadshotPage";
 
-export default function ResumePageWrapper() {
+export default function ProfessionalHeadshotPageWrapper() {
     return (
         <Suspense fallback={<LoadingSpinner />}>
-            <ResumePage />
+            <ProfessionalHeadshotPage />
         </Suspense>
     );
 }

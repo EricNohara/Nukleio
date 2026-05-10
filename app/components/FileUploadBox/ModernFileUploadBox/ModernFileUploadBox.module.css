@@ -1,0 +1,213 @@
+.exitEditBtn {
+  position: absolute;
+  bottom: 2rem;
+}
+
+/*  */
+.previewInner {
+  display: flex;
+  flex-direction: column;
+}
+
+.imagePreview,
+.pdfPreview {
+  width: 160px;
+  height: 120px;
+  display: block;
+  border: 0;
+}
+
+/*  */
+.uploadBox {
+  position: relative;
+  overflow: hidden;
+
+  border-radius: var(--global-border-radius);
+  padding: 2rem;
+  text-align: center;
+  transition: 0.2s ease;
+  background-color: var(--page-box-bg);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  flex: 1;
+  min-height: 0;
+
+  cursor: pointer;
+
+  border: 1.5px dashed var(--page-box-border);
+}
+
+.uploadBox:hover,
+.uploadBox:focus-visible,
+.dragging {
+  border-color: var(--btn-1);
+}
+
+.dragging {
+  background-color: color-mix(in srgb, var(--btn-1) 8%, transparent);
+}
+
+.fileInput {
+  display: none;
+}
+
+.labelContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--page-txt-1);
+  margin: 0;
+}
+
+.subLabel {
+  font-size: 0.85rem;
+  font-weight: normal;
+  margin: 0;
+  color: var(--page-txt-2);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  max-width: 300px;
+}
+
+.miniUploadBox {
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.miniLabel {
+  font-size: 0.9rem;
+}
+
+.miniSubLabel {
+  font-size: 0.75rem;
+}
+
+.uploadLabelContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  width: 100%;
+  height: 100%;
+
+  min-height: 0;
+}
+
+.uploadLabelContainer p {
+  font-weight: bold;
+  color: var(--page-txt-1);
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.asterisk {
+  color: var(--fail-color);
+}
+
+.iconCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  border: 2px solid var(--btn-1);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--btn-1) 20%, transparent);
+}
+
+.icon {
+  color: var(--btn-1);
+}
+
+.previewContainer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--global-border-radius);
+  overflow: hidden;
+  background-color: var(--page-box-bg);
+  border: none;
+}
+
+.previewLarge,
+.previewMini {
+  width: 100%;
+  height: 100%;
+}
+
+.imagePreview,
+.pdfPreview,
+.genericPreview {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+}
+
+.imagePreview {
+  object-fit: cover;
+}
+
+.genericPreview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewFooter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2.5rem 0.75rem 0.75rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.previewName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: bold;
+  color: white;
+}
+
+.previewSize {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.75rem;
+}
+
+.clearPreviewBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 0.35rem;
+  z-index: 5;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
