@@ -6,6 +6,7 @@ export interface ICachedProfessionalHeadshot {
   background_url: string | null;
   background_description: string | null;
   created_at: string;
+  attire: string;
   layout: string | null;
   validation: {
     ok: boolean;

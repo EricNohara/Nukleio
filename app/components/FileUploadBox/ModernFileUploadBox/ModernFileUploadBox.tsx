@@ -21,6 +21,7 @@ interface IFileUploadBoxProps {
     previewName?: string;
     onClearPreview?: () => void;
     disabled?: boolean;
+    resetKey?: string;
 }
 
 export default function ModernFileUploadBox({
@@ -36,6 +37,7 @@ export default function ModernFileUploadBox({
     previewName,
     onClearPreview,
     disabled = false,
+    resetKey,
 }: IFileUploadBoxProps) {
     const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -60,6 +62,15 @@ export default function ModernFileUploadBox({
             if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
         };
     }, [localPreviewUrl]);
+
+    useEffect(() => {
+        setSelectedFile(null);
+        setDragging(false);
+
+        if (inputRef.current) {
+            inputRef.current.value = "";
+        }
+    }, [resetKey]);
 
     const isImage =
         !!selectedFile?.type.startsWith("image/") ||

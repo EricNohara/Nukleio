@@ -4,9 +4,9 @@ import { WandSparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import { AsyncButtonWrapper } from "@/app/components/AsyncButtonWrapper/AsyncButtonWrapper";
+import LoadingSpinner from "@/app/components/AsyncButtonWrapper/LoadingSpinner/LoadingSpinner";
 import { ButtonOne } from "@/app/components/Buttons/Buttons";
 import ModernFileUploadBox from "@/app/components/FileUploadBox/ModernFileUploadBox/ModernFileUploadBox";
-import LoadingMessageSpinner from "@/app/components/LoadingMessageSpinner/LoadingMessageSpinner";
 import PageContentHeader, {
     IButton,
 } from "@/app/components/PageContentHeader/PageContentHeader";
@@ -24,6 +24,15 @@ type HeadshotLayout =
     | "1024x1536"
     | "auto";
 
+type HeadshotAttire =
+    | "auto"
+    | "business"
+    | "businessCasual"
+    | "smartCasual"
+    | "casual"
+    | "techProfessional"
+    | "academic";
+
 const NEW_HEADSHOT_ID = "new";
 
 export default function ProfessionalHeadshotPage() {
@@ -31,6 +40,7 @@ export default function ProfessionalHeadshotPage() {
     const [backgroundImage, setBackgroundImage] = useState<File | null>(null);
     const [backgroundDescription, setBackgroundDescription] = useState("");
     const [layout, setLayout] = useState<HeadshotLayout>("auto");
+    const [attire, setAttire] = useState<HeadshotAttire>("auto");
     const [loading, setLoading] = useState(false);
     const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
     const [cachedHeadshots, setCachedHeadshots] = useState<ICachedProfessionalHeadshot[]>([]);
@@ -38,6 +48,7 @@ export default function ProfessionalHeadshotPage() {
     const [selectedCachedHeadshotId, setSelectedCachedHeadshotId] = useState(NEW_HEADSHOT_ID);
     const [cachedReferenceUrl, setCachedReferenceUrl] = useState<string | null>(null);
     const [cachedBackgroundUrl, setCachedBackgroundUrl] = useState<string | null>(null);
+    const [uploadResetKey, setUploadResetKey] = useState(0);
 
     const hasBackgroundImage =
         !!backgroundImage || !!cachedBackgroundUrl;
@@ -99,6 +110,7 @@ export default function ProfessionalHeadshotPage() {
             );
 
             formData.append("layout", layout);
+            formData.append("attire", attire);
 
             const res = await fetch(
                 "/api/internal/user/aiAgents/professionalHeadshot",
@@ -127,6 +139,7 @@ export default function ProfessionalHeadshotPage() {
                     background_description: backgroundDescription || null,
                     created_at: new Date().toISOString(),
                     validation: data.validation,
+                    attire,
                     layout
                 },
                 ...prev,
@@ -193,10 +206,12 @@ export default function ProfessionalHeadshotPage() {
                                     setGeneratedUrl(null);
                                     setBackgroundDescription("");
                                     setLayout("auto");
+                                    setAttire("auto");
                                     setCachedReferenceUrl(null);
                                     setCachedBackgroundUrl(null);
                                     setReferenceImage(null);
                                     setBackgroundImage(null);
+                                    setUploadResetKey((prev) => prev + 1);
                                     return;
                                 }
 
@@ -206,10 +221,12 @@ export default function ProfessionalHeadshotPage() {
                                     setGeneratedUrl(selected.generated_url);
                                     setBackgroundDescription(selected.background_description ?? "");
                                     setLayout((selected.layout as HeadshotLayout) ?? "auto");
+                                    setAttire((selected.attire as HeadshotAttire) ?? "auto")
                                     setCachedReferenceUrl(selected.reference_url ?? null);
                                     setCachedBackgroundUrl(selected.background_url ?? null);
                                     setReferenceImage(null);
                                     setBackgroundImage(null);
+                                    setUploadResetKey((prev) => prev + 1);
                                 }
                             }}
                         />
@@ -218,18 +235,36 @@ export default function ProfessionalHeadshotPage() {
 
                 <div className={styles.pageContent}>
                     <div className={styles.inputsContainer}>
-                        <div className={styles.inputItemContainer}>
-                            <p className={headerFont.className}>Layout</p>
-                            <SelectDropdown
-                                value={layout}
-                                options={[
-                                    { value: "auto", label: "Auto" },
-                                    { value: "1024x1024", label: "Square" },
-                                    { value: "1536x1024", label: "Landscape" },
-                                    { value: "1024x1536", label: "Portrait" }
-                                ]}
-                                onChange={(layout) => setLayout(layout as HeadshotLayout)}
-                            />
+                        <div className={styles.selectInputContainer}>
+                            <div className={styles.inputItemContainer}>
+                                <p className={headerFont.className}>Layout</p>
+                                <SelectDropdown
+                                    value={layout}
+                                    options={[
+                                        { value: "auto", label: "Auto" },
+                                        { value: "1024x1024", label: "Square" },
+                                        { value: "1536x1024", label: "Landscape" },
+                                        { value: "1024x1536", label: "Portrait" }
+                                    ]}
+                                    onChange={(layout) => setLayout(layout as HeadshotLayout)}
+                                />
+                            </div>
+                            <div className={styles.inputItemContainer}>
+                                <p className={headerFont.className}>Attire</p>
+                                <SelectDropdown
+                                    value={attire}
+                                    options={[
+                                        { value: "auto", label: "Auto" },
+                                        { value: "business", label: "Business" },
+                                        { value: "businessCasual", label: "Business Casual" },
+                                        { value: "smartCasual", label: "Smart Casual" },
+                                        { value: "casual", label: "Casual" },
+                                        { value: "techProfessional", label: "Tech Professional" },
+                                        { value: "academic", label: "Academic" },
+                                    ]}
+                                    onChange={(a) => setAttire(a as HeadshotAttire)}
+                                />
+                            </div>
                         </div>
 
                         <div className={styles.uploadGrid}>
@@ -249,6 +284,7 @@ export default function ProfessionalHeadshotPage() {
                                 }}
                                 uploadInstructions="PNG, JPG, WEBP up to 50MB"
                                 required
+                                resetKey={`reference-${uploadResetKey}`}
                             />
 
                             <ModernFileUploadBox
@@ -271,6 +307,7 @@ export default function ProfessionalHeadshotPage() {
                                         ? "Disabled: using background description"
                                         : "PNG, JPG, WEBP up to 50MB"
                                 }
+                                resetKey={`reference-${uploadResetKey}`}
                             />
                         </div>
 
@@ -305,7 +342,7 @@ export default function ProfessionalHeadshotPage() {
 
                             {loading && (
                                 <div className={styles.loadingContainer}>
-                                    <LoadingMessageSpinner messages={["Generating your professional headshot"]} />
+                                    <LoadingSpinner />
                                 </div>
                             )}
 

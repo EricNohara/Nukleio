@@ -12,11 +12,20 @@ const AGENT_BASE = process.env.PROFESSIONAL_HEADSHOT_AGENT_BASE_URL;
 const STORAGE_BUCKET = "professional_headshots";
 
 type HeadshotLayout = "1024x1024" | "1536x1024" | "1024x1536" | "auto";
+type HeadshotAttire =
+  | "auto"
+  | "business"
+  | "businessCasual"
+  | "smartCasual"
+  | "casual"
+  | "techProfessional"
+  | "academic";
 
 type GenerateProfessionalHeadshotBody = {
   referenceUrl: string;
   backgroundDescription: string | null;
   backgroundUrl?: string;
+  attire: HeadshotAttire;
   layout: HeadshotLayout;
 };
 
@@ -36,6 +45,18 @@ function isHeadshotLayout(value: unknown): value is HeadshotLayout {
     value === "1536x1024" ||
     value === "1024x1536" ||
     value === "auto"
+  );
+}
+
+function isHeadshotAttire(value: unknown): value is HeadshotAttire {
+  return (
+    value === "auto" ||
+    value === "business" ||
+    value === "businessCasual" ||
+    value === "smartCasual" ||
+    value === "casual" ||
+    value === "techProfessional" ||
+    value === "academic"
   );
 }
 
@@ -143,6 +164,7 @@ export async function POST(req: NextRequest) {
     const referenceImage = formData.get("referenceImage");
     const backgroundImage = formData.get("backgroundImage");
     const backgroundDescriptionRaw = formData.get("backgroundDescription");
+    const attireRaw = formData.get("attire");
     const layoutRaw = formData.get("layout");
 
     if (!(referenceImage instanceof File)) {
@@ -188,6 +210,10 @@ export async function POST(req: NextRequest) {
 
     if (!isHeadshotLayout(layoutRaw)) {
       return NextResponse.json({ error: "Invalid layout." }, { status: 400 });
+    }
+
+    if (!isHeadshotAttire(attireRaw)) {
+      return NextResponse.json({ error: "Invalid attire." }, { status: 400 });
     }
 
     const backgroundDescription =
@@ -252,6 +278,7 @@ export async function POST(req: NextRequest) {
       referenceUrl,
       backgroundDescription,
       backgroundUrl,
+      attire: attireRaw,
       layout: layoutRaw,
     };
 
@@ -291,6 +318,7 @@ export async function POST(req: NextRequest) {
       reference_url: referenceUrl,
       background_url: backgroundUrl ?? null,
       background_description: backgroundDescription,
+      attire: attireRaw,
       layout: layoutRaw,
       validation,
     };
