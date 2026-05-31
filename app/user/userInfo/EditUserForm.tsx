@@ -171,7 +171,7 @@ export default function EditUserForm({
                         onChange={handleChange}
                         isInInputForm={true}
                         type="textarea"
-                        textAreaRows={10}
+                        textAreaRows={8}
                         focusLabelColor="var(--btn-1)"
                     />
                 </div>

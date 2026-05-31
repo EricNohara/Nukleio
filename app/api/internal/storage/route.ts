@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
+import { refreshCachedUserInfo } from "@/utils/cachedUserInfo/refreshCachedUserInfo";
 import parseURL from "@/utils/general/parseURL";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
@@ -125,6 +126,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           .remove([parsedFilename]);
       }
 
+      // update the user info cache
+      await refreshCachedUserInfo(supabase, user.id);
+
       return NextResponse.json(
         { publicURL: publicURL.publicUrl },
         { status: 201 },
@@ -193,6 +197,9 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
         .remove([parsedFilename]);
 
       if (error) throw error;
+
+      // update the user info cache
+      await refreshCachedUserInfo(supabase, user.id);
 
       return new NextResponse(null, { status: 204 });
     }

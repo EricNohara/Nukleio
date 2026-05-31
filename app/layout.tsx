@@ -23,8 +23,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={baseFont.className}>
       <head>
-        <link rel="icon" href="/icons/favicon.ico" sizes="any" />
-        <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/icons/favicon-v2.ico" sizes="any" />
+        <link rel="icon" href="/icons/favicon-v2.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" crossOrigin="use-credentials" />
         <link rel="preload" href="/fonts/baseFont.woff2" as="font" type="font/woff2" crossOrigin="" />
