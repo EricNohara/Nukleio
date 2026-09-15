@@ -1,5 +1,6 @@
-import type { User } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+
+import type { User } from "@supabase/supabase-js";
 
 export function requireVerifiedEmailForAi(user: User): NextResponse | null {
   // Supabase sets this trusted field for confirmed email/password accounts and

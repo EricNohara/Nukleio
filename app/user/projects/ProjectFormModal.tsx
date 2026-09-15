@@ -26,6 +26,7 @@ type Props = {
     onSubmit: (e: React.FormEvent) => void;
     onClose: () => void;
     setThumbnailDoc: Dispatch<SetStateAction<File | null>>;
+    onExternalThumbnailSelect: (url: string) => void;
 };
 
 export default function ProjectFormModal({
@@ -36,6 +37,7 @@ export default function ProjectFormModal({
     onSubmit,
     onClose,
     setThumbnailDoc
+    , onExternalThumbnailSelect
 }: Props) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const toast = useToast();
@@ -169,6 +171,9 @@ export default function ProjectFormModal({
                         className={styles.upload}
                         label="Project Thumbnail"
                         isMini
+                        allowExternalUrl
+                        initialPreviewUrl={value.thumbnail_url}
+                        onExternalUrlSelect={(url) => onExternalThumbnailSelect(url)}
                     />
                 </div>
 

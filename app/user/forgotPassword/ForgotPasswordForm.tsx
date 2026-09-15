@@ -33,7 +33,7 @@ export default function ForgotPasswordForm() {
             // send the recovery email
             const { error } = await supabase.auth
                 .resetPasswordForEmail(email, {
-                    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/passwordReset`,
+                    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/passwordReset?next=/user`,
                     captchaToken,
                 });
             if (error) throw new Error(error.message);

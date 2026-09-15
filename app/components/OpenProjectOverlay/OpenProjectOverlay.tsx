@@ -1,5 +1,5 @@
 import { Github, Link2 } from "lucide-react";
-import Image from "next/image";
+import { useState } from "react";
 
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
 import { headerFont } from "@/app/localFonts";
@@ -21,6 +21,7 @@ interface IOpenProjectOverlayProps {
 }
 
 export default function OpenProjectOverlay({ project, index, onEdit, onDelete, onClose }: IOpenProjectOverlayProps) {
+    const [thumbnailFailed, setThumbnailFailed] = useState(false);
     const getFormattedDate = (): string => {
         if (project.date_start) {
             return `${formatDate(project.date_start)}${project.date_end && ` - ${formatDate(project.date_end)}`}`;
@@ -40,11 +41,13 @@ export default function OpenProjectOverlay({ project, index, onEdit, onDelete, o
                 <div className={styles.content}>
                     <div className={styles.contentGrid}>
                         <div className={styles.thumbnailContainer}>
-                            <Image
-                                src={project.thumbnail_url ? project.thumbnail_url : "/images/default-project.svg"}
+                            {/* External URLs must not go through Next's image optimizer. */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={!thumbnailFailed && project.thumbnail_url ? project.thumbnail_url : "/images/default-project.svg"}
                                 alt={project.name}
-                                fill
                                 className={styles.thumbnail}
+                                onError={() => setThumbnailFailed(true)}
                             />
                         </div>
                         <div className={styles.info}>

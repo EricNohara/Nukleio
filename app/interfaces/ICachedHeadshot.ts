@@ -2,7 +2,7 @@ export interface ICachedHeadshot {
   id: string;
   user_id: string;
   generated_url: string;
-  reference_url: string;
+  reference_url: string | null;
   background_url: string | null;
   background_description: string | null;
   created_at: string;

@@ -163,3 +163,6 @@
   right: 6px;
   z-index: 5;
 }
+
+.externalUrlInput { width: 100%; padding: .65rem; border-radius: var(--global-border-radius); border: 1px solid var(--page-box-border); }
+.externalUrlActions { display: flex; gap: .5rem; justify-content: center; margin-top: .75rem; }

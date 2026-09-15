@@ -18,6 +18,15 @@ function isOwnedProjectThumbnail(url: string, userID: string): boolean {
   );
 }
 
+function isSafeExternalThumbnail(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" && !parsed.username && !parsed.password;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const { user, supabase, response } = await getAuthenticatedUser();
@@ -97,7 +106,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (
       sentProject.thumbnail_url &&
-      !isOwnedProjectThumbnail(sentProject.thumbnail_url, user.id)
+      !isOwnedProjectThumbnail(sentProject.thumbnail_url, user.id) &&
+      !isSafeExternalThumbnail(sentProject.thumbnail_url)
     ) {
       return NextResponse.json(
         { message: "Invalid project thumbnail" },
@@ -117,6 +127,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       .single();
 
     if (error) throw error;
+
+    if (sentProject.thumbnail_url && isOwnedProjectThumbnail(sentProject.thumbnail_url, user.id)) {
+      const object = parseURL(sentProject.thumbnail_url)!;
+      const admin = createAdminClient();
+      const claim = await admin.rpc("claim_project_thumbnail", {
+        p_user_id: user.id,
+        p_bucket: object.parsedBucket,
+        p_object_path: object.parsedFilename,
+      });
+      if (claim.error || claim.data !== true) {
+        await supabase.from("projects").delete().eq("id", data.id).eq("user_id", user.id);
+        throw claim.error ?? new Error("Project thumbnail upload was not reserved");
+      }
+    }
 
     // update the user info cache
     await refreshCachedUserInfo(supabase, user.id);
@@ -165,7 +189,16 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
           .from(storageObject.parsedBucket)
           .remove([storageObject.parsedFilename]);
 
-        if (removeError) throw removeError;
+        if (removeError) {
+          const queued = await admin.from("storage_deletion_queue")
+            .insert({ object_url: project.thumbnail_url });
+          if (queued.error) throw removeError;
+        } else {
+          const ledger = await admin.from("storage_quota_ledger").delete()
+            .eq("bucket", storageObject.parsedBucket)
+            .eq("object_path", storageObject.parsedFilename);
+          if (ledger.error) throw ledger.error;
+        }
       } else {
         // Never follow a malformed or foreign DB reference with service-role
         // credentials. The project can still be deleted safely.
@@ -219,7 +252,8 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     if (
       updatedProject.thumbnail_url &&
-      !isOwnedProjectThumbnail(updatedProject.thumbnail_url, user.id)
+      !isOwnedProjectThumbnail(updatedProject.thumbnail_url, user.id) &&
+      !isSafeExternalThumbnail(updatedProject.thumbnail_url)
     ) {
       return NextResponse.json(
         { message: "Invalid project thumbnail" },
@@ -252,6 +286,21 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     if (error) throw error;
 
+    if (updatedProject.thumbnail_url && isOwnedProjectThumbnail(updatedProject.thumbnail_url, user.id)) {
+      const object = parseURL(updatedProject.thumbnail_url)!;
+      const admin = createAdminClient();
+      const claim = await admin.rpc("claim_project_thumbnail", {
+        p_user_id: user.id,
+        p_bucket: object.parsedBucket,
+        p_object_path: object.parsedFilename,
+      });
+      if (claim.error || claim.data !== true) {
+        await supabase.from("projects").update({ thumbnail_url: existingProject.thumbnail_url })
+          .eq("id", prevProjectID).eq("user_id", user.id);
+        throw claim.error ?? new Error("Project thumbnail upload was not reserved");
+      }
+    }
+
     if (
       existingProject.thumbnail_url &&
       existingProject.thumbnail_url !== updatedProject.thumbnail_url &&
@@ -267,6 +316,14 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         console.error(
           `Failed to remove replaced project thumbnail: ${removeError.message}`,
         );
+        const queued = await admin.from("storage_deletion_queue")
+          .insert({ object_url: existingProject.thumbnail_url });
+        if (queued.error) console.error(`Failed to queue thumbnail cleanup: ${queued.error.message}`);
+      } else {
+        const ledger = await admin.from("storage_quota_ledger").delete()
+          .eq("bucket", storageObject.parsedBucket)
+          .eq("object_path", storageObject.parsedFilename);
+        if (ledger.error) console.error(`Failed to release thumbnail quota: ${ledger.error.message}`);
       }
     }
 

@@ -11,7 +11,7 @@ import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentW
 import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { compressImage, compressPDF } from "@/utils/file-upload/compress";
-import { uploadFile } from "@/utils/file-upload/upload";
+import { saveExternalFileUrl, uploadFile } from "@/utils/file-upload/upload";
 
 import styles from "./DocumentsPage.module.css";
 
@@ -26,6 +26,7 @@ export default function DocumentsPage() {
     resume: null,
     transcript: null
   });
+  const [externalDocs, setExternalDocs] = useState({ portrait: "", resume: "", transcript: "" });
   const { state, dispatch } = useUser();
   const toast = useToast();
 
@@ -76,6 +77,11 @@ export default function DocumentsPage() {
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url: publicPortraitUrl, docType: "portrait_url" } });
         setIsEditing({ ...isEditing, portrait_url: false });
         setDocs({ ...docs, portrait: null });
+      } else if (externalDocs.portrait) {
+        const url = await saveExternalFileUrl(externalDocs.portrait, "portraits");
+        dispatch({ type: "UPDATE_DOCUMENT", payload: { url, docType: "portrait_url" } });
+        setExternalDocs((current) => ({ ...current, portrait: "" }));
+        setIsEditing((current) => ({ ...current, portrait_url: false }));
       }
       if (docs.resume) {
         const compressedResume = await compressPDF(docs.resume);
@@ -83,6 +89,11 @@ export default function DocumentsPage() {
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url: publicResumeUrl, docType: "resume_url" } });
         setIsEditing({ ...isEditing, resume_url: false });
         setDocs({ ...docs, resume: null });
+      } else if (externalDocs.resume) {
+        const url = await saveExternalFileUrl(externalDocs.resume, "resumes");
+        dispatch({ type: "UPDATE_DOCUMENT", payload: { url, docType: "resume_url" } });
+        setExternalDocs((current) => ({ ...current, resume: "" }));
+        setIsEditing((current) => ({ ...current, resume_url: false }));
       }
       if (docs.transcript) {
         const compressedTranscript = await compressPDF(docs.transcript);
@@ -90,6 +101,11 @@ export default function DocumentsPage() {
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url: publicTranscriptUrl, docType: "transcript_url" } });
         setIsEditing({ ...isEditing, transcript_url: false });
         setDocs({ ...docs, transcript: null });
+      } else if (externalDocs.transcript) {
+        const url = await saveExternalFileUrl(externalDocs.transcript, "transcripts");
+        dispatch({ type: "UPDATE_DOCUMENT", payload: { url, docType: "transcript_url" } });
+        setExternalDocs((current) => ({ ...current, transcript: "" }));
+        setIsEditing((current) => ({ ...current, transcript_url: false }));
       }
 
       toast.success("Success", "Successfully uploaded your documents.");
@@ -102,19 +118,31 @@ export default function DocumentsPage() {
   const handleFileSelect = (file: File, docType: string) => {
     switch (docType) {
       case "portrait_url":
-        setDocs({ ...docs, portrait: file });
+        setDocs((current) => ({ ...current, portrait: file }));
+        setExternalDocs((current) => ({ ...current, portrait: "" }));
         toast.info("Info", "Click save documents button to save your portrait.");
         break;
       case "resume_url":
-        setDocs({ ...docs, resume: file });
+        setDocs((current) => ({ ...current, resume: file }));
+        setExternalDocs((current) => ({ ...current, resume: "" }));
         toast.info("Info", "Click save documents button to save your resume.");
         break;
       case "transcript_url":
-        setDocs({ ...docs, transcript: file });
+        setDocs((current) => ({ ...current, transcript: file }));
+        setExternalDocs((current) => ({ ...current, transcript: "" }));
         toast.info("Info", "Click save documents button to save your transcript.");
         break;
       default:
         break;
+    }
+  };
+
+  const handleExternalSelect = (url: string, docType: string) => {
+    const key = docType === "portrait_url" ? "portrait" : docType === "resume_url" ? "resume" : "transcript";
+    setExternalDocs((current) => ({ ...current, [key]: url }));
+    if (url) {
+      setDocs((current) => ({ ...current, [key]: null }));
+      toast.info("External link selected", "Click save documents to use this externally hosted file.");
     }
   };
 
@@ -147,18 +175,23 @@ export default function DocumentsPage() {
               <FileUploadBox
                 label="Edit Profile Picture"
                 accepts="image/*"
-                uploadInstructions="Upload image files of up to 50 MB and click save documents"
+                uploadInstructions="Upload an image up to 1 MB, or use an external HTTPS link"
                 isEditView={isEditing.portrait_url}
                 onExitEditView={() => { setIsEditing({ ...isEditing, portrait_url: false }); setDocs({ ...docs, portrait: null }); }}
                 onFileSelect={handleFileSelect}
                 docType="portrait_url"
+                allowExternalUrl
+                onExternalUrlSelect={handleExternalSelect}
+                initialPreviewUrl={externalDocs.portrait || null}
               /> :
               <FileUploadBox
                 label="Upload Profile Picture"
                 accepts="image/*"
-                uploadInstructions="Upload image files of up to 50 MB and click save documents"
+                uploadInstructions="Upload an image up to 1 MB, or use an external HTTPS link"
                 onFileSelect={handleFileSelect}
                 docType="portrait_url"
+                allowExternalUrl
+                onExternalUrlSelect={handleExternalSelect}
               />
         }
         {
@@ -174,18 +207,23 @@ export default function DocumentsPage() {
               <FileUploadBox
                 label="Edit Resume File"
                 accepts=".pdf"
-                uploadInstructions="Upload PDF files of up to 50 MB and click save documents"
+                uploadInstructions="Upload a PDF up to 1 MB, or use an external HTTPS link"
                 isEditView={isEditing.resume_url}
                 onExitEditView={() => { setIsEditing({ ...isEditing, resume_url: false }); setDocs({ ...docs, resume: null }); }}
                 onFileSelect={handleFileSelect}
                 docType="resume_url"
+                allowExternalUrl
+                onExternalUrlSelect={handleExternalSelect}
+                initialPreviewUrl={externalDocs.resume || null}
               /> :
               <FileUploadBox
                 label="Upload Resume File"
                 accepts=".pdf"
-                uploadInstructions="Upload PDF files of up to 50 MB and click save documents"
+                uploadInstructions="Upload a PDF up to 1 MB, or use an external HTTPS link"
                 onFileSelect={handleFileSelect}
                 docType="resume_url"
+                allowExternalUrl
+                onExternalUrlSelect={handleExternalSelect}
               />
         }
         {
@@ -201,18 +239,23 @@ export default function DocumentsPage() {
               <FileUploadBox
                 label="Edit Transcript File"
                 accepts=".pdf"
-                uploadInstructions="Upload PDF files of up to 50 MB and click save documents"
+                uploadInstructions="Upload a PDF up to 1 MB, or use an external HTTPS link"
                 isEditView={isEditing.transcript_url}
                 onExitEditView={() => { setIsEditing({ ...isEditing, transcript_url: false }); setDocs({ ...docs, transcript: null }); }}
                 onFileSelect={handleFileSelect}
                 docType="transcript_url"
+                allowExternalUrl
+                onExternalUrlSelect={handleExternalSelect}
+                initialPreviewUrl={externalDocs.transcript || null}
               /> :
               <FileUploadBox
                 label="Upload Transcript File"
                 accepts=".pdf"
-                uploadInstructions="Upload PDF files of up to 50 MB and click save documents"
+                uploadInstructions="Upload a PDF up to 1 MB, or use an external HTTPS link"
                 onFileSelect={handleFileSelect}
                 docType="transcript_url"
+                allowExternalUrl
+                onExternalUrlSelect={handleExternalSelect}
               />
         }
       </div>

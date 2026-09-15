@@ -42,7 +42,7 @@ export default function HeadshotPage() {
   const { dispatch } = useUser();
   const toast = useToast();
   const { tier, loading: tierLoading } = useTier();
-  const isPremium = hasTier(tier, "premium");
+  const isPremium = hasTier(tier, "developer");
 
   const [referenceImage, setReferenceImage] = useState<File | null>(null);
   const [backgroundImage, setBackgroundImage] = useState<File | null>(null);
@@ -140,6 +140,13 @@ export default function HeadshotPage() {
 
       // update app state
       setGeneratedUrl(data.url);
+
+      if (!data.id) {
+        toast.info(
+          "Temporary result",
+          "Free results are available in this browser session. Download or save this image as your portrait to keep it.",
+        );
+      }
 
       if (data.id) {
         setCachedHeadshots((prev) => [

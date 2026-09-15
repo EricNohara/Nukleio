@@ -1,5 +1,7 @@
-import { Pencil, Trash } from "lucide-react";
-import Image from "next/image";
+"use client";
+
+import { ExternalLink, FileText, Pencil, Trash } from "lucide-react";
+import { useState } from "react";
 
 import { headerFont } from "@/app/localFonts";
 
@@ -19,6 +21,8 @@ interface IFileDisplayBoxProps {
 }
 
 export default function FileDisplayBox({ imageUrl, alt, pdfUrl, uploadedItemName, docType, onEdit, onDelete }: IFileDisplayBoxProps) {
+    const [imageFailed, setImageFailed] = useState(false);
+    const isExternalPdf = Boolean(pdfUrl?.startsWith("https://") && !pdfUrl.includes("/storage/v1/object/public/"));
     return (
         <div className={styles.container}>
             <div className={styles.badgeContainer}>
@@ -32,16 +36,23 @@ export default function FileDisplayBox({ imageUrl, alt, pdfUrl, uploadedItemName
                 {
                     imageUrl && alt ?
                         <div className={styles.previewImageContainer}>
-                            <Image className={styles.previewImage} src={imageUrl} alt={alt} fill />
+                            {imageFailed ? <FileText className={styles.fallbackIcon} size={64} /> :
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img className={styles.previewImage} src={imageUrl} alt={alt} onError={() => setImageFailed(true)} />}
                         </div>
-                        : pdfUrl?.endsWith(".pdf") ?
+                        : pdfUrl ? isExternalPdf ?
+                            <a className={styles.externalDocument} href={pdfUrl} target="_blank" rel="noopener noreferrer">
+                                <FileText size={64} />
+                                <span>Open externally hosted PDF</span>
+                                <ExternalLink size={18} />
+                            </a> :
                             <PDFThumbnail pdfUrl={pdfUrl} title={`${uploadedItemName} PDF Preview`} /> : null
                 }
                 <div className={styles.buttonsContainer}>
                     <ButtonOne onClick={() => onEdit(docType)} className={styles.editBtn}><Pencil /></ButtonOne>
                     <AsyncButtonWrapper
                         button={<DeleteButton><Trash /></DeleteButton>}
-                        onClick={() => onDelete(imageUrl, docType)}
+                        onClick={() => onDelete(imageUrl ?? pdfUrl, docType)}
                     />
                 </div>
             </div>

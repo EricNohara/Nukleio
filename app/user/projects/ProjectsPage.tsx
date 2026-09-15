@@ -268,7 +268,11 @@ export default function ProjectsPage() {
                     onChange={handleChange}
                     onSubmit={onSubmit}
                     onClose={onClose}
-                    setThumbnailDoc={setThumbnailDoc}
+                setThumbnailDoc={setThumbnailDoc}
+                onExternalThumbnailSelect={(url) => {
+                    setThumbnailDoc(null);
+                    setFormValues((current) => ({ ...current, thumbnail_url: url }));
+                }}
                 />
             }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { Clock3, Mail, RotateCw, SendHorizonal } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
@@ -23,10 +24,30 @@ export default function ResetPasswordForm() {
     const [cooldown, setCooldown] = useState<number>(0);
     const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
-
-    const email = state?.email ?? "";
+    const [email, setEmail] = useState(state?.email ?? "");
 
     const toast = useToast();
+
+    // The user-info request can run before Supabase restores the browser session.
+    // Read the authenticated user directly so the first visit is not left disabled.
+    useEffect(() => {
+        if (state?.email) setEmail(state.email);
+    }, [state?.email]);
+
+    useEffect(() => {
+        const syncEmail = async () => {
+            const { data } = await supabase.auth.getUser();
+            if (data.user?.email) setEmail(data.user.email);
+        };
+
+        void syncEmail();
+
+        const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+            setEmail(session?.user.email ?? "");
+        });
+
+        return () => subscription.subscription.unsubscribe();
+    }, [supabase]);
 
     // countdown timer
     useEffect(() => {
@@ -56,7 +77,7 @@ export default function ResetPasswordForm() {
 
         try {
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/passwordReset`,
+                redirectTo: `${window.location.origin}/passwordReset?next=/user/settings/password`,
                 captchaToken,
             });
 
@@ -110,22 +131,40 @@ export default function ResetPasswordForm() {
                 </div>
             </div>
 
-            {/* Instructions */}
             <div className={styles.instructions}>
-                <h3>How it works</h3>
+                <h2>How it works</h2>
+                <p className={`${styles.instructionsSubtitle} ${headerFont.className}`}>Follow these steps to reset your password.</p>
 
-                <ul className={styles.instructionList}>
-                    <li>Click the <strong className={styles.sendResetLink}>Send reset link</strong> button to send the reset email</li>
-                    <li>Check your email for a password reset link</li>
-                    <li>The link will expire after a short time</li>
-                    <li>Check spam or junk folders if you don&apos;t see it</li>
-                    <li>Click the link in the email to access the password reset page</li>
-                    <li>You can reset your password from the password reset page</li>
-                    <li>The reset link will become invalid after your first redirect</li>
-                    <li>You can resend the link after the 60 second cooldown</li>
-                </ul>
+                <ol className={styles.steps}>
+                    <li className={styles.step}>
+                        <span className={styles.stepNumber}>1</span>
+                        <span className={styles.stepIcon}><SendHorizonal size={25} /></span>
+                        <span><strong>We&apos;ll send you an email</strong><small>A secure password reset link will be sent to the email below.</small></span>
+                    </li>
+                    <li className={styles.step}>
+                        <span className={styles.stepNumber}>2</span>
+                        <span className={styles.stepIcon}><Mail size={25} /></span>
+                        <span><strong>Check your email</strong><small>Click the link in the email.</small></span>
+                    </li>
+                    <li className={styles.step}>
+                        <span className={styles.stepNumber}>3</span>
+                        <span className={styles.stepIcon}><Clock3 size={25} /></span>
+                        <span><strong>The link expires soon</strong><small>For security, the link will expire shortly.</small></span>
+                    </li>
+                    <li className={styles.step}>
+                        <span className={styles.stepNumber}>4</span>
+                        <span className={styles.stepIcon}><RotateCw size={25} /></span>
+                        <span><strong>Set a new password</strong><small>Follow the link to create a new password.</small></span>
+                    </li>
+                </ol>
 
-                <h3>Email: <span>{email || ""}</span></h3>
+                <div className={styles.emailCard}>
+                    <span className={styles.emailIcon}><Mail size={27} /></span>
+                    <div>
+                        <small>Reset link will be sent to</small>
+                        <strong>{email || "Your account email"}</strong>
+                    </div>
+                </div>
             </div>
         </div>
     );
