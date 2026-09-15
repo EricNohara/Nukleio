@@ -4,9 +4,11 @@ import {
   DynamoDBClient,
   TransactWriteItemsCommand,
 } from "@aws-sdk/client-dynamodb";
-import type { NextRequest } from "next/server";
 
 import { getAgentAwsConfig } from "@/utils/aiAgents/awsConfig";
+
+import type { NextRequest } from "next/server";
+
 
 const IP_LIMIT = 5;
 const IP_WINDOW_SECONDS = 15 * 60;
