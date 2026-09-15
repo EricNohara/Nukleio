@@ -180,6 +180,8 @@ export async function GET(_req: NextRequest) {
 export async function POST(req: NextRequest) {
   const { user, response } = await getAuthenticatedUser();
   if (!user) return response;
+  const emailGate = requireVerifiedEmailForAi(user);
+  if (emailGate) return emailGate;
 
   let charge: AiGenerationCharge | null = null;
 
