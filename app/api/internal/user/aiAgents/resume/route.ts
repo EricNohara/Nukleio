@@ -126,6 +126,7 @@ type ResumeAgentPayload = {
   userInfo: ResumeUserInfo;
   templateId?: string;
   targetJobs?: string[];
+  deliveryMode: "cached" | "transient";
 };
 
 // type guard functions
@@ -437,6 +438,7 @@ export async function POST(req: NextRequest) {
         ...(generateBody.templateId
           ? { templateId: generateBody.templateId }
           : {}),
+        deliveryMode: isPremium ? "cached" : "transient",
       };
     } else {
       const generateAiBody = body as GenerateResumeWithAiBody;
@@ -449,6 +451,7 @@ export async function POST(req: NextRequest) {
         ...(generateAiBody.targetJobs
           ? { targetJobs: generateAiBody.targetJobs }
           : {}),
+        deliveryMode: isPremium ? "cached" : "transient",
       };
     }
 
@@ -497,8 +500,9 @@ export async function POST(req: NextRequest) {
 
     const data = await agentRes.json().catch(() => null);
     const url: string | null = data?.resumeUrl ?? null;
+    const transientPdfBase64: string | null = data?.pdfBase64 ?? null;
 
-    if (!agentRes.ok || !data || data?.success === false || !url) {
+    if (!agentRes.ok || !data || data?.success === false || (!url && !transientPdfBase64)) {
       throw new AiGenerationRequestError(
         data?.error ?? "Resume generation failed",
         502,
@@ -507,7 +511,7 @@ export async function POST(req: NextRequest) {
 
     let cachedResumeId: string | null = null;
 
-    if (isPremium) {
+    if (isPremium && url) {
       const admin = createAdminClient();
       cachedResumeId = randomUUID();
       const cachedResumePayload = {
@@ -525,7 +529,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ url, id: cachedResumeId }, { status: 200 });
+    return NextResponse.json({
+      url: url ?? `data:${data.contentType ?? "application/pdf"};base64,${transientPdfBase64}`,
+      id: cachedResumeId,
+    }, { status: 200 });
   } catch (error) {
     if (charge) {
       try {

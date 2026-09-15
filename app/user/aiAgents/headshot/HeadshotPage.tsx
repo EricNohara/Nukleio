@@ -141,6 +141,13 @@ export default function HeadshotPage() {
       // update app state
       setGeneratedUrl(data.url);
 
+      if (!data.id) {
+        toast.info(
+          "Temporary result",
+          "Free results are available in this browser session. Download or save this image as your portrait to keep it.",
+        );
+      }
+
       if (data.id) {
         setCachedHeadshots((prev) => [
           {

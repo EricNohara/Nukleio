@@ -4,6 +4,7 @@ import { FileText, X } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "./FileUploadBox.module.css";
+import { useToast } from "@/app/context/ToastProvider";
 import { ButtonOne, ButtonFour, ExitButton } from "../Buttons/Buttons";
 
 interface IFileUploadBoxProps {
@@ -16,6 +17,9 @@ interface IFileUploadBoxProps {
     docType: string;
     className?: string;
     isMini?: boolean;
+    maxFileBytes?: number;
+    allowExternalUrl?: boolean;
+    onExternalUrlSelect?: (url: string, docType: string) => void;
 }
 
 export default function FileUploadBox({
@@ -28,10 +32,16 @@ export default function FileUploadBox({
     docType,
     className,
     isMini = false,
+    maxFileBytes = 1024 * 1024,
+    allowExternalUrl = false,
+    onExternalUrlSelect,
 }: IFileUploadBoxProps) {
+    const toast = useToast();
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     const [dragging, setDragging] = useState(false);
+    const [externalMode, setExternalMode] = useState(false);
+    const [externalUrl, setExternalUrl] = useState("");
 
     // keep the actual file so we can preview it
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -60,6 +70,10 @@ export default function FileUploadBox({
     };
 
     const setFile = (file: File) => {
+        if (file.size > maxFileBytes) {
+            toast.error("File too large", "Files must be 1 MB or smaller.");
+            return;
+        }
         setSelectedFile(file);
         onFileSelect(file, docType);
     };
@@ -87,6 +101,17 @@ export default function FileUploadBox({
         // clear native input so same file can be reselected
         if (inputRef.current) {
             inputRef.current.value = "";
+        }
+    };
+
+    const useExternalUrl = () => {
+        try {
+            const url = new URL(externalUrl.trim());
+            if (url.protocol !== "https:" || url.username || url.password) throw new Error();
+            onExternalUrlSelect?.(url.toString(), docType);
+            toast.success("External link selected", "This file will be hosted by the linked provider.");
+        } catch {
+            toast.error("Invalid link", "Use a valid HTTPS URL.");
         }
     };
 
@@ -120,7 +145,7 @@ export default function FileUploadBox({
 
             <div className={styles.labelContainer}>
                 {label && <h1 className={`${styles.label} ${isMini ? styles.miniLabel : ""}`}>{label}</h1>}
-                {!selectedFile &&
+                {!selectedFile && !externalMode &&
                     <h2 className={`${styles.subLabel} ${isMini ? styles.miniSubLabel : ""}`}>
                         {"Drag and drop or select a file"}
                     </h2>
@@ -169,11 +194,31 @@ export default function FileUploadBox({
                 </div>
             )}
 
-            {!selectedFile &&
+            {!selectedFile && !externalMode &&
                 <ButtonOne type="button" onClick={() => inputRef.current?.click()}>
                     Browse Files
                 </ButtonOne>
             }
+
+            {allowExternalUrl && !selectedFile && !externalMode && (
+                <ButtonFour type="button" onClick={() => setExternalMode(true)}>Use a link instead</ButtonFour>
+            )}
+
+            {externalMode && !selectedFile && (
+                <div className={styles.uploadInstructionsContainer}>
+                    <input
+                        aria-label="External HTTPS URL"
+                        className={styles.externalUrlInput}
+                        placeholder="https://..."
+                        value={externalUrl}
+                        onChange={(event) => setExternalUrl(event.target.value)}
+                    />
+                    <div className={styles.externalUrlActions}>
+                        <ButtonOne type="button" onClick={useExternalUrl}>Use link</ButtonOne>
+                        <ButtonFour type="button" onClick={() => setExternalMode(false)}>Back to upload</ButtonFour>
+                    </div>
+                </div>
+            )}
 
             {uploadInstructions && !selectedFile && (
                 <div className={styles.uploadInstructionsContainer}>

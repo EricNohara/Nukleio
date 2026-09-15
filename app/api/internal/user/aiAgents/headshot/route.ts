@@ -39,6 +39,7 @@ export const runtime = "nodejs";
 
 const AGENT_BASE = process.env.PROFESSIONAL_HEADSHOT_AGENT_BASE_URL;
 const STORAGE_BUCKET = "professional_headshots";
+const MAX_HEADSHOT_INPUT_BYTES = 1024 * 1024;
 
 type HeadshotLayout = "1024x1024" | "1536x1024" | "1024x1536" | "auto";
 type HeadshotAttire =
@@ -57,6 +58,7 @@ type GenerateProfessionalHeadshotBody = {
   backgroundUrl?: string;
   attire: HeadshotAttire;
   layout: HeadshotLayout;
+  deliveryMode: "cached" | "transient";
 };
 
 type ReviseProfessionalHeadshotRequestBody = {
@@ -68,6 +70,7 @@ type ReviseProfessionalHeadshotRequestBody = {
 type ReviseProfessionalHeadshotAgentBody =
   ReviseProfessionalHeadshotRequestBody & {
     userId: string;
+    deliveryMode: "cached" | "transient";
   };
 
 function isString(value: unknown): value is string {
@@ -211,6 +214,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (referenceImage.size > MAX_HEADSHOT_INPUT_BYTES) {
+      return NextResponse.json(
+        { error: "Reference images must be 1 MB or smaller." },
+        { status: 413 },
+      );
+    }
+
     if (!referenceImage.type.startsWith("image/")) {
       return NextResponse.json(
         { error: "Reference file must be an image." },
@@ -232,6 +242,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Background file must be an image." },
         { status: 400 }
+      );
+    }
+
+    if (backgroundImage instanceof File && backgroundImage.size > MAX_HEADSHOT_INPUT_BYTES) {
+      return NextResponse.json(
+        { error: "Background images must be 1 MB or smaller." },
+        { status: 413 },
       );
     }
 
@@ -370,6 +387,7 @@ export async function POST(req: NextRequest) {
       backgroundUrl,
       attire: attireRaw,
       layout: layoutRaw,
+      deliveryMode: isPremium ? "cached" : "transient",
     };
 
     const agentRes = await invokeAiAgent({
@@ -384,13 +402,14 @@ export async function POST(req: NextRequest) {
     const data = await agentRes.json().catch(() => null);
 
     const generatedUrl: string | null = data?.publicUrl ?? null;
+    const transientImageBase64: string | null = data?.imageBase64 ?? null;
     const validation = data?.validation ?? null;
 
     if (
       !agentRes.ok ||
       !data ||
       !data.success ||
-      !generatedUrl ||
+      (!generatedUrl && !transientImageBase64) ||
       !validation
     ) {
       throw new AiGenerationRequestError(
@@ -401,7 +420,7 @@ export async function POST(req: NextRequest) {
 
     let cachedProfessionalHeadshotId: string | null = null;
 
-    if (isPremium) {
+    if (isPremium && generatedUrl) {
       cachedProfessionalHeadshotId = randomUUID();
       const cachePayload = {
         id: cachedProfessionalHeadshotId,
@@ -424,14 +443,22 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    if (!isPremium) {
+      await storageAdmin.storage.from(STORAGE_BUCKET).remove(uploadedInputPaths);
+    }
+
     return NextResponse.json(
-      {
-        id: cachedProfessionalHeadshotId,
-        url: generatedUrl,
-        referenceUrl,
-        backgroundUrl: backgroundUrl ?? null,
-        validation,
-      },
+      isPremium
+        ? {
+            id: cachedProfessionalHeadshotId,
+            url: generatedUrl,
+            referenceUrl,
+            backgroundUrl: backgroundUrl ?? null,
+            validation,
+          }
+        : {
+            url: `data:${data.contentType ?? "image/jpeg"};base64,${transientImageBase64}`,
+          },
       { status: 200 }
     );
   } catch (error) {
@@ -550,6 +577,7 @@ export async function PUT(req: NextRequest) {
     const agentPayload: ReviseProfessionalHeadshotAgentBody = {
       ...body,
       userId: user.id,
+      deliveryMode: "cached",
     };
 
     const agentRes = await invokeAiAgent({

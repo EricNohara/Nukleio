@@ -22,6 +22,10 @@ const ALLOWED_BUCKETS = [
   "resumes",
   "transcripts",
 ];
+const MAX_STORED_FILE_BYTES = 1024 * 1024;
+// Multipart bodies include field and boundary overhead. This early guard keeps
+// oversized bodies out of Next's formData() buffering path.
+const MAX_MULTIPART_BODY_BYTES = MAX_STORED_FILE_BYTES + 64 * 1024;
 
 const DOCUMENT_FIELDS = {
   portraits: "portrait_url",
@@ -53,6 +57,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
+    const contentLength = Number(req.headers.get("content-length"));
+    if (Number.isFinite(contentLength) && contentLength > MAX_MULTIPART_BODY_BYTES) {
+      return NextResponse.json(
+        { message: "Files must be 1 MB or smaller." },
+        { status: 413 },
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     const bucketName = formData.get("bucketName") as string | null;
@@ -79,9 +91,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    if (file.size > 50 * 1024 * 1024) {
-      // 50MB limit
-      return NextResponse.json({ message: "File too large" }, { status: 400 });
+    if (file.size > MAX_STORED_FILE_BYTES) {
+      return NextResponse.json(
+        { message: "Files must be 1 MB or smaller." },
+        { status: 413 },
+      );
     }
 
     // upload to supabase
