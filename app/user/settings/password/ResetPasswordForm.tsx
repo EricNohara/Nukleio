@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne } from "@/app/components/Buttons/Buttons";
+import TurnstileWidget from "@/app/components/Turnstile/TurnstileWidget";
 import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { headerFont } from "@/app/localFonts";
@@ -20,6 +21,8 @@ export default function ResetPasswordForm() {
     const [isLoading, setIsLoading] = useState(false);
 
     const [cooldown, setCooldown] = useState<number>(0);
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
 
     const email = state?.email ?? "";
 
@@ -39,10 +42,12 @@ export default function ResetPasswordForm() {
     const onPasswordReset = async () => {
         toast.clear();
 
-        if (!email) {
+        if (!email || !captchaToken) {
             toast.error(
                 "Error",
-                "Error sending email. You need to be signed in to send a reset link."
+                !email
+                    ? "You need to be signed in to send a reset link."
+                    : "Complete the CAPTCHA challenge before requesting a reset link.",
             );
             return;
         }
@@ -52,6 +57,7 @@ export default function ResetPasswordForm() {
         try {
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: `${window.location.origin}/passwordReset`,
+                captchaToken,
             });
 
             if (error) throw error;
@@ -68,10 +74,11 @@ export default function ResetPasswordForm() {
             );
         } finally {
             setIsLoading(false);
+            setCaptchaResetSignal((signal) => signal + 1);
         }
     };
 
-    const buttonDisabled = isLoading || cooldown > 0 || !email;
+    const buttonDisabled = isLoading || cooldown > 0 || !email || !captchaToken;
 
     return (
         <div className={styles.inputForm}>
@@ -86,6 +93,10 @@ export default function ResetPasswordForm() {
                 </div>
 
                 <div className={styles.buttons}>
+                    <TurnstileWidget
+                        onTokenChange={setCaptchaToken}
+                        resetSignal={captchaResetSignal}
+                    />
                     <ButtonOne onClick={onPasswordReset} disabled={buttonDisabled}>
                         {cooldown > 0 ? (
                             `Resend in ${cooldown}s`

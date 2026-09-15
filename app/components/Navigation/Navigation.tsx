@@ -9,7 +9,7 @@ import LoginNav from "./LoginNav/LoginNav";
 
 export default function Navigation() {
     const pathname = usePathname();
-    const isLoginOrSignUp = pathname === "/user/login" || pathname === "/user/signup" || pathname === "/user/forgotPassword";
+    const isLoginOrSignUp = pathname === "/user/login" || pathname === "/user/signup" || pathname === "/user/forgotPassword" || pathname === "/user/signup/confirmEmail";
 
     if (pathname === "/") return <LandingNav />;
     else if (isLoginOrSignUp) return <LoginNav />;

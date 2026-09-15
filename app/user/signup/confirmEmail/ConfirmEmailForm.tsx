@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
 import TextInput from "@/app/components/TextInput/TextInput";
+import TurnstileWidget from "@/app/components/Turnstile/TurnstileWidget";
 import { useToast } from "@/app/context/ToastProvider";
 
 import styles from "../../login/LoginPage.module.css";
@@ -27,6 +28,8 @@ export default function ConfirmEmailForm() {
   const [secondsRemaining, setSecondsRemaining] = useState(
     searchParams.get("sent") === "1" ? RESEND_COOLDOWN_SECONDS : 0,
   );
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
 
   useEffect(() => {
     if (secondsRemaining <= 0) return;
@@ -38,14 +41,14 @@ export default function ConfirmEmailForm() {
 
   const handleResend = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!email.trim() || secondsRemaining > 0) return;
+    if (!email.trim() || !captchaToken || secondsRemaining > 0) return;
 
     setIsLoading(true);
     try {
       const response = await fetch("/api/internal/auth/resend-confirmation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, captchaToken }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
@@ -57,6 +60,7 @@ export default function ConfirmEmailForm() {
       toast.error("Error", message);
     } finally {
       setIsLoading(false);
+      setCaptchaResetSignal((signal) => signal + 1);
     }
   };
 
@@ -78,10 +82,15 @@ export default function ConfirmEmailForm() {
           required
           type="email"
         />
+        <TurnstileWidget
+          onTokenChange={setCaptchaToken}
+          resetSignal={captchaResetSignal}
+          messageClassName={styles.inputLabel}
+        />
         <ButtonOne
           type="submit"
           className={styles.loginButton}
-          disabled={isLoading || secondsRemaining > 0 || !email.trim()}
+          disabled={isLoading || secondsRemaining > 0 || !email.trim() || !captchaToken}
         >
           <LoadableButtonContent
             isLoading={isLoading}

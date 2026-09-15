@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Script from "next/script";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
@@ -12,6 +11,7 @@ import ContinueWithGitlabButton from "@/app/components/OauthButtons/ContinueWith
 import ContinueWithGoogleButton from "@/app/components/OauthButtons/ContinueWithGoogleButton";
 import ContinueWithLinkedinButton from "@/app/components/OauthButtons/ContinueWithLinkedinButton";
 import TextInput from "@/app/components/TextInput/TextInput";
+import TurnstileWidget from "@/app/components/Turnstile/TurnstileWidget";
 import { useToast } from "@/app/context/ToastProvider";
 import { headerFont } from "@/app/localFonts";
 
@@ -20,24 +20,6 @@ import styles from "../login/LoginPage.module.css";
 interface IInputData {
   email: string;
   password: string;
-}
-
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (
-        container: HTMLElement,
-        options: {
-          sitekey: string;
-          callback: (token: string) => void;
-          "expired-callback": () => void;
-          "error-callback": () => void;
-        },
-      ) => string;
-      reset: (widgetId?: string) => void;
-      remove: (widgetId?: string) => void;
-    };
-  }
 }
 
 export default function SignUpForm() {
@@ -49,60 +31,9 @@ export default function SignUpForm() {
     password: "",
   });
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [captchaError, setCaptchaError] = useState<string | null>(null);
-  const captchaContainerRef = useRef<HTMLDivElement>(null);
-  const captchaWidgetIdRef = useRef<string | null>(null);
-  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
 
   const minPasswordLen: number = parseInt(process.env.MIN_PASSWORD_LEN || "6");
-
-  const renderTurnstile = useCallback(() => {
-    if (
-      !turnstileSiteKey ||
-      !captchaContainerRef.current ||
-      !window.turnstile ||
-      captchaWidgetIdRef.current
-    ) {
-      return;
-    }
-
-    captchaWidgetIdRef.current = window.turnstile.render(
-      captchaContainerRef.current,
-      {
-        sitekey: turnstileSiteKey,
-        callback: (token) => {
-          setCaptchaToken(token);
-          setCaptchaError(null);
-        },
-        "expired-callback": () => {
-          setCaptchaToken(null);
-          setCaptchaError("The CAPTCHA expired. Please complete it again.");
-        },
-        "error-callback": () => {
-          setCaptchaToken(null);
-          setCaptchaError("The CAPTCHA could not be verified. Please try again.");
-        },
-      },
-    );
-  }, [turnstileSiteKey]);
-
-  const resetTurnstile = useCallback(() => {
-    setCaptchaToken(null);
-    setCaptchaError(null);
-    if (captchaWidgetIdRef.current && window.turnstile) {
-      window.turnstile.reset(captchaWidgetIdRef.current);
-    }
-  }, []);
-
-  useEffect(() => {
-    renderTurnstile();
-    return () => {
-      if (captchaWidgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(captchaWidgetIdRef.current);
-        captchaWidgetIdRef.current = null;
-      }
-    };
-  }, [renderTurnstile]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -141,14 +72,14 @@ export default function SignUpForm() {
 
       toast.success(data.message);
       router.push(
-        `/user/signup/confirm-email?email=${encodeURIComponent(userData.email)}&sent=1`,
+        `/user/signup/confirmEmail?email=${encodeURIComponent(userData.email)}&sent=1`,
       );
     } catch (error) {
       const err = error as Error
       toast.error("Error", err.message)
     } finally {
       setIsLoading(false);
-      resetTurnstile();
+      setCaptchaResetSignal((signal) => signal + 1);
     }
   };
 
@@ -158,11 +89,6 @@ export default function SignUpForm() {
 
   return (
     <>
-      <Script
-        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-        strategy="afterInteractive"
-        onLoad={renderTurnstile}
-      />
       <form onSubmit={handleSubmit} className={styles.loginForm}>
         <TextInput
           label="Email"
@@ -182,15 +108,13 @@ export default function SignUpForm() {
           type="password"
         />
 
-        <div ref={captchaContainerRef} />
-        {!turnstileSiteKey && (
-          <p className={styles.inputLabel}>
-            Signup is temporarily unavailable. Please try again later.
-          </p>
-        )}
-        {captchaError && <p className={styles.inputLabel}>{captchaError}</p>}
+        <TurnstileWidget
+          onTokenChange={setCaptchaToken}
+          resetSignal={captchaResetSignal}
+          messageClassName={styles.inputLabel}
+        />
 
-        <ButtonOne type="submit" className={styles.loginButton} disabled={isLoading || !captchaToken || !turnstileSiteKey}>
+        <ButtonOne type="submit" className={styles.loginButton} disabled={isLoading || !captchaToken}>
           <LoadableButtonContent isLoading={isLoading} buttonLabel="Sign up" />
         </ButtonOne>
       </form>

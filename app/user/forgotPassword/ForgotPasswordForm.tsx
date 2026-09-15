@@ -6,6 +6,7 @@ import { useState } from "react";
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import { ButtonOne, ButtonThree } from "@/app/components/Buttons/Buttons";
 import TextInput from "@/app/components/TextInput/TextInput";
+import TurnstileWidget from "@/app/components/Turnstile/TurnstileWidget";
 import { useToast } from "@/app/context/ToastProvider";
 import { headerFont } from "@/app/localFonts";
 import { createClient } from "@/utils/supabase/client";
@@ -17,23 +18,31 @@ export default function ForgotPasswordForm() {
     const supabase = createClient();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [email, setEmail] = useState<string>("");
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
     const toast = useToast();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (email.length === 0) return;
+        if (email.length === 0 || !captchaToken) return;
 
         setIsLoading(true);
 
         try {
             // send the recovery email
             const { error } = await supabase.auth
-                .resetPasswordForEmail(email, { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/passwordReset` });
+                .resetPasswordForEmail(email, {
+                    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/passwordReset`,
+                    captchaToken,
+                });
             if (error) throw new Error(error.message);
             toast.info("Password reset email sent. Check your inbox.")
         } catch {
             toast.error("Failed to send password reset email")
+        } finally {
+            setIsLoading(false);
+            setCaptchaResetSignal((signal) => signal + 1);
         }
     };
 
@@ -48,7 +57,12 @@ export default function ForgotPasswordForm() {
                     placeholder="Enter your email"
                     required
                 />
-                <ButtonOne type="submit" className={styles.loginButton} disabled={isLoading}>
+                <TurnstileWidget
+                    onTokenChange={setCaptchaToken}
+                    resetSignal={captchaResetSignal}
+                    messageClassName={styles.inputLabel}
+                />
+                <ButtonOne type="submit" className={styles.loginButton} disabled={isLoading || !captchaToken}>
                     <LoadableButtonContent isLoading={isLoading} buttonLabel="Send reset link" />
                 </ButtonOne>
             </form >

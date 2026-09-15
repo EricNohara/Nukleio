@@ -11,6 +11,7 @@ import ContinueWithGitlabButton from "@/app/components/OauthButtons/ContinueWith
 import ContinueWithGoogleButton from "@/app/components/OauthButtons/ContinueWithGoogleButton";
 import ContinueWithLinkedinButton from "@/app/components/OauthButtons/ContinueWithLinkedinButton";
 import TextInput from "@/app/components/TextInput/TextInput";
+import TurnstileWidget from "@/app/components/Turnstile/TurnstileWidget";
 import { useToast } from "@/app/context/ToastProvider";
 import { headerFont } from "@/app/localFonts";
 
@@ -25,6 +26,8 @@ export default function LoginForm() {
     email: "",
     password: "",
   });
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -40,10 +43,14 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
+      if (!captchaToken) {
+        throw new Error("Complete the CAPTCHA challenge before signing in.");
+      }
+
       const res = await fetch("/api/internal/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials),
+        body: JSON.stringify({ ...credentials, captchaToken }),
       });
 
       const data = await res.json();
@@ -51,7 +58,7 @@ export default function LoginForm() {
       if (!res.ok) {
         if (data.code === "EMAIL_NOT_CONFIRMED") {
           router.push(
-            `/user/signup/confirm-email?email=${encodeURIComponent(credentials.email)}`,
+            `/user/signup/confirmEmail?email=${encodeURIComponent(credentials.email)}`,
           );
           return;
         }
@@ -63,7 +70,9 @@ export default function LoginForm() {
       const error = err as Error;
       toast.error(error.message)
       setCredentials({ email: "", password: "" });
+    } finally {
       setIsLoading(false);
+      setCaptchaResetSignal((signal) => signal + 1);
     }
   };
 
@@ -91,7 +100,12 @@ export default function LoginForm() {
           required
           type="password"
         />
-        <ButtonOne type="submit" className={styles.loginButton} disabled={isLoading}>
+        <TurnstileWidget
+          onTokenChange={setCaptchaToken}
+          resetSignal={captchaResetSignal}
+          messageClassName={styles.inputLabel}
+        />
+        <ButtonOne type="submit" className={styles.loginButton} disabled={isLoading || !captchaToken}>
           <LoadableButtonContent isLoading={isLoading} buttonLabel="Sign in" />
         </ButtonOne>
       </form >

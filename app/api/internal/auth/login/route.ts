@@ -6,7 +6,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient();
 
-    const { email, password }: { email: string; password: string } =
+    const { email, password, captchaToken }: {
+      email: string;
+      password: string;
+      captchaToken?: unknown;
+    } =
       await req.json();
 
     if (!email || !password) {
@@ -16,11 +20,34 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const data = { email: email, password: password };
+    if (typeof captchaToken !== "string" || !captchaToken.trim()) {
+      return NextResponse.json(
+        {
+          code: "CAPTCHA_REQUIRED",
+          message: "Complete the CAPTCHA challenge before signing in.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const data = {
+      email: email,
+      password: password,
+      options: { captchaToken },
+    };
 
     const { error } = await supabase.auth.signInWithPassword(data);
 
     if (error) {
+      if (error.message.toLowerCase().includes("captcha")) {
+        return NextResponse.json(
+          {
+            code: "CAPTCHA_FAILED",
+            message: "CAPTCHA verification failed. Complete it again and retry.",
+          },
+          { status: 400 },
+        );
+      }
       if (error.code === "email_not_confirmed") {
         return NextResponse.json(
           {
