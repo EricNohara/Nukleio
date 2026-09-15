@@ -172,6 +172,7 @@ export default function ProjectFormModal({
                         label="Project Thumbnail"
                         isMini
                         allowExternalUrl
+                        initialPreviewUrl={value.thumbnail_url}
                         onExternalUrlSelect={(url) => onExternalThumbnailSelect(url)}
                     />
                 </div>

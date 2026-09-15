@@ -4,6 +4,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { isAccountActive } from "@/utils/accountDeletion/status";
 import { AgentAwsConfigurationError } from "@/utils/aiAgents/awsConfig";
+import {
+  finalizeAiCacheSlot,
+  releaseAiCacheSlot,
+  reserveAiCacheSlot,
+} from "@/utils/aiAgents/cacheRetention";
 import { invokeAiAgent } from "@/utils/aiAgents/client";
 import {
   GlobalAiBudgetServiceError,
@@ -30,6 +35,7 @@ import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 import { getUserSubscriptionTier } from "@/utils/auth/getUserSubscriptionTier";
 import { requireTier } from "@/utils/auth/requireTier";
 import { requireVerifiedEmailForAi } from "@/utils/auth/requireVerifiedEmail";
+import parseURL from "@/utils/general/parseURL";
 import {
   createAdminClient,
   createClient,
@@ -146,7 +152,7 @@ export async function GET(_req: NextRequest) {
   const { user, response } = await getAuthenticatedUser();
   if (!user) return response;
 
-  const gate = await requireTier(user.id, "premium");
+  const gate = await requireTier(user.id, "developer");
   if (!gate.ok) return gate.response;
 
   try {
@@ -187,6 +193,10 @@ export async function POST(req: NextRequest) {
   if (emailGate) return emailGate;
 
   let charge: AiGenerationCharge | null = null;
+  const uploadedInputPaths: string[] = [];
+  const reservedInputPaths: string[] = [];
+  const storageAdmin = createAdminClient();
+  let cacheReservationId: string | null = null;
 
   try {
     if (!AGENT_BASE) {
@@ -276,7 +286,7 @@ export async function POST(req: NextRequest) {
         ? backgroundDescriptionRaw.trim()
         : null;
 
-    const isPremium = (await getUserSubscriptionTier(user.id)) === "premium";
+    const isPremium = (await getUserSubscriptionTier(user.id)) !== "free";
 
     const operation: AiAgentOperation = "headshot_generate";
     const requestId = getAiRequestId(req);
@@ -310,11 +320,22 @@ export async function POST(req: NextRequest) {
     );
 
     const supabase = await createClient();
-    const storageAdmin = createAdminClient();
-
     const referenceImageId = randomUUID();
     const referenceExtension = getImageExtension(referenceImage);
     const referenceStoragePath = `inputs/${user.id}/reference-${referenceImageId}.${referenceExtension}`;
+
+    const referenceReservation = await storageAdmin.rpc("reserve_storage_upload", {
+      p_user_id: user.id,
+      p_bucket: STORAGE_BUCKET,
+      p_object_path: referenceStoragePath,
+      p_category: "temporary",
+      p_byte_size: referenceImage.size,
+      p_is_premium: isPremium,
+    });
+    if (referenceReservation.error || !referenceReservation.data) {
+      throw new Error(referenceReservation.error?.message ?? "Unable to reserve input storage");
+    }
+    reservedInputPaths.push(referenceStoragePath);
 
     const { error: referenceUploadError } = await storageAdmin.storage
       .from(STORAGE_BUCKET)
@@ -336,12 +357,27 @@ export async function POST(req: NextRequest) {
     const referenceUrl = referencePublicUrlData.publicUrl;
 
     let backgroundUrl: string | undefined;
-    const uploadedInputPaths = [referenceStoragePath];
+    uploadedInputPaths.push(referenceStoragePath);
+    const referenceFinalize = await storageAdmin.rpc("finalize_storage_upload", { p_id: referenceReservation.data });
+    if (referenceFinalize.error) throw referenceFinalize.error;
 
     if (backgroundImage instanceof File) {
       const backgroundImageId = randomUUID();
       const backgroundExtension = getImageExtension(backgroundImage);
       const backgroundStoragePath = `inputs/${user.id}/background-${backgroundImageId}.${backgroundExtension}`;
+
+      const backgroundReservation = await storageAdmin.rpc("reserve_storage_upload", {
+        p_user_id: user.id,
+        p_bucket: STORAGE_BUCKET,
+        p_object_path: backgroundStoragePath,
+        p_category: "temporary",
+        p_byte_size: backgroundImage.size,
+        p_is_premium: isPremium,
+      });
+      if (backgroundReservation.error || !backgroundReservation.data) {
+        throw new Error(backgroundReservation.error?.message ?? "Unable to reserve input storage");
+      }
+      reservedInputPaths.push(backgroundStoragePath);
 
       const { error: backgroundUploadError } = await storageAdmin.storage
         .from(STORAGE_BUCKET)
@@ -360,6 +396,8 @@ export async function POST(req: NextRequest) {
       }
 
       uploadedInputPaths.push(backgroundStoragePath);
+      const backgroundFinalize = await storageAdmin.rpc("finalize_storage_upload", { p_id: backgroundReservation.data });
+      if (backgroundFinalize.error) throw backgroundFinalize.error;
 
       const { data: backgroundPublicUrlData } = supabase.storage
         .from(STORAGE_BUCKET)
@@ -389,6 +427,10 @@ export async function POST(req: NextRequest) {
       layout: layoutRaw,
       deliveryMode: isPremium ? "cached" : "transient",
     };
+
+    if (isPremium) {
+      cacheReservationId = await reserveAiCacheSlot(user.id);
+    }
 
     const agentRes = await invokeAiAgent({
       baseUrl: AGENT_BASE,
@@ -421,13 +463,14 @@ export async function POST(req: NextRequest) {
     let cachedProfessionalHeadshotId: string | null = null;
 
     if (isPremium && generatedUrl) {
+      if (!cacheReservationId) throw new Error("Missing AI cache reservation");
       cachedProfessionalHeadshotId = randomUUID();
       const cachePayload = {
         id: cachedProfessionalHeadshotId,
         user_id: user.id,
         generated_url: generatedUrl,
-        reference_url: referenceUrl,
-        background_url: backgroundUrl ?? null,
+        reference_url: null,
+        background_url: null,
         background_description: backgroundDescription,
         attire: attireRaw,
         layout: layoutRaw,
@@ -437,14 +480,31 @@ export async function POST(req: NextRequest) {
       const { error: cacheError } = await storageAdmin
         .from("cached_professional_headshots")
         .insert(cachePayload);
-
       if (cacheError) {
+        const object = parseURL(generatedUrl);
+        if (object) {
+          await storageAdmin.storage.from(object.parsedBucket)
+            .remove([object.parsedFilename]);
+          await storageAdmin.from("storage_quota_ledger").delete()
+            .eq("bucket", object.parsedBucket)
+            .eq("object_path", object.parsedFilename);
+        }
         throw new Error(`Cache insert failed: ${cacheError.message}`);
       }
-    }
-
-    if (!isPremium) {
-      await storageAdmin.storage.from(STORAGE_BUCKET).remove(uploadedInputPaths);
+      try {
+        await finalizeAiCacheSlot(cacheReservationId);
+      } catch (finalizeError) {
+        await storageAdmin.from("cached_professional_headshots").delete()
+          .eq("id", cachedProfessionalHeadshotId).eq("user_id", user.id);
+        const object = parseURL(generatedUrl);
+        if (object) {
+          await storageAdmin.storage.from(object.parsedBucket).remove([object.parsedFilename]);
+          await storageAdmin.from("storage_quota_ledger").delete()
+            .eq("bucket", object.parsedBucket).eq("object_path", object.parsedFilename);
+        }
+        throw finalizeError;
+      }
+      cacheReservationId = null;
     }
 
     return NextResponse.json(
@@ -452,8 +512,8 @@ export async function POST(req: NextRequest) {
         ? {
             id: cachedProfessionalHeadshotId,
             url: generatedUrl,
-            referenceUrl,
-            backgroundUrl: backgroundUrl ?? null,
+            referenceUrl: null,
+            backgroundUrl: null,
             validation,
           }
         : {
@@ -509,6 +569,26 @@ export async function POST(req: NextRequest) {
       { error: "Internal server error" },
       { status: 500 }
     );
+  } finally {
+    if (uploadedInputPaths.length > 0) {
+      const { error } = await storageAdmin.storage
+        .from(STORAGE_BUCKET)
+        .remove(uploadedInputPaths);
+      if (error) console.error("Headshot input cleanup failed:", error.message);
+    }
+    if (reservedInputPaths.length > 0) {
+      const { error } = await storageAdmin.from("storage_quota_ledger")
+        .delete().eq("user_id", user.id).eq("bucket", STORAGE_BUCKET)
+        .in("object_path", reservedInputPaths);
+      if (error) console.error("Headshot input ledger cleanup failed:", error.message);
+    }
+    if (cacheReservationId) {
+      try {
+        await releaseAiCacheSlot(cacheReservationId, user.id);
+      } catch (error) {
+        console.error("Headshot cache reservation cleanup failed:", error);
+      }
+    }
   }
 }
 
@@ -522,6 +602,7 @@ export async function PUT(req: NextRequest) {
   if (!gate.ok) return gate.response;
 
   let charge: AiGenerationCharge | null = null;
+  let cacheReservationId: string | null = null;
 
   try {
     if (!AGENT_BASE) {
@@ -573,6 +654,7 @@ export async function PUT(req: NextRequest) {
       "headshot_revise",
       AI_CREDIT_COSTS.headshot.revise,
     );
+    cacheReservationId = await reserveAiCacheSlot(user.id);
 
     const agentPayload: ReviseProfessionalHeadshotAgentBody = {
       ...body,
@@ -620,10 +702,31 @@ export async function PUT(req: NextRequest) {
     const { error } = await admin
       .from("cached_professional_headshots")
       .insert(cachePayload);
-
     if (error) {
+      const object = parseURL(generatedUrl);
+      if (object) {
+        await admin.storage.from(object.parsedBucket)
+          .remove([object.parsedFilename]);
+        await admin.from("storage_quota_ledger").delete()
+          .eq("bucket", object.parsedBucket)
+          .eq("object_path", object.parsedFilename);
+      }
       throw new Error(`Revision caching failed: ${error.message}`);
     }
+    try {
+      await finalizeAiCacheSlot(cacheReservationId);
+    } catch (finalizeError) {
+      await admin.from("cached_professional_headshots").delete()
+        .eq("id", cacheId).eq("user_id", user.id);
+      const object = parseURL(generatedUrl);
+      if (object) {
+        await admin.storage.from(object.parsedBucket).remove([object.parsedFilename]);
+        await admin.from("storage_quota_ledger").delete()
+          .eq("bucket", object.parsedBucket).eq("object_path", object.parsedFilename);
+      }
+      throw finalizeError;
+    }
+    cacheReservationId = null;
 
     return NextResponse.json(
       { id: cacheId, url: generatedUrl, validation },
@@ -677,5 +780,13 @@ export async function PUT(req: NextRequest) {
       { error: "Internal server error" },
       { status: 500 }
     );
+  } finally {
+    if (cacheReservationId) {
+      try {
+        await releaseAiCacheSlot(cacheReservationId, user.id);
+      } catch (error) {
+        console.error("Headshot revision cache reservation cleanup failed:", error);
+      }
+    }
   }
 }

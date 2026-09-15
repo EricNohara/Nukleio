@@ -25,3 +25,17 @@ export async function uploadFile(
 
   return data.publicURL;
 }
+
+export async function saveExternalFileUrl(
+  externalUrl: string,
+  bucketName: "portraits" | "resumes" | "transcripts",
+): Promise<string> {
+  const res = await fetch("/api/internal/storage", {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ externalUrl, bucketName }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message ?? "External file link failed");
+  return data.publicURL;
+}

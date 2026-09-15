@@ -42,7 +42,7 @@ export default function HeadshotPage() {
   const { dispatch } = useUser();
   const toast = useToast();
   const { tier, loading: tierLoading } = useTier();
-  const isPremium = hasTier(tier, "premium");
+  const isPremium = hasTier(tier, "developer");
 
   const [referenceImage, setReferenceImage] = useState<File | null>(null);
   const [backgroundImage, setBackgroundImage] = useState<File | null>(null);

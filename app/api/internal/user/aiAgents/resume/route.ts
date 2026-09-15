@@ -4,6 +4,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { IUserInfoInternal } from "@/app/interfaces/IUserInfoInternal";
 import { AgentAwsConfigurationError } from "@/utils/aiAgents/awsConfig";
+import {
+  finalizeAiCacheSlot,
+  releaseAiCacheSlot,
+  reserveAiCacheSlot,
+} from "@/utils/aiAgents/cacheRetention";
 import { invokeAiAgent } from "@/utils/aiAgents/client";
 import {
   GlobalAiBudgetServiceError,
@@ -30,6 +35,7 @@ import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 import { getUserSubscriptionTier } from "@/utils/auth/getUserSubscriptionTier";
 import { requireTier } from "@/utils/auth/requireTier";
 import { requireVerifiedEmailForAi } from "@/utils/auth/requireVerifiedEmail";
+import parseURL from "@/utils/general/parseURL";
 import { createAdminClient } from "@/utils/supabase/server";
 
 export const runtime = "nodejs";
@@ -320,7 +326,7 @@ export async function GET(_req: NextRequest) {
   const { user, response } = await getAuthenticatedUser();
   if (!user) return response;
 
-  const gate = await requireTier(user.id, "premium");
+  const gate = await requireTier(user.id, "developer");
   if (!gate.ok) return gate.response;
 
   try {
@@ -358,6 +364,7 @@ export async function POST(req: NextRequest) {
   if (emailGate) return emailGate;
 
   let charge: AiGenerationCharge | null = null;
+  let cacheReservationId: string | null = null;
 
   try {
     if (!AGENT_BASE) {
@@ -403,7 +410,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = rawBody as RequestBody;
-    const isPremium = (await getUserSubscriptionTier(user.id)) === "premium";
+    const isPremium = (await getUserSubscriptionTier(user.id)) !== "free";
 
     const { data: internalUserInfo, error: userInfoError } = await supabase.rpc(
       "get_user_info_internal",
@@ -488,6 +495,9 @@ export async function POST(req: NextRequest) {
       `resume_${generationType}`,
       AI_CREDIT_COSTS.resume[generationType],
     );
+    if (isPremium) {
+      cacheReservationId = await reserveAiCacheSlot(user.id);
+    }
 
     const agentRes = await invokeAiAgent({
       baseUrl: AGENT_BASE,
@@ -513,6 +523,7 @@ export async function POST(req: NextRequest) {
 
     if (isPremium && url) {
       const admin = createAdminClient();
+      if (!cacheReservationId) throw new Error("Missing AI cache reservation");
       cachedResumeId = randomUUID();
       const cachedResumePayload = {
         id: cachedResumeId,
@@ -523,10 +534,31 @@ export async function POST(req: NextRequest) {
       const { error } = await admin
         .from("cached_resumes")
         .insert(cachedResumePayload);
-
       if (error) {
+        const object = parseURL(url);
+        if (object) {
+          await admin.storage.from(object.parsedBucket)
+            .remove([object.parsedFilename]);
+          await admin.from("storage_quota_ledger").delete()
+            .eq("bucket", object.parsedBucket)
+            .eq("object_path", object.parsedFilename);
+        }
         throw new Error(`Resume cache insert failed: ${error.message}`);
       }
+      try {
+        await finalizeAiCacheSlot(cacheReservationId);
+      } catch (finalizeError) {
+        await admin.from("cached_resumes").delete()
+          .eq("id", cachedResumeId).eq("user_id", user.id);
+        const object = parseURL(url);
+        if (object) {
+          await admin.storage.from(object.parsedBucket).remove([object.parsedFilename]);
+          await admin.from("storage_quota_ledger").delete()
+            .eq("bucket", object.parsedBucket).eq("object_path", object.parsedFilename);
+        }
+        throw finalizeError;
+      }
+      cacheReservationId = null;
     }
 
     return NextResponse.json({
@@ -580,5 +612,13 @@ export async function POST(req: NextRequest) {
       { error: "Internal server error" },
       { status: 500 },
     );
+  } finally {
+    if (cacheReservationId) {
+      try {
+        await releaseAiCacheSlot(cacheReservationId, user.id);
+      } catch (error) {
+        console.error("Resume cache reservation cleanup failed:", error);
+      }
+    }
   }
 }

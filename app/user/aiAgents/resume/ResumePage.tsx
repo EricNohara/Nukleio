@@ -142,7 +142,7 @@ export default function ResumePage() {
 
     const { tier, loading: tierLoading } = useTier();
     const { state } = useUser();
-    const isPremium = hasTier(tier, "premium");
+    const isPremium = hasTier(tier, "developer");
 
     const [step, setStep] = useState<ResumeStep>("start");
     const [loading, setLoading] = useState(false);
@@ -308,7 +308,14 @@ export default function ResumePage() {
             }
 
             setResumeUrl(data.url);
-            toast.success("Success", "Resume generated successfully.");
+            if (data.id) {
+                toast.success("Success", "Resume generated successfully.");
+            } else {
+                toast.info(
+                    "Temporary result",
+                    "This free result is not stored. Download it from the PDF viewer before leaving this page.",
+                );
+            }
         } catch (error) {
             const message = error instanceof Error ? error.message : "Failed to generate resume.";
             toast.error("Error", message);

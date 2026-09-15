@@ -1,7 +1,6 @@
 "use client";
 
 import { Maximize, Pencil, Trash, EllipsisVertical } from "lucide-react";
-import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
@@ -22,6 +21,7 @@ interface IProjectCardProps {
 
 export default function ProjectCard({ project, onEdit, onDelete, onOpen, index, isActive, onSingleClick }: IProjectCardProps) {
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
+    const [thumbnailFailed, setThumbnailFailed] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
     // close menu
@@ -83,11 +83,14 @@ export default function ProjectCard({ project, onEdit, onDelete, onOpen, index, 
                 </div>
             </div>
             <div className={styles.thumbnailContainer}>
-                <Image
+                {/* External URLs are user-controlled and must render in the browser,
+                    not through Next's hostname allowlist/optimizer. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                     className={styles.thumbnail}
-                    src={project.thumbnail_url ? project.thumbnail_url : "/images/default-project.svg"}
+                    src={!thumbnailFailed && project.thumbnail_url ? project.thumbnail_url : "/images/default-project.svg"}
                     alt={project.name}
-                    fill
+                    onError={() => setThumbnailFailed(true)}
                 />
             </div>
             <i className={`${styles.date} ${headerFont.className}`}>{getFormattedDate()}</i>

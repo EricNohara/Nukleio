@@ -3,8 +3,9 @@
 import { FileText, X } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-import styles from "./FileUploadBox.module.css";
 import { useToast } from "@/app/context/ToastProvider";
+
+import styles from "./FileUploadBox.module.css";
 import { ButtonOne, ButtonFour, ExitButton } from "../Buttons/Buttons";
 
 interface IFileUploadBoxProps {
@@ -20,6 +21,7 @@ interface IFileUploadBoxProps {
     maxFileBytes?: number;
     allowExternalUrl?: boolean;
     onExternalUrlSelect?: (url: string, docType: string) => void;
+    initialPreviewUrl?: string | null;
 }
 
 export default function FileUploadBox({
@@ -35,6 +37,7 @@ export default function FileUploadBox({
     maxFileBytes = 1024 * 1024,
     allowExternalUrl = false,
     onExternalUrlSelect,
+    initialPreviewUrl = null,
 }: IFileUploadBoxProps) {
     const toast = useToast();
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -42,6 +45,8 @@ export default function FileUploadBox({
     const [dragging, setDragging] = useState(false);
     const [externalMode, setExternalMode] = useState(false);
     const [externalUrl, setExternalUrl] = useState("");
+    const [selectedExternalUrl, setSelectedExternalUrl] = useState<string | null>(initialPreviewUrl);
+    const [externalImageFailed, setExternalImageFailed] = useState(false);
 
     // keep the actual file so we can preview it
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -74,6 +79,8 @@ export default function FileUploadBox({
             toast.error("File too large", "Files must be 1 MB or smaller.");
             return;
         }
+        if (selectedExternalUrl) onExternalUrlSelect?.("", docType);
+        setSelectedExternalUrl(null);
         setSelectedFile(file);
         onFileSelect(file, docType);
     };
@@ -96,6 +103,9 @@ export default function FileUploadBox({
 
     const clearFile = () => {
         setSelectedFile(null);
+        if (selectedExternalUrl) onExternalUrlSelect?.("", docType);
+        setSelectedExternalUrl(null);
+        setExternalImageFailed(false);
         setDragging(false);
 
         // clear native input so same file can be reselected
@@ -109,6 +119,9 @@ export default function FileUploadBox({
             const url = new URL(externalUrl.trim());
             if (url.protocol !== "https:" || url.username || url.password) throw new Error();
             onExternalUrlSelect?.(url.toString(), docType);
+            setSelectedExternalUrl(url.toString());
+            setExternalImageFailed(false);
+            setExternalMode(false);
             toast.success("External link selected", "This file will be hosted by the linked provider.");
         } catch {
             toast.error("Invalid link", "Use a valid HTTPS URL.");
@@ -145,7 +158,7 @@ export default function FileUploadBox({
 
             <div className={styles.labelContainer}>
                 {label && <h1 className={`${styles.label} ${isMini ? styles.miniLabel : ""}`}>{label}</h1>}
-                {!selectedFile && !externalMode &&
+                {!selectedFile && !selectedExternalUrl && !externalMode &&
                     <h2 className={`${styles.subLabel} ${isMini ? styles.miniSubLabel : ""}`}>
                         {"Drag and drop or select a file"}
                     </h2>
@@ -194,17 +207,39 @@ export default function FileUploadBox({
                 </div>
             )}
 
-            {!selectedFile && !externalMode &&
+            {selectedExternalUrl && !selectedFile && (
+                <div className={`${styles.previewContainer} ${!isMini ? styles.previewLarge : styles.previewMini}`}>
+                    <ExitButton
+                        onClick={(event) => { event.stopPropagation(); clearFile(); }}
+                        aria-label="Remove external image"
+                        className={styles.clearPreviewBtn}
+                    ><X size={16} /></ExitButton>
+                    <div className={styles.previewInner}>
+                        {accepts?.includes("pdf") || externalImageFailed ? (
+                            <div className={styles.genericPreview}><FileText size={20} /></div>
+                        ) : (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img className={styles.imagePreview} src={selectedExternalUrl} alt="External image preview" onError={() => setExternalImageFailed(true)} />
+                        )}
+                        <div className={styles.previewFooter}>
+                            <div className={styles.previewName} title={selectedExternalUrl}>External HTTPS link</div>
+                            <div className={styles.previewSize}>{accepts?.includes("pdf") || externalImageFailed ? "Preview unavailable" : "Externally hosted"}</div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {!selectedFile && !selectedExternalUrl && !externalMode &&
                 <ButtonOne type="button" onClick={() => inputRef.current?.click()}>
                     Browse Files
                 </ButtonOne>
             }
 
-            {allowExternalUrl && !selectedFile && !externalMode && (
+            {allowExternalUrl && !selectedFile && !selectedExternalUrl && !externalMode && (
                 <ButtonFour type="button" onClick={() => setExternalMode(true)}>Use a link instead</ButtonFour>
             )}
 
-            {externalMode && !selectedFile && (
+            {externalMode && !selectedFile && !selectedExternalUrl && (
                 <div className={styles.uploadInstructionsContainer}>
                     <input
                         aria-label="External HTTPS URL"
@@ -220,7 +255,7 @@ export default function FileUploadBox({
                 </div>
             )}
 
-            {uploadInstructions && !selectedFile && (
+            {uploadInstructions && !selectedFile && !selectedExternalUrl && (
                 <div className={styles.uploadInstructionsContainer}>
                     <p className={styles.uploadInstructions}>{uploadInstructions}</p>
                 </div>
