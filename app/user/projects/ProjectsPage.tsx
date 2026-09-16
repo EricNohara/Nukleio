@@ -9,9 +9,9 @@ import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentW
 import ProjectCard from "@/app/components/ProjectCard/ProjectCard";
 import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
+import { usePreparedStoredFile } from "@/app/hooks/usePreparedStoredFile";
 import { IProjectInput } from "@/app/interfaces/IProject";
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
-import { compressStoredFile } from "@/utils/file-upload/compressWithAgent";
 import { uploadFile } from "@/utils/file-upload/upload";
 
 import ProjectFormModal from "./ProjectFormModal";
@@ -35,7 +35,6 @@ export default function ProjectsPage() {
     const { state, dispatch } = useUser();
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
     const [formValues, setFormValues] = useState<IProjectInput>(EMPTY_PROJECT_INPUT);
-    const [thumbnailDoc, setThumbnailDoc] = useState<File | null>(null);
     const [projectToEdit, setProjectToEdit] = useState<IProjectInternal | null>(null);
     const [openProject, setOpenProject] = useState<number | null>(null);
     const [activeProjectIndex, setActiveProjectIndex] = useState<number | null>(null); // for single and double clicks
@@ -45,6 +44,7 @@ export default function ProjectsPage() {
     const searchParams = useSearchParams();
     const indexParam = searchParams.get("index");
     const toast = useToast();
+    const thumbnail = usePreparedStoredFile("project-thumbnail", (message) => toast.error("Thumbnail optimization failed", message));
 
     // used to open given project if inputted as search param
     useEffect(() => {
@@ -104,11 +104,10 @@ export default function ProjectsPage() {
 
     const handleUpload = async (): Promise<string | undefined> => {
         try {
-            if (!thumbnailDoc) throw new Error("Missing project thumbnail");
-            const compressed = await compressStoredFile(thumbnailDoc, "project-thumbnail");
-            const publicProjectThumbnailUrl = await uploadFile(compressed, "project_thumbnails");
+            if (!thumbnail.file) throw new Error("Project thumbnail is still optimizing");
+            const publicProjectThumbnailUrl = await uploadFile(thumbnail.file, "project_thumbnails");
             if (!publicProjectThumbnailUrl) throw new Error();
-            setThumbnailDoc(null);
+            thumbnail.clear();
             return publicProjectThumbnailUrl;
         } catch (error) {
             const message = error instanceof Error ? error.message : "Failed to upload your project thumbnail. Please try again.";
@@ -157,7 +156,12 @@ export default function ProjectsPage() {
 
         try {
             // upload the new project thumbnail if one was uploaded
-            if (thumbnailDoc !== null) {
+            if (thumbnail.status === "optimizing") {
+                toast.info("Optimizing thumbnail", "Your project thumbnail is still being optimized. Please wait a moment.");
+                return;
+            }
+            if (thumbnail.status === "failed") return;
+            if (thumbnail.file !== null) {
                 const publicThumbnailUrl = await handleUpload();
                 if (!publicThumbnailUrl) throw new Error()
                 newProject.thumbnail_url = publicThumbnailUrl
@@ -270,9 +274,10 @@ export default function ProjectsPage() {
                     onChange={handleChange}
                     onSubmit={onSubmit}
                     onClose={onClose}
-                setThumbnailDoc={setThumbnailDoc}
+                onThumbnailSelect={thumbnail.selectFile}
+                isThumbnailOptimizing={thumbnail.status === "optimizing"}
                 onExternalThumbnailSelect={(url) => {
-                    setThumbnailDoc(null);
+                    thumbnail.clear();
                     setFormValues((current) => ({ ...current, thumbnail_url: url }));
                 }}
                 />

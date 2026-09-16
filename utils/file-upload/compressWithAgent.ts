@@ -1,6 +1,6 @@
 "use client";
 
-type MediaKind = "portrait" | "project-thumbnail" | "resume" | "transcript";
+export type MediaKind = "portrait" | "project-thumbnail" | "resume" | "transcript";
 
 type PreparedUpload = {
   jobId: string;

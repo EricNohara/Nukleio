@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import React, { FormEvent, useState } from "react";
 
 import LoadableButtonContent from "@/app/components/AsyncButtonWrapper/LoadableButtonContent/LoadableButtonContent";
 import AutocompleteListSelector from "@/app/components/AutocompleteListSelector/AutocompleteListSelector";
@@ -25,7 +25,8 @@ type Props = {
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     onSubmit: (e: React.FormEvent) => void;
     onClose: () => void;
-    setThumbnailDoc: Dispatch<SetStateAction<File | null>>;
+    onThumbnailSelect: (file: File) => void;
+    isThumbnailOptimizing: boolean;
     onExternalThumbnailSelect: (url: string) => void;
 };
 
@@ -36,8 +37,9 @@ export default function ProjectFormModal({
     onChange,
     onSubmit,
     onClose,
-    setThumbnailDoc
-    , onExternalThumbnailSelect
+    onThumbnailSelect,
+    isThumbnailOptimizing,
+    onExternalThumbnailSelect,
 }: Props) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const toast = useToast();
@@ -49,8 +51,8 @@ export default function ProjectFormModal({
     };
 
     const handleFileSelect = (file: File, _: string) => {
-        setThumbnailDoc(file);
-        toast.info("Info", "Project thumbnail uploaded. Click the save button to save your new thumbnail.");
+        onThumbnailSelect(file);
+        toast.info("Optimizing thumbnail", "Your thumbnail is being optimized while you edit this project.");
     };
 
     return (
@@ -178,8 +180,8 @@ export default function ProjectFormModal({
                 </div>
 
                 <div className={styles.buttonContainer}>
-                    <ButtonOne type="submit" disabled={isLoading}>
-                        <LoadableButtonContent isLoading={isLoading} buttonLabel={submitLabel} />
+                    <ButtonOne type="submit" disabled={isLoading || isThumbnailOptimizing}>
+                        <LoadableButtonContent isLoading={isLoading || isThumbnailOptimizing} buttonLabel={isThumbnailOptimizing ? "Optimizing thumbnail" : submitLabel} />
                     </ButtonOne>
                 </div>
             </form>

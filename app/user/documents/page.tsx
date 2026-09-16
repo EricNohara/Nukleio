@@ -10,7 +10,7 @@ import { IButton } from "@/app/components/PageContentHeader/PageContentHeader";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
-import { compressStoredFile } from "@/utils/file-upload/compressWithAgent";
+import { usePreparedStoredFile } from "@/app/hooks/usePreparedStoredFile";
 import { saveExternalFileUrl, uploadFile } from "@/utils/file-upload/upload";
 
 import styles from "./DocumentsPage.module.css";
@@ -21,14 +21,12 @@ export default function DocumentsPage() {
     resume_url: false,
     transcript_url: false
   });
-  const [docs, setDocs] = useState<{ portrait: File | null, resume: File | null, transcript: File | null }>({
-    portrait: null,
-    resume: null,
-    transcript: null
-  });
   const [externalDocs, setExternalDocs] = useState({ portrait: "", resume: "", transcript: "" });
   const { state, dispatch } = useUser();
   const toast = useToast();
+  const portrait = usePreparedStoredFile("portrait", (message) => toast.error("Portrait optimization failed", message));
+  const resume = usePreparedStoredFile("resume", (message) => toast.error("Resume optimization failed", message));
+  const transcript = usePreparedStoredFile("transcript", (message) => toast.error("Transcript optimization failed", message));
 
   const handleEdit = (url: string | undefined) => {
     switch (url) {
@@ -71,36 +69,33 @@ export default function DocumentsPage() {
   const handleUpload = async () => {
     try {
       // upload each file and update cached state + state variables
-      if (docs.portrait) {
-        const compressedPortrait = await compressStoredFile(docs.portrait, "portrait");
-        const publicPortraitUrl = await uploadFile(compressedPortrait, "portraits");
+      if (portrait.file) {
+        const publicPortraitUrl = await uploadFile(portrait.file, "portraits");
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url: publicPortraitUrl, docType: "portrait_url" } });
         setIsEditing({ ...isEditing, portrait_url: false });
-        setDocs({ ...docs, portrait: null });
+        portrait.clear();
       } else if (externalDocs.portrait) {
         const url = await saveExternalFileUrl(externalDocs.portrait, "portraits");
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url, docType: "portrait_url" } });
         setExternalDocs((current) => ({ ...current, portrait: "" }));
         setIsEditing((current) => ({ ...current, portrait_url: false }));
       }
-      if (docs.resume) {
-        const compressedResume = await compressStoredFile(docs.resume, "resume");
-        const publicResumeUrl = await uploadFile(compressedResume, "resumes");
+      if (resume.file) {
+        const publicResumeUrl = await uploadFile(resume.file, "resumes");
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url: publicResumeUrl, docType: "resume_url" } });
         setIsEditing({ ...isEditing, resume_url: false });
-        setDocs({ ...docs, resume: null });
+        resume.clear();
       } else if (externalDocs.resume) {
         const url = await saveExternalFileUrl(externalDocs.resume, "resumes");
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url, docType: "resume_url" } });
         setExternalDocs((current) => ({ ...current, resume: "" }));
         setIsEditing((current) => ({ ...current, resume_url: false }));
       }
-      if (docs.transcript) {
-        const compressedTranscript = await compressStoredFile(docs.transcript, "transcript");
-        const publicTranscriptUrl = await uploadFile(compressedTranscript, "transcripts");
+      if (transcript.file) {
+        const publicTranscriptUrl = await uploadFile(transcript.file, "transcripts");
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url: publicTranscriptUrl, docType: "transcript_url" } });
         setIsEditing({ ...isEditing, transcript_url: false });
-        setDocs({ ...docs, transcript: null });
+        transcript.clear();
       } else if (externalDocs.transcript) {
         const url = await saveExternalFileUrl(externalDocs.transcript, "transcripts");
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url, docType: "transcript_url" } });
@@ -118,19 +113,19 @@ export default function DocumentsPage() {
   const handleFileSelect = (file: File, docType: string) => {
     switch (docType) {
       case "portrait_url":
-        setDocs((current) => ({ ...current, portrait: file }));
+        portrait.selectFile(file);
         setExternalDocs((current) => ({ ...current, portrait: "" }));
-        toast.info("Info", "Click save documents button to save your portrait.");
+        toast.info("Optimizing portrait", "Your portrait is being optimized in the background.");
         break;
       case "resume_url":
-        setDocs((current) => ({ ...current, resume: file }));
+        resume.selectFile(file);
         setExternalDocs((current) => ({ ...current, resume: "" }));
-        toast.info("Info", "Click save documents button to save your resume.");
+        toast.info("Optimizing resume", "Your resume is being optimized in the background.");
         break;
       case "transcript_url":
-        setDocs((current) => ({ ...current, transcript: file }));
+        transcript.selectFile(file);
         setExternalDocs((current) => ({ ...current, transcript: "" }));
-        toast.info("Info", "Click save documents button to save your transcript.");
+        toast.info("Optimizing transcript", "Your transcript is being optimized in the background.");
         break;
       default:
         break;
@@ -141,15 +136,16 @@ export default function DocumentsPage() {
     const key = docType === "portrait_url" ? "portrait" : docType === "resume_url" ? "resume" : "transcript";
     setExternalDocs((current) => ({ ...current, [key]: url }));
     if (url) {
-      setDocs((current) => ({ ...current, [key]: null }));
+      ({ portrait, resume, transcript }[key]).clear();
       toast.info("External link selected", "Click save documents to use this externally hosted file.");
     }
   };
 
   const buttonOne: IButton = {
-    name: "Save Documents",
+    name: [portrait, resume, transcript].some((item) => item.status === "optimizing") ? "Optimizing files" : "Save Documents",
     onClick: handleUpload,
-    isAsync: true
+    isAsync: true,
+    disabled: [portrait, resume, transcript].some((item) => item.status === "optimizing")
   };
 
   // only render save button if needed
@@ -177,7 +173,7 @@ export default function DocumentsPage() {
                 accepts="image/*"
                 uploadInstructions="Upload an image up to 50 MB; it will be compressed to fit, or use an external HTTPS link"
                 isEditView={isEditing.portrait_url}
-                onExitEditView={() => { setIsEditing({ ...isEditing, portrait_url: false }); setDocs({ ...docs, portrait: null }); }}
+                onExitEditView={() => { setIsEditing({ ...isEditing, portrait_url: false }); portrait.clear(); }}
                 onFileSelect={handleFileSelect}
                 docType="portrait_url"
                 allowExternalUrl
@@ -209,7 +205,7 @@ export default function DocumentsPage() {
                 accepts=".pdf"
                 uploadInstructions="Upload a PDF up to 50 MB; it will be compressed to fit, or use an external HTTPS link"
                 isEditView={isEditing.resume_url}
-                onExitEditView={() => { setIsEditing({ ...isEditing, resume_url: false }); setDocs({ ...docs, resume: null }); }}
+                onExitEditView={() => { setIsEditing({ ...isEditing, resume_url: false }); resume.clear(); }}
                 onFileSelect={handleFileSelect}
                 docType="resume_url"
                 allowExternalUrl
@@ -241,7 +237,7 @@ export default function DocumentsPage() {
                 accepts=".pdf"
                 uploadInstructions="Upload a PDF up to 50 MB; it will be compressed to fit, or use an external HTTPS link"
                 isEditView={isEditing.transcript_url}
-                onExitEditView={() => { setIsEditing({ ...isEditing, transcript_url: false }); setDocs({ ...docs, transcript: null }); }}
+                onExitEditView={() => { setIsEditing({ ...isEditing, transcript_url: false }); transcript.clear(); }}
                 onFileSelect={handleFileSelect}
                 docType="transcript_url"
                 allowExternalUrl
