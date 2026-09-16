@@ -27,6 +27,7 @@ type Props = {
     onClose: () => void;
     onThumbnailSelect: (file: File) => void;
     isThumbnailOptimizing: boolean;
+    preparedThumbnail: File | null;
     onExternalThumbnailSelect: (url: string) => void;
 };
 
@@ -39,6 +40,7 @@ export default function ProjectFormModal({
     onClose,
     onThumbnailSelect,
     isThumbnailOptimizing,
+    preparedThumbnail,
     onExternalThumbnailSelect,
 }: Props) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -175,6 +177,7 @@ export default function ProjectFormModal({
                         isMini
                         allowExternalUrl
                         initialPreviewUrl={value.thumbnail_url}
+                        preparedFile={preparedThumbnail}
                         onExternalUrlSelect={(url) => onExternalThumbnailSelect(url)}
                     />
                 </div>

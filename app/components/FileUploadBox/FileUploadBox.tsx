@@ -22,6 +22,7 @@ interface IFileUploadBoxProps {
     allowExternalUrl?: boolean;
     onExternalUrlSelect?: (url: string, docType: string) => void;
     initialPreviewUrl?: string | null;
+    preparedFile?: File | null;
 }
 
 export default function FileUploadBox({
@@ -38,6 +39,7 @@ export default function FileUploadBox({
     allowExternalUrl = false,
     onExternalUrlSelect,
     initialPreviewUrl = null,
+    preparedFile = null,
 }: IFileUploadBoxProps) {
     const toast = useToast();
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -63,6 +65,10 @@ export default function FileUploadBox({
             if (previewUrl) URL.revokeObjectURL(previewUrl);
         };
     }, [previewUrl]);
+
+    useEffect(() => {
+        if (preparedFile) setSelectedFile(preparedFile);
+    }, [preparedFile]);
 
     const isImage = !!selectedFile?.type.startsWith("image/");
     const isPdf = selectedFile?.type === "application/pdf";
@@ -222,8 +228,14 @@ export default function FileUploadBox({
                             <img className={styles.imagePreview} src={selectedExternalUrl} alt="External image preview" onError={() => setExternalImageFailed(true)} />
                         )}
                         <div className={styles.previewFooter}>
-                            <div className={styles.previewName} title={selectedExternalUrl}>External HTTPS link</div>
-                            <div className={styles.previewSize}>{accepts?.includes("pdf") || externalImageFailed ? "Preview unavailable" : "Externally hosted"}</div>
+                            <div className={styles.previewName} title={selectedExternalUrl}>
+                                {selectedExternalUrl.includes(".supabase.co/storage/v1/object/public/") ? "Stored file upload" : "External HTTPS link"}
+                            </div>
+                            <div className={styles.previewSize}>
+                                {selectedExternalUrl.includes(".supabase.co/storage/v1/object/public/")
+                                    ? "Stored in Nukleio"
+                                    : accepts?.includes("pdf") || externalImageFailed ? "Preview unavailable" : "Externally hosted"}
+                            </div>
                         </div>
                     </div>
                 </div>
