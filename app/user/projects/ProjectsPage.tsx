@@ -276,6 +276,7 @@ export default function ProjectsPage() {
                     onClose={onClose}
                 onThumbnailSelect={thumbnail.selectFile}
                 isThumbnailOptimizing={thumbnail.status === "optimizing"}
+                preparedThumbnail={thumbnail.file}
                 onExternalThumbnailSelect={(url) => {
                     thumbnail.clear();
                     setFormValues((current) => ({ ...current, thumbnail_url: url }));
