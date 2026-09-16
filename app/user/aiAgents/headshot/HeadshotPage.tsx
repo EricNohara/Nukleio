@@ -20,7 +20,7 @@ import { ICachedHeadshot } from "@/app/interfaces/ICachedHeadshot";
 import { headerFont } from "@/app/localFonts";
 import { showAiRateLimitToast } from "@/app/user/aiAgents/showAiRateLimitToast";
 import { AI_CREDIT_COSTS } from "@/utils/aiCredits/config";
-import { compressImage } from "@/utils/file-upload/compress";
+import { compressStoredFile } from "@/utils/file-upload/compressWithAgent";
 import { uploadFile } from "@/utils/file-upload/upload";
 
 import styles from "./HeadshotPage.module.css";
@@ -113,11 +113,13 @@ export default function HeadshotPage() {
       setLoading(true);
 
       const formData = new FormData();
+      const compressedReference = await compressStoredFile(referenceImage, "portrait");
 
-      formData.append("referenceImage", referenceImage);
+      formData.append("referenceImage", compressedReference);
 
       if (backgroundImage) {
-        formData.append("backgroundImage", backgroundImage);
+        const compressedBackground = await compressStoredFile(backgroundImage, "portrait");
+        formData.append("backgroundImage", compressedBackground);
       }
 
       formData.append("backgroundDescription", backgroundDescription);
@@ -211,15 +213,16 @@ export default function HeadshotPage() {
         `nukleio-headshot-${Date.now()}-${crypto.randomUUID()}.${extension}`,
         { type: blob.type }
       );
-      const compressed = await compressImage(imageFile);
+      const compressed = await compressStoredFile(imageFile, "portrait");
       const publicPortraitUrl = await uploadFile(compressed, "portraits");
       dispatch({
         type: "UPDATE_DOCUMENT",
         payload: { url: publicPortraitUrl, docType: "portrait_url" },
       });
       toast.success("Success", "Portrait successfully updated.");
-    } catch {
-      toast.error("Failed to update user portrait.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update user portrait.";
+      toast.error("Failed to update user portrait.", message);
     } finally {
       setUseThisHeadshotLoading(false);
     }
