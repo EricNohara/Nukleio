@@ -89,7 +89,9 @@ const nextConfig: NextConfig = {
     https://api.github.com
     https://www.linkedin.com
     https://api.linkedin.com
-    https://gitlab.com;
+    https://gitlab.com
+    https://nukleio-file-compression-staging-dev.s3.us-east-2.amazonaws.com
+    https://nukleio-file-compression-staging-prod.s3.us-east-2.amazonaws.com;
   font-src 'self' https://fonts.gstatic.com;
 
   worker-src 'self' blob:;
