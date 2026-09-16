@@ -34,7 +34,7 @@ export default function FileUploadBox({
     docType,
     className,
     isMini = false,
-    maxFileBytes = 1024 * 1024,
+    maxFileBytes = 50 * 1024 * 1024,
     allowExternalUrl = false,
     onExternalUrlSelect,
     initialPreviewUrl = null,
@@ -76,7 +76,7 @@ export default function FileUploadBox({
 
     const setFile = (file: File) => {
         if (file.size > maxFileBytes) {
-            toast.error("File too large", "Files must be 1 MB or smaller.");
+            toast.error("File too large", "Files must be 50 MB or smaller before compression.");
             return;
         }
         if (selectedExternalUrl) onExternalUrlSelect?.("", docType);

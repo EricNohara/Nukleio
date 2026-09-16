@@ -11,7 +11,7 @@ import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
 import { IProjectInput } from "@/app/interfaces/IProject";
 import { IProjectInternal } from "@/app/interfaces/IUserInfoInternal";
-import { compressImage } from "@/utils/file-upload/compress";
+import { compressStoredFile } from "@/utils/file-upload/compressWithAgent";
 import { uploadFile } from "@/utils/file-upload/upload";
 
 import ProjectFormModal from "./ProjectFormModal";
@@ -104,13 +104,15 @@ export default function ProjectsPage() {
 
     const handleUpload = async (): Promise<string | undefined> => {
         try {
-            const compressed = await compressImage(thumbnailDoc);
+            if (!thumbnailDoc) throw new Error("Missing project thumbnail");
+            const compressed = await compressStoredFile(thumbnailDoc, "project-thumbnail");
             const publicProjectThumbnailUrl = await uploadFile(compressed, "project_thumbnails");
             if (!publicProjectThumbnailUrl) throw new Error();
             setThumbnailDoc(null);
             return publicProjectThumbnailUrl;
-        } catch {
-            toast.error("Error", "Failed to upload your project thumbnail. Please try again.");
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Failed to upload your project thumbnail. Please try again.";
+            toast.error("Error", message);
         }
     };
 

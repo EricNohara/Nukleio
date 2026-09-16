@@ -10,7 +10,7 @@ import { IButton } from "@/app/components/PageContentHeader/PageContentHeader";
 import PageContentWrapper from "@/app/components/PageContentWrapper/PageContentWrapper";
 import { useToast } from "@/app/context/ToastProvider";
 import { useUser } from "@/app/context/UserProvider";
-import { compressImage, compressPDF } from "@/utils/file-upload/compress";
+import { compressStoredFile } from "@/utils/file-upload/compressWithAgent";
 import { saveExternalFileUrl, uploadFile } from "@/utils/file-upload/upload";
 
 import styles from "./DocumentsPage.module.css";
@@ -72,7 +72,7 @@ export default function DocumentsPage() {
     try {
       // upload each file and update cached state + state variables
       if (docs.portrait) {
-        const compressedPortrait = await compressImage(docs.portrait);
+        const compressedPortrait = await compressStoredFile(docs.portrait, "portrait");
         const publicPortraitUrl = await uploadFile(compressedPortrait, "portraits");
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url: publicPortraitUrl, docType: "portrait_url" } });
         setIsEditing({ ...isEditing, portrait_url: false });
@@ -84,7 +84,7 @@ export default function DocumentsPage() {
         setIsEditing((current) => ({ ...current, portrait_url: false }));
       }
       if (docs.resume) {
-        const compressedResume = await compressPDF(docs.resume);
+        const compressedResume = await compressStoredFile(docs.resume, "resume");
         const publicResumeUrl = await uploadFile(compressedResume, "resumes");
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url: publicResumeUrl, docType: "resume_url" } });
         setIsEditing({ ...isEditing, resume_url: false });
@@ -96,7 +96,7 @@ export default function DocumentsPage() {
         setIsEditing((current) => ({ ...current, resume_url: false }));
       }
       if (docs.transcript) {
-        const compressedTranscript = await compressPDF(docs.transcript);
+        const compressedTranscript = await compressStoredFile(docs.transcript, "transcript");
         const publicTranscriptUrl = await uploadFile(compressedTranscript, "transcripts");
         dispatch({ type: "UPDATE_DOCUMENT", payload: { url: publicTranscriptUrl, docType: "transcript_url" } });
         setIsEditing({ ...isEditing, transcript_url: false });
@@ -175,7 +175,7 @@ export default function DocumentsPage() {
               <FileUploadBox
                 label="Edit Profile Picture"
                 accepts="image/*"
-                uploadInstructions="Upload an image up to 1 MB, or use an external HTTPS link"
+                uploadInstructions="Upload an image up to 50 MB; it will be compressed to fit, or use an external HTTPS link"
                 isEditView={isEditing.portrait_url}
                 onExitEditView={() => { setIsEditing({ ...isEditing, portrait_url: false }); setDocs({ ...docs, portrait: null }); }}
                 onFileSelect={handleFileSelect}
@@ -187,7 +187,7 @@ export default function DocumentsPage() {
               <FileUploadBox
                 label="Upload Profile Picture"
                 accepts="image/*"
-                uploadInstructions="Upload an image up to 1 MB, or use an external HTTPS link"
+                uploadInstructions="Upload an image up to 50 MB; it will be compressed to fit, or use an external HTTPS link"
                 onFileSelect={handleFileSelect}
                 docType="portrait_url"
                 allowExternalUrl
@@ -207,7 +207,7 @@ export default function DocumentsPage() {
               <FileUploadBox
                 label="Edit Resume File"
                 accepts=".pdf"
-                uploadInstructions="Upload a PDF up to 1 MB, or use an external HTTPS link"
+                uploadInstructions="Upload a PDF up to 50 MB; it will be compressed to fit, or use an external HTTPS link"
                 isEditView={isEditing.resume_url}
                 onExitEditView={() => { setIsEditing({ ...isEditing, resume_url: false }); setDocs({ ...docs, resume: null }); }}
                 onFileSelect={handleFileSelect}
@@ -219,7 +219,7 @@ export default function DocumentsPage() {
               <FileUploadBox
                 label="Upload Resume File"
                 accepts=".pdf"
-                uploadInstructions="Upload a PDF up to 1 MB, or use an external HTTPS link"
+                uploadInstructions="Upload a PDF up to 50 MB; it will be compressed to fit, or use an external HTTPS link"
                 onFileSelect={handleFileSelect}
                 docType="resume_url"
                 allowExternalUrl
@@ -239,7 +239,7 @@ export default function DocumentsPage() {
               <FileUploadBox
                 label="Edit Transcript File"
                 accepts=".pdf"
-                uploadInstructions="Upload a PDF up to 1 MB, or use an external HTTPS link"
+                uploadInstructions="Upload a PDF up to 50 MB; it will be compressed to fit, or use an external HTTPS link"
                 isEditView={isEditing.transcript_url}
                 onExitEditView={() => { setIsEditing({ ...isEditing, transcript_url: false }); setDocs({ ...docs, transcript: null }); }}
                 onFileSelect={handleFileSelect}
@@ -251,7 +251,7 @@ export default function DocumentsPage() {
               <FileUploadBox
                 label="Upload Transcript File"
                 accepts=".pdf"
-                uploadInstructions="Upload a PDF up to 1 MB, or use an external HTTPS link"
+                uploadInstructions="Upload a PDF up to 50 MB; it will be compressed to fit, or use an external HTTPS link"
                 onFileSelect={handleFileSelect}
                 docType="transcript_url"
                 allowExternalUrl
