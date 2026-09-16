@@ -1,4 +1,3 @@
-// @ts-nocheck -- Supabase Edge Functions are type-checked by Deno.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const supabase = createClient(
@@ -50,26 +49,30 @@ Deno.serve(async (request) => {
   for (const item of resumes.data ?? []) {
     if (await removePublicObject(item.url)) {
       const result = await supabase.from("cached_resumes").delete().eq("id", item.id);
-      result.error ? failed++ : deleted++;
+      if (result.error) failed++;
+      else deleted++;
     } else failed++;
   }
   for (const item of headshots.data ?? []) {
     if (await removePublicObject(item.generated_url)) {
       const result = await supabase.from("cached_professional_headshots").delete().eq("id", item.id);
-      result.error ? failed++ : deleted++;
+      if (result.error) failed++;
+      else deleted++;
     } else failed++;
   }
   for (const item of expiringLedger.data ?? []) {
     const removal = await supabase.storage.from(item.bucket).remove([item.object_path]);
     if (!removal.error) {
       const result = await supabase.from("storage_quota_ledger").delete().eq("id", item.id);
-      result.error ? failed++ : deleted++;
+      if (result.error) failed++;
+      else deleted++;
     } else failed++;
   }
   for (const item of deletionQueue.data ?? []) {
     if (await removePublicObject(item.object_url)) {
       const result = await supabase.from("storage_deletion_queue").delete().eq("id", item.id);
-      result.error ? failed++ : deleted++;
+      if (result.error) failed++;
+      else deleted++;
     } else failed++;
   }
 
