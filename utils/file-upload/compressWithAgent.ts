@@ -35,7 +35,7 @@ export async function compressStoredFile(file: File, mediaKind: MediaKind): Prom
   });
   if (!compressResponse.ok) {
     const data = await compressResponse.json().catch(() => null);
-    throw new Error(data?.message ?? "File could not be compressed");
+    throw new Error(data?.detail ?? data?.message ?? data?.error ?? "File could not be compressed");
   }
   const contentType = compressResponse.headers.get("content-type") ?? "application/octet-stream";
   const blob = await compressResponse.blob();
