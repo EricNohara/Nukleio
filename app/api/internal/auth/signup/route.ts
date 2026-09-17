@@ -176,15 +176,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
     }
 
-    // update the created_by_oauth field to false
+    // Confirm-email signup has no user session, so this must use the
+    // service-role client rather than the request-scoped client under RLS.
     if (data.user) {
-      const { error: updateError } = await supabase
+      const admin = createAdminClient();
+      const { error: updateError } = await admin
         .from("users")
         .update({ requires_oauth_signup: false })
         .eq("id", data.user.id);
 
       if (updateError) {
-        console.error("Failed to update requires_oauth_signup:", updateError);
+        await deleteOrBlockRejectedSignup(data.user.id);
+        throw new SignupRateLimitServiceError("Unable to finalize email signup state");
       }
     }
 
