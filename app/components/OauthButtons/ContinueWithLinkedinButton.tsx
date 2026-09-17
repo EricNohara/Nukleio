@@ -1,28 +1,26 @@
 import Image from "next/image";
 
 import { useToast } from "@/app/context/ToastProvider";
-import { createClient } from "@/utils/supabase/client";
+import { OAuthButtonProps, startOauth } from "@/utils/oauth/startOauth";
 
 import styles from "./OauthButtons.module.css";
 
-export default function ContinueWithLinkedinButton() {
-    const supabase = createClient();
-    const toast = useToast()
+export default function ContinueWithLinkedinButton({ captchaToken, onCaptchaConsumed }: OAuthButtonProps) {
+    const toast = useToast();
 
     const handleLinkedin = async () => {
-        const base = process.env.NEXT_PUBLIC_SITE_URL;
-        const redirectTo = `${base}/api/internal/auth/callback?provider=linkedin_oidc&next=${encodeURIComponent("/user")}`;
-
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: "linkedin_oidc",
-            options: { redirectTo },
-        });
-
-        if (error) toast.error("Error logging in with LinkedIn")
+        if (!captchaToken) return;
+        try {
+            await startOauth("linkedin_oidc", captchaToken);
+        } catch {
+            toast.error("Error logging in with LinkedIn");
+        } finally {
+            onCaptchaConsumed();
+        }
     };
 
     return (
-        <button onClick={handleLinkedin} className={`${styles.button}`}>
+        <button type="button" onClick={handleLinkedin} className={`${styles.button}`} disabled={!captchaToken}>
             <Image
                 src="/images/linkedin-icon.svg"
                 alt="LinkedIn icon"

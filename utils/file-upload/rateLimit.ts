@@ -1,15 +1,18 @@
+import { randomUUID } from "crypto";
+
 import { NextRequest, NextResponse } from "next/server";
 
 import { AiRateLimitServiceError, consumeAiRateLimit } from "@/utils/aiAgents/rateLimit";
-import { getAiRequestId } from "@/utils/aiAgents/requestId";
 
 const UPLOAD_LIMIT = 10;
 const UPLOAD_WINDOW_SECONDS = 60;
 
-export async function requireUploadRateLimit(request: NextRequest, userId: string): Promise<NextResponse | null> {
+export async function requireUploadRateLimit(_request: NextRequest, userId: string): Promise<NextResponse | null> {
   const result = await consumeAiRateLimit({
     operation: "storage_upload",
-    requestId: getAiRequestId(request),
+    // This must not reuse a client-supplied idempotency key: DynamoDB would
+    // otherwise treat repeated upload-limit transactions as one request.
+    requestId: randomUUID(),
     userId,
     limit: UPLOAD_LIMIT,
     windowSeconds: UPLOAD_WINDOW_SECONDS,

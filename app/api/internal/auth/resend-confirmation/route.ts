@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import {
+  consumeResendConfirmationRateLimit,
+  SignupRateLimitServiceError,
+} from "@/utils/auth/signupRateLimit";
 import { createClient } from "@/utils/supabase/server";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -28,6 +32,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
+    const rateLimit = await consumeResendConfirmationRateLimit({
+      request: req,
+      email: email.trim(),
+    });
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          code: "CONFIRMATION_RESEND_RATE_LIMIT_EXCEEDED",
+          message: "Please wait before requesting another confirmation email.",
+        },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+        },
+      );
+    }
+
     const supabase = await createClient();
     const { error } = await supabase.auth.resend({
       type: "signup",
@@ -51,6 +72,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       console.error("Unable to resend confirmation email:", error.message);
     }
   } catch (error) {
+    if (error instanceof SignupRateLimitServiceError) {
+      console.error("Confirmation resend abuse protection unavailable:", error);
+      return NextResponse.json(
+        { message: "Confirmation emails are temporarily unavailable. Please try again later." },
+        { status: 503 },
+      );
+    }
     console.error("Unable to resend confirmation email:", error);
   }
 

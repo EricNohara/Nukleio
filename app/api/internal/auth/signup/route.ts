@@ -2,20 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 
 import {
   consumeSignupRateLimit,
+  consumeSuccessfulSignupDeviceLimit,
   getSignupDevice,
   getSignupDeviceCookieName,
   SignupRateLimitServiceError,
+  SignupDevice,
 } from "@/utils/auth/signupRateLimit";
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient, createClient } from "@/utils/supabase/server";
 
-function withSignupDeviceCookie(response: NextResponse, device: {
-  value: string;
-  isNew: boolean;
-}): NextResponse {
+function withSignupDeviceCookie(response: NextResponse, device: SignupDevice): NextResponse {
   if (device.isNew) {
     response.cookies.set({
       name: getSignupDeviceCookieName(),
-      value: device.value,
+      value: device.cookieValue,
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
@@ -26,10 +25,10 @@ function withSignupDeviceCookie(response: NextResponse, device: {
   return response;
 }
 
-function signupProviderErrorResponse(error: { message?: string; code?: string; status?: number }, device: {
-  value: string;
-  isNew: boolean;
-}): NextResponse {
+function signupProviderErrorResponse(
+  error: { message?: string; code?: string; status?: number },
+  device: SignupDevice,
+): NextResponse {
   const message = error.message?.toLowerCase() ?? "";
   if (message.includes("captcha") || message.includes("bot")) {
     return withSignupDeviceCookie(
@@ -69,6 +68,26 @@ function signupProviderErrorResponse(error: { message?: string; code?: string; s
   );
 }
 
+async function deleteOrBlockRejectedSignup(userId: string): Promise<void> {
+  const admin = createAdminClient();
+  let deleteError: { message: string } | null = null;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { error } = await admin.auth.admin.deleteUser(userId);
+    if (!error) return;
+    deleteError = error;
+  }
+
+  console.error("Unable to remove rate-limited signup:", deleteError?.message);
+  const { error: blockError } = await admin.auth.admin.updateUserById(userId, {
+    app_metadata: { signup_blocked: true },
+  });
+  if (blockError) {
+    console.error("Unable to block rate-limited signup:", blockError.message);
+    throw new SignupRateLimitServiceError("Unable to enforce successful signup limits");
+  }
+}
+
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient();
@@ -91,7 +110,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const device = getSignupDevice(req);
-    const signupLimit = await consumeSignupRateLimit({ request: req, device });
+    const signupLimit = await consumeSignupRateLimit({ request: req, email });
     if (!signupLimit.allowed) {
       return withSignupDeviceCookie(
         NextResponse.json(
@@ -134,15 +153,41 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return signupProviderErrorResponse(error, device);
     }
 
-    // update the created_by_oauth field to false
+    // Supabase returns an identity-less obfuscated user for an existing email
+    // when confirmation is enabled. Only count genuine account creations.
+    const isNewAccount = Boolean(data.user?.identities?.length);
+    if (data.user && isNewAccount) {
+      const deviceLimit = await consumeSuccessfulSignupDeviceLimit({ device });
+      if (!deviceLimit.allowed) {
+        await deleteOrBlockRejectedSignup(data.user.id);
+        return withSignupDeviceCookie(
+          NextResponse.json(
+            {
+              code: "SIGNUP_DEVICE_LIMIT_EXCEEDED",
+              message: "Too many accounts were created from this device. Please try again later.",
+            },
+            {
+              status: 429,
+              headers: { "Retry-After": String(deviceLimit.retryAfterSeconds) },
+            },
+          ),
+          device,
+        );
+      }
+    }
+
+    // Confirm-email signup has no user session, so this must use the
+    // service-role client rather than the request-scoped client under RLS.
     if (data.user) {
-      const { error: updateError } = await supabase
+      const admin = createAdminClient();
+      const { error: updateError } = await admin
         .from("users")
         .update({ requires_oauth_signup: false })
         .eq("id", data.user.id);
 
       if (updateError) {
-        console.error("Failed to update requires_oauth_signup:", updateError);
+        await deleteOrBlockRejectedSignup(data.user.id);
+        throw new SignupRateLimitServiceError("Unable to finalize email signup state");
       }
     }
 

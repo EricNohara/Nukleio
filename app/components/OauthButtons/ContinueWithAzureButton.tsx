@@ -1,28 +1,26 @@
 import Image from "next/image";
 
 import { useToast } from "@/app/context/ToastProvider";
-import { createClient } from "@/utils/supabase/client";
+import { OAuthButtonProps, startOauth } from "@/utils/oauth/startOauth";
 
 import styles from "./OauthButtons.module.css";
 
-export default function ContinueWithAzureButton() {
-    const supabase = createClient();
+export default function ContinueWithAzureButton({ captchaToken, onCaptchaConsumed }: OAuthButtonProps) {
     const toast = useToast();
 
     const handleAzure = async () => {
-        const base = process.env.NEXT_PUBLIC_SITE_URL;
-        const redirectTo = `${base}/api/internal/auth/callback?provider=azure&next=${encodeURIComponent("/user")}`;
-
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: "azure",
-            options: { redirectTo, scopes: "email" },
-        });
-
-        if (error) toast.error("Error logging in with Azure");
+        if (!captchaToken) return;
+        try {
+            await startOauth("azure", captchaToken);
+        } catch {
+            toast.error("Error logging in with Azure");
+        } finally {
+            onCaptchaConsumed();
+        }
     };
 
     return (
-        <button onClick={handleAzure} className={`${styles.button}`}>
+        <button type="button" onClick={handleAzure} className={`${styles.button}`} disabled={!captchaToken}>
             <Image
                 src="/images/microsoft-icon.svg"
                 alt="Azure icon"

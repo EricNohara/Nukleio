@@ -13,3 +13,8 @@
   cursor: pointer;
   background-color: #3d3d3d;
 }
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

@@ -128,11 +128,11 @@ export default function SignUpForm() {
         </div>
 
         <div className={styles.oauthButtonsContainer}>
-          <ContinueWithGithubButton />
-          <ContinueWithGitlabButton />
-          <ContinueWithLinkedinButton />
-          <ContinueWithGoogleButton />
-          <ContinueWithAzureButton />
+          <ContinueWithGithubButton captchaToken={captchaToken} onCaptchaConsumed={() => setCaptchaResetSignal((signal) => signal + 1)} />
+          <ContinueWithGitlabButton captchaToken={captchaToken} onCaptchaConsumed={() => setCaptchaResetSignal((signal) => signal + 1)} />
+          <ContinueWithLinkedinButton captchaToken={captchaToken} onCaptchaConsumed={() => setCaptchaResetSignal((signal) => signal + 1)} />
+          <ContinueWithGoogleButton captchaToken={captchaToken} onCaptchaConsumed={() => setCaptchaResetSignal((signal) => signal + 1)} />
+          <ContinueWithAzureButton captchaToken={captchaToken} onCaptchaConsumed={() => setCaptchaResetSignal((signal) => signal + 1)} />
         </div>
 
         <div className={styles.otherContent}>

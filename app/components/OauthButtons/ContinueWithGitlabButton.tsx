@@ -1,28 +1,26 @@
 import Image from "next/image";
 
 import { useToast } from "@/app/context/ToastProvider";
-import { createClient } from "@/utils/supabase/client";
+import { OAuthButtonProps, startOauth } from "@/utils/oauth/startOauth";
 
 import styles from "./OauthButtons.module.css";
 
-export default function ContinueWithGitlabButton() {
-    const supabase = createClient();
+export default function ContinueWithGitlabButton({ captchaToken, onCaptchaConsumed }: OAuthButtonProps) {
     const toast = useToast();
 
     const handleGitlab = async () => {
-        const base = process.env.NEXT_PUBLIC_SITE_URL;
-        const redirectTo = `${base}/api/internal/auth/callback?provider=gitlab&next=${encodeURIComponent("/user")}`;
-
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: "gitlab",
-            options: { redirectTo },
-        });
-
-        if (error) toast.error("Error logging in with GitLab")
+        if (!captchaToken) return;
+        try {
+            await startOauth("gitlab", captchaToken);
+        } catch {
+            toast.error("Error logging in with GitLab");
+        } finally {
+            onCaptchaConsumed();
+        }
     };
 
     return (
-        <button onClick={handleGitlab} className={`${styles.button}`}>
+        <button type="button" onClick={handleGitlab} className={`${styles.button}`} disabled={!captchaToken}>
             <Image
                 src="/images/gitlab-icon.svg"
                 alt="Gitlab icon"
