@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
-import { prepareFileCompression, type CompressionMediaKind } from "@/utils/fileCompression/client";
 import { AiRateLimitServiceError, requireUploadRateLimit } from "@/utils/file-upload/rateLimit";
+import { prepareFileCompression, type CompressionMediaKind } from "@/utils/fileCompression/client";
 
 export const runtime = "nodejs";
 
