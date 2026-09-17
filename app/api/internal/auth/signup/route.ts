@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 import {
   consumeSignupRateLimit,
+  consumeSuccessfulSignupDeviceLimit,
   getSignupDevice,
   getSignupDeviceCookieName,
   SignupRateLimitServiceError,
 } from "@/utils/auth/signupRateLimit";
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient, createClient } from "@/utils/supabase/server";
 
 function withSignupDeviceCookie(response: NextResponse, device: {
   value: string;
@@ -91,7 +92,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const device = getSignupDevice(req);
-    const signupLimit = await consumeSignupRateLimit({ request: req, device });
+    const signupLimit = await consumeSignupRateLimit({ request: req, email });
     if (!signupLimit.allowed) {
       return withSignupDeviceCookie(
         NextResponse.json(
@@ -132,6 +133,34 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (error) {
       return signupProviderErrorResponse(error, device);
+    }
+
+    // Supabase returns an identity-less obfuscated user for an existing email
+    // when confirmation is enabled. Only count genuine account creations.
+    const isNewAccount = Boolean(data.user?.identities?.length);
+    if (data.user && isNewAccount) {
+      const deviceLimit = await consumeSuccessfulSignupDeviceLimit({ device });
+      if (!deviceLimit.allowed) {
+        const admin = createAdminClient();
+        const { error: deleteError } = await admin.auth.admin.deleteUser(data.user.id);
+        if (deleteError) {
+          console.error("Unable to remove rate-limited signup:", deleteError.message);
+          throw new SignupRateLimitServiceError("Unable to enforce successful signup limits");
+        }
+        return withSignupDeviceCookie(
+          NextResponse.json(
+            {
+              code: "SIGNUP_DEVICE_LIMIT_EXCEEDED",
+              message: "Too many accounts were created from this device. Please try again later.",
+            },
+            {
+              status: 429,
+              headers: { "Retry-After": String(deviceLimit.retryAfterSeconds) },
+            },
+          ),
+          device,
+        );
+      }
     }
 
     // update the created_by_oauth field to false
