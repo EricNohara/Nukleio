@@ -1,4 +1,4 @@
-import { createHmac, randomBytes, randomUUID } from "crypto";
+import { createHmac, randomBytes, randomUUID, timingSafeEqual } from "crypto";
 
 import {
   DynamoDBClient,
@@ -25,6 +25,7 @@ const RESEND_EMAIL_HOUR_WINDOW_SECONDS = 60 * 60;
 const TTL_GRACE_SECONDS = 60 * 60;
 const DEVICE_COOKIE_NAME = "nukleio_signup_device";
 const DEVICE_ID_PATTERN = /^[A-Za-z0-9_-]{32,128}$/;
+const DEVICE_COOKIE_TTL_SECONDS = 365 * 24 * 60 * 60;
 
 type DynamoDbSender = {
   send(command: TransactWriteItemsCommand): Promise<unknown>;
@@ -32,6 +33,7 @@ type DynamoDbSender = {
 
 export type SignupDevice = {
   value: string;
+  cookieValue: string;
   isNew: boolean;
 };
 
@@ -79,6 +81,42 @@ function hashIdentifier(value: string): string {
     .digest("base64url");
 }
 
+function signDeviceCookie(payload: string): string {
+  return createHmac(
+    "sha256",
+    requiredEnvironmentValue("SIGNUP_ABUSE_HMAC_SECRET"),
+  )
+    .update(payload)
+    .digest("base64url");
+}
+
+function createDeviceCookieValue(value: string): string {
+  const expiresAt = Math.floor(Date.now() / 1000) + DEVICE_COOKIE_TTL_SECONDS;
+  const payload = `v1.${value}.${expiresAt}`;
+  return `${payload}.${signDeviceCookie(payload)}`;
+}
+
+function getDeviceValueFromCookie(cookieValue: string | undefined): string | null {
+  if (!cookieValue) return null;
+  const [version, value, expiresAtRaw, signature, ...rest] = cookieValue.split(".");
+  const expiresAt = Number(expiresAtRaw);
+  if (
+    rest.length ||
+    version !== "v1" ||
+    !DEVICE_ID_PATTERN.test(value ?? "") ||
+    !Number.isSafeInteger(expiresAt) ||
+    expiresAt < Math.floor(Date.now() / 1000) ||
+    !signature
+  ) {
+    return null;
+  }
+
+  const expected = Buffer.from(signDeviceCookie(`${version}.${value}.${expiresAt}`));
+  const actual = Buffer.from(signature);
+  if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) return null;
+  return value;
+}
+
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
@@ -103,11 +141,12 @@ function isConditionalFailure(error: unknown): boolean {
 }
 
 export function getSignupDevice(request: NextRequest): SignupDevice {
-  const existing = request.cookies.get(DEVICE_COOKIE_NAME)?.value;
-  if (existing && DEVICE_ID_PATTERN.test(existing)) {
-    return { value: existing, isNew: false };
+  const existing = getDeviceValueFromCookie(request.cookies.get(DEVICE_COOKIE_NAME)?.value);
+  if (existing) {
+    return { value: existing, cookieValue: request.cookies.get(DEVICE_COOKIE_NAME)!.value, isNew: false };
   }
-  return { value: randomBytes(32).toString("base64url"), isNew: true };
+  const value = randomBytes(32).toString("base64url");
+  return { value, cookieValue: createDeviceCookieValue(value), isNew: true };
 }
 
 export function getSignupDeviceCookieName(): string {

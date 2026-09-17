@@ -18,7 +18,7 @@ function withDeviceCookie(response: NextResponse, device: ReturnType<typeof getS
   if (device.isNew) {
     response.cookies.set({
       name: getSignupDeviceCookieName(),
-      value: device.value,
+      value: device.cookieValue,
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
@@ -50,8 +50,22 @@ async function rejectNewOauthSignup(
 ): Promise<NextResponse> {
   await supabase.auth.signOut();
   const admin = createAdminClient();
-  const { error } = await admin.auth.admin.deleteUser(userId);
-  if (error) console.error("Unable to remove rejected OAuth signup:", error.message);
+  let deleteError: { message: string } | null = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { error } = await admin.auth.admin.deleteUser(userId);
+    if (!error) {
+      deleteError = null;
+      break;
+    }
+    deleteError = error;
+  }
+  if (deleteError) {
+    console.error("Unable to remove rejected OAuth signup:", deleteError.message);
+    const { error: blockError } = await admin.auth.admin.updateUserById(userId, {
+      app_metadata: { signup_blocked: true },
+    });
+    if (blockError) console.error("Unable to block rejected OAuth signup:", blockError.message);
+  }
   return clearApproval(NextResponse.redirect(`${origin}/user/login?error=${code}`));
 }
 
@@ -74,11 +88,7 @@ export async function GET(request: NextRequest) {
         data: { user },
       } = await supabase.auth.getUser();
 
-      const identity = providerParam
-        ? user?.identities?.find((i) => i.provider === providerParam)
-        : user?.identities?.[0];
-
-      if (user && identity && providerParam) {
+      if (user) {
         const { data: userRow, error: userRowError } = await supabase
           .from("users")
           .select("requires_oauth_signup")
@@ -92,8 +102,12 @@ export async function GET(request: NextRequest) {
         }
 
         if (userRow?.requires_oauth_signup) {
+          // A new OAuth user has exactly one authenticated provider identity.
+          // Never select that identity from a client-controlled query value.
+          const identity = user.identities?.length === 1 ? user.identities[0] : undefined;
+          const provider = identity?.provider;
           const approval = request.cookies.get(OAUTH_SIGNUP_APPROVAL_COOKIE)?.value;
-          if (!isValidOauthSignupApproval(approval, providerParam) || !user.email) {
+          if (!providerParam || !identity || !provider || provider !== providerParam || !isValidOauthSignupApproval(approval, provider) || !user.email) {
             return rejectNewOauthSignup(supabase, user.id, origin, "oauth_signup_rejected");
           }
 
@@ -123,9 +137,14 @@ export async function GET(request: NextRequest) {
             throw error;
           }
 
-          await handleOauthSignup(providerParam, supabase, user, identity);
+          await handleOauthSignup(provider, supabase, user, identity);
           const response = clearApproval(NextResponse.redirect(`${origin}${next}`));
           return withDeviceCookie(response, device);
+        }
+
+        if (providerParam && !user.identities?.some((identity) => identity.provider === providerParam)) {
+          await supabase.auth.signOut();
+          return clearApproval(NextResponse.redirect(`${origin}/user/login?error=oauth_signup_rejected`));
         }
       }
 

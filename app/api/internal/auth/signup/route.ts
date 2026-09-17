@@ -6,17 +6,15 @@ import {
   getSignupDevice,
   getSignupDeviceCookieName,
   SignupRateLimitServiceError,
+  SignupDevice,
 } from "@/utils/auth/signupRateLimit";
 import { createAdminClient, createClient } from "@/utils/supabase/server";
 
-function withSignupDeviceCookie(response: NextResponse, device: {
-  value: string;
-  isNew: boolean;
-}): NextResponse {
+function withSignupDeviceCookie(response: NextResponse, device: SignupDevice): NextResponse {
   if (device.isNew) {
     response.cookies.set({
       name: getSignupDeviceCookieName(),
-      value: device.value,
+      value: device.cookieValue,
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
@@ -27,10 +25,10 @@ function withSignupDeviceCookie(response: NextResponse, device: {
   return response;
 }
 
-function signupProviderErrorResponse(error: { message?: string; code?: string; status?: number }, device: {
-  value: string;
-  isNew: boolean;
-}): NextResponse {
+function signupProviderErrorResponse(
+  error: { message?: string; code?: string; status?: number },
+  device: SignupDevice,
+): NextResponse {
   const message = error.message?.toLowerCase() ?? "";
   if (message.includes("captcha") || message.includes("bot")) {
     return withSignupDeviceCookie(
@@ -68,6 +66,26 @@ function signupProviderErrorResponse(error: { message?: string; code?: string; s
     ),
     device,
   );
+}
+
+async function deleteOrBlockRejectedSignup(userId: string): Promise<void> {
+  const admin = createAdminClient();
+  let deleteError: { message: string } | null = null;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { error } = await admin.auth.admin.deleteUser(userId);
+    if (!error) return;
+    deleteError = error;
+  }
+
+  console.error("Unable to remove rate-limited signup:", deleteError?.message);
+  const { error: blockError } = await admin.auth.admin.updateUserById(userId, {
+    app_metadata: { signup_blocked: true },
+  });
+  if (blockError) {
+    console.error("Unable to block rate-limited signup:", blockError.message);
+    throw new SignupRateLimitServiceError("Unable to enforce successful signup limits");
+  }
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -141,12 +159,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (data.user && isNewAccount) {
       const deviceLimit = await consumeSuccessfulSignupDeviceLimit({ device });
       if (!deviceLimit.allowed) {
-        const admin = createAdminClient();
-        const { error: deleteError } = await admin.auth.admin.deleteUser(data.user.id);
-        if (deleteError) {
-          console.error("Unable to remove rate-limited signup:", deleteError.message);
-          throw new SignupRateLimitServiceError("Unable to enforce successful signup limits");
-        }
+        await deleteOrBlockRejectedSignup(data.user.id);
         return withSignupDeviceCookie(
           NextResponse.json(
             {
