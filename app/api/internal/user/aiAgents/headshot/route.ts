@@ -33,6 +33,8 @@ import {
 import { InsufficientAiCreditsError } from "@/utils/aiCredits/service";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 import { getUserSubscriptionTier } from "@/utils/auth/getUserSubscriptionTier";
+import { requireUploadRateLimit } from "@/utils/file-upload/rateLimit";
+import { parseBoundedMultipart, RequestTooLargeError } from "@/utils/http/boundedMultipart";
 import { requireTier } from "@/utils/auth/requireTier";
 import { requireVerifiedEmailForAi } from "@/utils/auth/requireVerifiedEmail";
 import parseURL from "@/utils/general/parseURL";
@@ -46,6 +48,7 @@ export const runtime = "nodejs";
 const AGENT_BASE = process.env.PROFESSIONAL_HEADSHOT_AGENT_BASE_URL;
 const STORAGE_BUCKET = "professional_headshots";
 const MAX_HEADSHOT_INPUT_BYTES = 1024 * 1024;
+const MAX_HEADSHOT_MULTIPART_BYTES = (MAX_HEADSHOT_INPUT_BYTES * 2) + (128 * 1024);
 
 type HeadshotLayout = "1024x1024" | "1536x1024" | "1024x1536" | "auto";
 type HeadshotAttire =
@@ -199,6 +202,8 @@ export async function POST(req: NextRequest) {
   let cacheReservationId: string | null = null;
 
   try {
+    const uploadRateLimit = await requireUploadRateLimit(req, user.id);
+    if (uploadRateLimit) return uploadRateLimit;
     if (!AGENT_BASE) {
       return NextResponse.json(
         {
@@ -209,7 +214,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const formData = await req.formData();
+    const formData = await parseBoundedMultipart(req, MAX_HEADSHOT_MULTIPART_BYTES);
 
     const referenceImage = formData.get("referenceImage");
     const backgroundImage = formData.get("backgroundImage");
@@ -537,6 +542,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (error instanceof RequestTooLargeError) {
+      return NextResponse.json({ error: "Headshot images must be 1 MB or smaller." }, { status: 413 });
+    }
+
     if (error instanceof DuplicateAiGenerationError) {
       return NextResponse.json(
         { error: error.message, code: "DUPLICATE_AI_GENERATION" },
@@ -570,16 +579,29 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   } finally {
+    let removedInputPaths = new Set<string>();
     if (uploadedInputPaths.length > 0) {
       const { error } = await storageAdmin.storage
         .from(STORAGE_BUCKET)
         .remove(uploadedInputPaths);
-      if (error) console.error("Headshot input cleanup failed:", error.message);
+      if (error) {
+        console.error("Headshot input cleanup failed:", error.message);
+        const queue = uploadedInputPaths.map((path) => ({
+          object_url: storageAdmin.storage.from(STORAGE_BUCKET).getPublicUrl(path).data.publicUrl,
+        }));
+        const { error: queueError } = await storageAdmin.from("storage_deletion_queue").insert(queue);
+        if (queueError) console.error("Headshot input cleanup queue failed:", queueError.message);
+      } else {
+        removedInputPaths = new Set(uploadedInputPaths);
+      }
     }
-    if (reservedInputPaths.length > 0) {
+    const releasableReservations = reservedInputPaths.filter((path) =>
+      !uploadedInputPaths.includes(path) || removedInputPaths.has(path),
+    );
+    if (releasableReservations.length > 0) {
       const { error } = await storageAdmin.from("storage_quota_ledger")
         .delete().eq("user_id", user.id).eq("bucket", STORAGE_BUCKET)
-        .in("object_path", reservedInputPaths);
+        .in("object_path", releasableReservations);
       if (error) console.error("Headshot input ledger cleanup failed:", error.message);
     }
     if (cacheReservationId) {
