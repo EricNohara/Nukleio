@@ -29,13 +29,15 @@ type DynamoDbSender = {
 };
 
 type ConsumeAiRateLimitInput = {
-  operation: AiAgentOperation;
+  operation: AiAgentOperation | "storage_upload";
   requestId: string;
   userId: string;
   client?: DynamoDbSender;
   namespace?: string;
   nowMs?: number;
   tableName?: string;
+  limit?: number;
+  windowSeconds?: number;
 };
 
 export class AiRateLimitServiceError extends Error {
@@ -106,6 +108,8 @@ export async function consumeAiRateLimit({
   tableName = requiredRateLimitEnvironmentValue(
     "AI_AGENT_RATE_LIMIT_TABLE_NAME",
   ),
+  limit = AI_RATE_LIMIT_REQUESTS,
+  windowSeconds = AI_RATE_LIMIT_WINDOW_SECONDS,
 }: ConsumeAiRateLimitInput): Promise<AiRateLimitResult> {
   if (!NAMESPACE_PATTERN.test(namespace)) {
     throw new AiRateLimitServiceError(
@@ -113,8 +117,9 @@ export async function consumeAiRateLimit({
     );
   }
 
-  const { windowStartSeconds, windowEndsAtSeconds } =
-    getRateLimitWindow(nowMs);
+  const nowSeconds = Math.floor(nowMs / 1000);
+  const windowStartSeconds = Math.floor(nowSeconds / windowSeconds) * windowSeconds;
+  const windowEndsAtSeconds = windowStartSeconds + windowSeconds;
   const retryAfterSeconds = Math.max(
     1,
     windowEndsAtSeconds - Math.floor(nowMs / 1000),
@@ -149,7 +154,7 @@ export async function consumeAiRateLimit({
           ExpressionAttributeValues: {
             ":zero": { N: "0" },
             ":one": { N: "1" },
-            ":limit": { N: String(AI_RATE_LIMIT_REQUESTS) },
+            ":limit": { N: String(limit) },
             ":expiresAt": {
               N: String(
                 windowEndsAtSeconds + AI_RATE_LIMIT_TTL_GRACE_SECONDS,
@@ -165,7 +170,7 @@ export async function consumeAiRateLimit({
     await client.send(command);
     return {
       allowed: true,
-      limit: AI_RATE_LIMIT_REQUESTS,
+      limit,
       retryAfterSeconds,
       windowEndsAtSeconds,
     };
@@ -173,7 +178,7 @@ export async function consumeAiRateLimit({
     if (isRateLimitConditionFailure(error)) {
       return {
         allowed: false,
-        limit: AI_RATE_LIMIT_REQUESTS,
+        limit,
         retryAfterSeconds,
         windowEndsAtSeconds,
       };

@@ -6,7 +6,9 @@ import { isAccountActive } from "@/utils/accountDeletion/status";
 import { getAuthenticatedUser } from "@/utils/auth/getAuthenticatedUser";
 import { getUserSubscriptionTier } from "@/utils/auth/getUserSubscriptionTier";
 import { refreshCachedUserInfo } from "@/utils/cachedUserInfo/refreshCachedUserInfo";
+import { AiRateLimitServiceError, requireUploadRateLimit } from "@/utils/file-upload/rateLimit";
 import parseURL, { isStorageObjectOwnedByUser } from "@/utils/general/parseURL";
+import { parseBoundedMultipart, RequestTooLargeError } from "@/utils/http/boundedMultipart";
 import { createAdminClient } from "@/utils/supabase/server";
 
 const ALLOWED_BUCKETS = ["project_thumbnails", "portraits", "resumes", "transcripts"];
@@ -68,12 +70,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const { user, supabase, response } = await getAuthenticatedUser();
     if (!user) return response;
 
+    const rateLimit = await requireUploadRateLimit(req, user.id);
+    if (rateLimit) return rateLimit;
+
     const contentLength = Number(req.headers.get("content-length"));
     if (Number.isFinite(contentLength) && contentLength > MAX_MULTIPART_BODY_BYTES) {
       return NextResponse.json({ message: "Files must be 1 MB or smaller." }, { status: 413 });
     }
 
-    const formData = await req.formData();
+    const formData = await parseBoundedMultipart(req, MAX_MULTIPART_BODY_BYTES);
     const file = formData.get("file");
     const bucketName = formData.get("bucketName");
     if (!(file instanceof File) || typeof bucketName !== "string" || !ALLOWED_BUCKETS.includes(bucketName)) {
@@ -159,9 +164,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     uploaded = null;
     return NextResponse.json({ publicURL: publicURL.publicUrl }, { status: 201 });
   } catch (error) {
-    if (uploaded) await admin.storage.from(uploaded.bucket).remove([uploaded.path]);
+    if (uploaded) {
+      const { error: removeError } = await admin.storage.from(uploaded.bucket).remove([uploaded.path]);
+      if (removeError) {
+        const { data } = admin.storage.from(uploaded.bucket).getPublicUrl(uploaded.path);
+        const { error: queueError } = await admin.from("storage_deletion_queue").insert({ object_url: data.publicUrl });
+        if (queueError) console.error("Upload cleanup queue failed", queueError);
+        reservationId = null;
+      }
+    }
     if (reservationId) await admin.from("storage_quota_ledger").delete().eq("id", reservationId);
     console.error(error);
+    if (error instanceof AiRateLimitServiceError) {
+      return NextResponse.json({ message: "Upload protection is temporarily unavailable." }, { status: 503 });
+    }
+    if (error instanceof RequestTooLargeError) {
+      return NextResponse.json({ message: "Files must be 1 MB or smaller." }, { status: 413 });
+    }
     return NextResponse.json({ message: error instanceof Error ? error.message : "Upload failed" }, { status: 500 });
   }
 }
