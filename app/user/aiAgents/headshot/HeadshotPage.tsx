@@ -346,6 +346,7 @@ export default function HeadshotPage() {
               </div>
             </div>
 
+            <p>Uploaded images and stored generated headshots use public links. Anyone with a link can view and share them without signing in.</p>
             <div className={styles.uploadGrid}>
               <ModernFileUploadBox
                 label="Reference image"

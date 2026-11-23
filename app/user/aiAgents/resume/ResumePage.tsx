@@ -430,6 +430,7 @@ export default function ResumePage() {
             />
 
             <div className={styles.resumePageContainer}>
+                <p className={styles.subtitle}>Stored generated resumes use public links. Anyone with a link can view and share them without signing in.</p>
                 {loading && (
                     <LoadingMessageSpinner
                         messages={[

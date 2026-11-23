@@ -172,6 +172,10 @@ export default function FileUploadBox({
             </div>
 
             {/* PREVIEW */}
+            <p className={styles.uploadInstructions}>
+                Uploaded files use public links. Anyone with a link can view and share the file without signing in.
+            </p>
+
             {selectedFile && previewUrl && (
                 <div className={`${styles.previewContainer} ${!isMini ? styles.previewLarge : styles.previewMini}`}>
                     <ExitButton

@@ -46,6 +46,10 @@ The free tier of Supabase automatically freezes a project after a period of inac
 
 [GitHub Link to Supabase Uptime Trigger](https://github.com/EricNohara/Portfolio-Manager-Supabase-Trigger)
 
+## Public files
+
+Files stored by Nukleio, including resumes, transcripts, portraits, project images, and stored AI-generated files, use public URLs. Anyone with a URL can open and share the file without signing in or supplying an API key. Upload only files you are comfortable sharing publicly. Removing a file cannot recall copies already downloaded or cached. External links are governed by their hosting provider's access settings.
+
 ## Known Issues
 
 No known issues.
