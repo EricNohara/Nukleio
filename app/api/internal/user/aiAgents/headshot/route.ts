@@ -71,13 +71,14 @@ type GenerateProfessionalHeadshotBody = {
 };
 
 type ReviseProfessionalHeadshotRequestBody = {
-  headshotUrl: string;
+  headshotId: string;
   feedback: string;
   layout: HeadshotLayout;
 };
 
 type ReviseProfessionalHeadshotAgentBody =
-  ReviseProfessionalHeadshotRequestBody & {
+  Omit<ReviseProfessionalHeadshotRequestBody, "headshotId"> & {
+    headshotUrl: string;
     userId: string;
     deliveryMode: "cached" | "transient";
   };
@@ -121,11 +122,11 @@ function isReviseProfessionalHeadshotBody(
 
   const obj = body as Record<string, unknown>;
 
-  if (!hasOnlyAllowedKeys(obj, ["headshotUrl", "feedback", "layout"])) {
+  if (!hasOnlyAllowedKeys(obj, ["headshotId", "feedback", "layout"])) {
     return false;
   }
 
-  if (!isString(obj.headshotUrl)) return false;
+  if (!isString(obj.headshotId) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(obj.headshotId)) return false;
   if (!isString(obj.feedback)) return false;
   if (!isHeadshotLayout(obj.layout)) return false;
 
@@ -646,6 +647,26 @@ export async function PUT(req: NextRequest) {
       );
     }
 
+    const admin = createAdminClient();
+    const { data: source, error: sourceError } = await admin
+      .from("cached_professional_headshots")
+      .select("generated_url, expires_at")
+      .eq("id", body.headshotId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (sourceError) throw sourceError;
+    if (!source || new Date(source.expires_at).getTime() <= Date.now()) {
+      return NextResponse.json({ error: "Headshot not found." }, { status: 404 });
+    }
+    const sourceObject = parseURL(source.generated_url);
+    const expectedPrefix = `generated/${user.id}/`;
+    if (!sourceObject || sourceObject.parsedBucket !== STORAGE_BUCKET ||
+        !sourceObject.parsedFilename.startsWith(expectedPrefix) ||
+        !/^headshot-[a-zA-Z0-9.-]+\.(?:webp|jpg|jpeg|png)$/.test(sourceObject.parsedFilename.slice(expectedPrefix.length))) {
+      return NextResponse.json({ error: "Headshot not found." }, { status: 404 });
+    }
+    const headshotUrl = admin.storage.from(STORAGE_BUCKET).getPublicUrl(sourceObject.parsedFilename).data.publicUrl;
+
     const operation: AiAgentOperation = "headshot_revise";
     const requestId = getAiRequestId(req);
     const rateLimit = await consumeAiRateLimit({
@@ -679,7 +700,9 @@ export async function PUT(req: NextRequest) {
     cacheReservationId = await reserveAiCacheSlot(user.id);
 
     const agentPayload: ReviseProfessionalHeadshotAgentBody = {
-      ...body,
+      headshotUrl,
+      feedback: body.feedback,
+      layout: body.layout,
       userId: user.id,
       deliveryMode: "cached",
     };
@@ -711,7 +734,6 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const admin = createAdminClient();
     const cacheId = randomUUID();
 
     const cachePayload = {
