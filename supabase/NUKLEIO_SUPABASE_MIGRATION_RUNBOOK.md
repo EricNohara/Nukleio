@@ -209,6 +209,20 @@ git commit -m "Add initial Supabase database migration"
 
 ## 5. Standard workflow for every future schema change
 
+New public tables, sequences, and routines do not automatically grant access to
+`authenticated`. Include only the explicit grants needed by the application in
+each migration, alongside appropriate RLS policies. PostgreSQL's default PUBLIC
+routine execution is revoked globally for new routines created by `postgres`;
+future routines in other schemas also need explicit grants where appropriate.
+These defaults are per creating role: review any other role that can create
+application objects. Existing object grants are unchanged. After applying the
+default-privileges migration, run `supabase/tests/default_privileges.sql` as
+`postgres` against development and production, for example by pasting the full
+script into the Supabase SQL Editor using the `postgres` role. It rolls its
+probe objects back. Run it after migration deployment and whenever default grants
+or the migration-creating role change; a raised exception means verification
+failed. Review the target project before running it.
+
 Example change: adding a `username` column to `profiles`.
 
 ### Step 1: Update your Git branch
